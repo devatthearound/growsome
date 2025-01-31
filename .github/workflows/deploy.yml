@@ -8,7 +8,7 @@ env:
   AWS_REGION: ap-northeast-2
   ECR_REPOSITORY: growsome  # ECR 저장소 이름
   ECS_CLUSTER: growsome    # ECS 클러스터 이름
-  ECS_SERVICE: growsome-landing-service  # ECS 서비스 이름
+  ECS_SERVICE: growsome-service  # ECS 서비스 이름
 
 jobs:
   deploy:
