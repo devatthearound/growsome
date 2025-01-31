@@ -6,11 +6,10 @@ RUN apk add --no-cache python3 make g++
 
 WORKDIR /app
 
-# package.json과 package-lock.json (있는 경우) 복사
+# package.json과 package-lock.json 복사
 COPY package*.json ./
 
-# npm 캐시 클리어 및 CI 모드로 설치
-RUN npm cache clean --force
+# 의존성 설치
 RUN npm ci --legacy-peer-deps
 
 # 소스 코드 복사
@@ -22,11 +21,13 @@ RUN npm run build
 # Production stage
 FROM nginx:alpine
 
+# nginx 설정 파일 복사
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 # 빌드 결과물을 nginx로 복사
 COPY --from=builder /app/build /usr/share/nginx/html
-
-# nginx 설정 파일 복사 (필요한 경우)
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# public 폴더의 정적 파일들도 복사
+COPY --from=builder /app/public /usr/share/nginx/html
 
 EXPOSE 80
 
