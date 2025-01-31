@@ -6,6 +6,7 @@ import { faBars, faTimes, faEnvelope } from '@fortawesome/free-solid-svg-icons';
 
 const Header = ({ onSubscribeClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -14,90 +15,113 @@ const Header = ({ onSubscribeClick }) => {
     document.body.style.overflow = !isMenuOpen ? 'hidden' : 'auto';
   };
 
-  const handleInquiryClick = () => {
-    navigate('/inquiry');
+  const handleMenuClick = (e) => {
+    e.preventDefault();
+    setIsMenuOpen(false);
+    setShowPopup(true);
+  };
+
+  const handleInquiryClick = (e) => {
+    e.preventDefault(); // 페이지 이동 방지
+    setShowPopup(true);
   };
 
   const isActive = (path) => {
     return location.pathname === path;
   };
 
+  const handleOpenPopup = () => {
+    setShowPopup(true);
+  };
+
+  const handleClosePopup = () => {
+    setShowPopup(false);
+  };
+
   return (
-    <HeaderWrapper>
-      <HeaderContainer>
-        <Logo to="/">
-          <LogoImage src="/logo_growsome.png" alt="Growsome Logo" />
-        </Logo>
-        <MenuButton onClick={toggleMenu}>
-          <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} />
-        </MenuButton>
-        <NavMenu isOpen={isMenuOpen}>
-          <NavItem>
-            <NavLink 
-              to="/services" 
-              onClick={() => setIsMenuOpen(false)}
-              active={isActive('/services')}
-            >
-              개발구독
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink 
-              to="/portfolio" 
-              onClick={() => setIsMenuOpen(false)}
-              active={isActive('/portfolio')}
-            >
-              포트폴리오
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink 
-              to="/store" 
-              onClick={() => setIsMenuOpen(false)}
-              active={isActive('/store')}
-            >
-              스토어
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink 
-              to="/toy-projects" 
-              onClick={() => setIsMenuOpen(false)}
-              active={isActive('/toy-projects')}
-            >
-              토이 프로젝트
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink 
-              to="/blog" 
-              onClick={() => setIsMenuOpen(false)}
-              active={isActive('/blog')}
-            >
-              블로그
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink 
-              to="/class" 
-              onClick={() => setIsMenuOpen(false)}
-              active={isActive('/class')}
-            >
-              강의
-            </NavLink>
-          </NavItem>
-          <ButtonGroup>
-            <InquiryButton onClick={handleInquiryClick}>
-              개발문의하기
-            </InquiryButton>
-            <SubscribeButton onClick={onSubscribeClick}>
-              <FontAwesomeIcon icon={faEnvelope} />
-              구독하기
-            </SubscribeButton>
-          </ButtonGroup>
-        </NavMenu>
-      </HeaderContainer>
-    </HeaderWrapper>
+    <>
+      <HeaderWrapper>
+        <HeaderContainer>
+          <Logo onClick={(e) => e.preventDefault()}>
+            <LogoImage src="/logo_growsome.png" alt="Growsome Logo" />
+          </Logo>
+          <MenuButton onClick={toggleMenu}>
+            <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} />
+          </MenuButton>
+          <NavMenu isOpen={isMenuOpen}>
+            <NavItem>
+              <NavLink onClick={handleMenuClick}>
+                개발구독
+                <ComingSoonChip>OPEN SOON</ComingSoonChip>
+                <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink onClick={handleMenuClick}>
+                포트폴리오
+                <ComingSoonChip>OPEN SOON</ComingSoonChip>
+                <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink onClick={handleMenuClick}>
+                스토어
+                <ComingSoonChip>OPEN SOON</ComingSoonChip>
+                <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink onClick={handleMenuClick}>
+                토이 프로젝트
+                <ComingSoonChip>OPEN SOON</ComingSoonChip>
+                <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink onClick={handleMenuClick}>
+                블로그
+                <ComingSoonChip>OPEN SOON</ComingSoonChip>
+                <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink onClick={handleMenuClick}>
+                강의
+                <ComingSoonChip>OPEN SOON</ComingSoonChip>
+                <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+              </NavLink>
+            </NavItem>
+            <ButtonGroup>
+              <InquiryButton onClick={handleInquiryClick}>
+                개발문의하기
+              </InquiryButton>
+              <SubscribeButton onClick={handleMenuClick}>
+                <FontAwesomeIcon icon={faEnvelope} />
+                구독하기
+              </SubscribeButton>
+            </ButtonGroup>
+          </NavMenu>
+        </HeaderContainer>
+      </HeaderWrapper>
+
+      {showPopup && (
+        <PopupOverlay onClick={handleClosePopup}>
+          <PopupContent onClick={(e) => e.stopPropagation()}>
+            <PopupEmoji>🚀</PopupEmoji>
+            <PopupTitle>20년차 고인물 디자이너의<br />AI 프로젝트</PopupTitle>
+            <PopupText>
+              "누구나 쉽게 만들 수 있다고?"<br />
+              20년 경력의 디자이너가 만드는<br />
+              진짜 프리미엄 AI 서비스를 기대해주세요.<br /><br />
+              <PopupHighlight>곧 여러분의 실력을 넘어서는 경험을 선사합니다.</PopupHighlight>
+            </PopupText>
+            <CloseButton onClick={handleClosePopup}>
+              기대되네요!
+            </CloseButton>
+          </PopupContent>
+        </PopupOverlay>
+      )}
+    </>
   );
 };
 
@@ -168,38 +192,65 @@ const NavMenu = styled.ul`
 
 const NavItem = styled.li``;
 
-const NavLink = styled(Link)`
-  color: ${props => props.active ? '#222' : '#999'};
-  text-decoration: none;
-  font-size: 1rem;
-  font-weight: ${props => props.active ? '700' : '400'};
-  transition: all 0.3s ease;
-  position: relative;
+const ComingSoonTooltip = styled.span`
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #514FE4;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
 
   &:after {
     content: '';
     position: absolute;
-    left: 0;
     bottom: -4px;
-    width: 100%;
-    height: 2px;
-    background-color: ${props => props.active ? '#222' : '#514FE4'};
-    transform: scaleX(${props => props.active ? 1 : 0});
-    transition: transform 0.3s ease;
-  }
-
-  &:hover {
-    color: #222;
-    
-    &:after {
-      transform: scaleX(1);
-    }
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 4px 4px 0 4px;
+    border-style: solid;
+    border-color: #514FE4 transparent transparent transparent;
   }
 
   @media (max-width: 1280px) {
-    font-size: 1.2rem;
-    padding: 1rem 0;
-    display: block;
+    display: none;
+  }
+`;
+
+const ComingSoonChip = styled.span`
+  font-size: 0.6rem;
+  background: #514FE4;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 20px;
+  margin-left: 8px;
+  vertical-align: middle;
+  
+  @media (min-width: 1281px) {
+    display: none;
+  }
+`;
+
+const NavLink = styled.span`
+  position: relative;
+  color: #999;
+  font-size: 1rem;
+  font-weight: 400;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+
+  &:hover ${ComingSoonTooltip} {
+    opacity: 1;
+    visibility: visible;
+    top: -35px;
   }
 `;
 
@@ -251,6 +302,73 @@ const SubscribeButton = styled.button`
 
   &:hover {
     background: #f0f4ff;
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 1280px) {
+    width: 100%;
+  }
+`;
+
+const PopupOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const PopupContent = styled.div`
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+`;
+
+const PopupEmoji = styled.div`
+  font-size: 3rem;
+  margin-bottom: 1rem;
+`;
+
+const PopupTitle = styled.h3`
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+`;
+
+const PopupText = styled.p`
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+`;
+
+const PopupHighlight = styled.span`
+  color: #514FE4;
+  font-weight: 600;
+  display: block;
+  margin-top: 0.5rem;
+`;
+
+const CloseButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  background: #514FE4;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #4340c0;
     transform: translateY(-2px);
   }
 

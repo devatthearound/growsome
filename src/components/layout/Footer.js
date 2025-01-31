@@ -7,91 +7,40 @@ import { faGithub, faInstagram, faLinkedin, faBehance } from '@fortawesome/free-
 const Footer = () => {
   return (
     <FooterWrapper>
-      <FooterContainer>
-        <TopSection>
-          <LogoSection>
-            <FooterLogo>Growsome</FooterLogo>
-            <LogoDescription>
-              혁신적인 디지털 솔루션으로<br />
-              비즈니스의 성장을 함께합니다.
-            </LogoDescription>
-            <SocialLinks>
-              <SocialLink href="https://github.com/growsome" target="_blank">
-                <FontAwesomeIcon icon={faGithub} />
-              </SocialLink>
-              <SocialLink href="https://instagram.com/growsome" target="_blank">
-                <FontAwesomeIcon icon={faInstagram} />
-              </SocialLink>
-              <SocialLink href="https://linkedin.com/company/growsome" target="_blank">
-                <FontAwesomeIcon icon={faLinkedin} />
-              </SocialLink>
-              <SocialLink href="https://behance.net/growsome" target="_blank">
-                <FontAwesomeIcon icon={faBehance} />
-              </SocialLink>
-            </SocialLinks>
-          </LogoSection>
-
-          <LinksSection>
-            <LinkColumn>
-              <ColumnTitle>Services</ColumnTitle>
-              <LinkList>
-                <StyledLink to="/services">개발구독</StyledLink>
-                <StyledLink to="/inquiry">개발문의</StyledLink>
-                <StyledLink to="/consulting">컨설팅</StyledLink>
-              </LinkList>
-            </LinkColumn>
-
-            <LinkColumn>
-              <ColumnTitle>Projects</ColumnTitle>
-              <LinkList>
-                <StyledLink to="/projects">포트폴리오</StyledLink>
-                <StyledLink to="/toy-projects">토이 프로젝트</StyledLink>
-                <StyledLink to="/store">스토어</StyledLink>
-              </LinkList>
-            </LinkColumn>
-
-            <LinkColumn>
-              <ColumnTitle>Resources</ColumnTitle>
-              <LinkList>
-                <StyledLink to="/blog">블로그</StyledLink>
-                <StyledLink to="/class">강의</StyledLink>
-                <StyledLink to="https://discord.gg/W8dZjdEa3w" target="_blank">커뮤니티</StyledLink>
-              </LinkList>
-            </LinkColumn>
-
-            <LinkColumn>
-              <ColumnTitle>Contact</ColumnTitle>
-              <ContactInfo>
-                <ContactText>경기도 평택시 중앙로 199, 4층 19호</ContactText>
-                <ContactText>master@growsome.com</ContactText>
-                <ContactText>0107554-2397</ContactText>
-              </ContactInfo>
-            </LinkColumn>
-            
-          </LinksSection>
-        </TopSection>
-
-        <Divider />
-
-        <BottomSection>
-          <CopyrightText>
-            © 2024 Growsome. All rights reserved.
-          </CopyrightText>
-          <LegalLinks>
-            <LegalLink>Privacy Policy</LegalLink>
-            <LegalLink>Terms of Service</LegalLink>
-            <LegalLink>Cookies Settings</LegalLink>
-          </LegalLinks>
-        </BottomSection>
-      </FooterContainer>
+      <FooterContent>
+        <FooterText>
+          © 2024 Growthsome. All rights reserved.
+        </FooterText>
+        <ComingSoon>NEW SERVICE COMING SOON</ComingSoon>
+      </FooterContent>
     </FooterWrapper>
   );
 };
 
 const FooterWrapper = styled.footer`
   background: #f8f9fa;
-  color: #333;
-  padding: 80px 0 40px;
+  padding: 40px 0;
+  margin-top: auto;
+`;
+
+const FooterContent = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  text-align: center;
+`;
+
+const FooterText = styled.p`
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+`;
+
+const ComingSoon = styled.div`
+  color: #514FE4;
+  font-weight: 600;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
 `;
 
 const FooterContainer = styled.div`

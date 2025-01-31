@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRocket, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
+import Home from './Home';
+import SpecialGift from './SpecialGift';
 
 const WhiteBox = styled.div`
   background: white;
@@ -371,6 +374,8 @@ const SubmitButton = styled.button`
   cursor: pointer;
   transition: all 0.3s ease;
   width: 100%;
+  opacity: ${props => props.disabled ? 0.7 : 1};
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
 
   &:hover {
     transform: translateY(-2px);
@@ -438,28 +443,194 @@ const RegistrationForm = styled.form`
   margin: 0 auto;
 `;
 
+const StudentReviews = [
+  {
+    id: 1,
+    emoji: '👨‍🍳',
+    name: '김OO님',
+    role: '식당 운영 / 예비창업가',
+    review: '20년간 식당만 운영했는데, AI로 새로운 비즈니스 모델을 발견했어요. 배달 앱에 의존하지 않고도 단골 고객을 확보하는 방법을 찾았습니다.'
+  },
+  {
+    id: 2,
+    emoji: '👩‍💼',
+    name: '이OO님',
+    role: '스타트업 대표',
+    review: 'MVP를 3개월 만에 출시했고, 초기 유저 1000명을 유치했어요. AI가 시장 분석부터 고객 피드백 분석까지 해주니 의사결정이 정말 빨라졌습니다.'
+  },
+  {
+    id: 3,
+    emoji: '👨‍💼',
+    name: '박OO님',
+    role: '중소기업 대표',
+    review: '사업계획서 작성부터 정부지원사업 선정까지 AI의 도움으로 한 번에 성공했어요. 20년 동안 못 받았던 지원사업, 드디어 선정되었습니다.'
+  },
+  {
+    id: 4,
+    emoji: '🧑‍💻',
+    name: '최OO님',
+    role: 'N잡러 / 콘텐츠 크리에이터',
+    review: '틈새시장을 정확히 파악하고 차별화된 콘텐츠를 만들 수 있게 되었어요. 수익이 3배 늘었고, 작업 시간은 절반으로 줄었습니다.'
+  },
+  {
+    id: 5,
+    emoji: '👨‍🎨',
+    name: '정OO님',
+    role: 'IT기업 마케터',
+    review: '돈 들이지 않고도 브랜드 스토리를 효과적으로 전달할 수 있게 되었어요. 서사적 마케팅으로 경쟁사 대비 CAC가 1/3 수준입니다.'
+  },
+  {
+    id: 6,
+    emoji: '👩‍🚀',
+    name: '강OO님',
+    role: '1인 사업가',
+    review: 'AI가 제안하는 방향이 신선해요. 예전에는 생각지도 못한 사업 아이디어를 발견했고, 진짜 내가 좋아하는 일을 찾았습니다.'
+  }
+];
+
+const StudentResults = [
+  {
+    id: 1,
+    emoji: '🚀',
+    name: '김OO님',
+    achievement: '월 매출 2배 달성',
+    description: '자체 앱 출시 및 충성 고객 확보'
+  },
+  {
+    id: 2,
+    emoji: '💫',
+    name: '이OO님',
+    achievement: '시드 투자 유치 성공',
+    description: '3개월 만에 PMF 달성'
+  },
+  {
+    id: 3,
+    emoji: '🎯',
+    name: '박OO님',
+    achievement: '정부지원금 2억 확보',
+    description: '사업계획 완성도 최상위 평가'
+  },
+  {
+    id: 4,
+    emoji: '⚡',
+    name: '최OO님',
+    achievement: '월 수익 300% 증가',
+    description: '작업시간 50% 단축'
+  },
+  {
+    id: 5,
+    emoji: '🎨',
+    name: '정OO님',
+    achievement: '마케팅 비용 70% 절감',
+    description: '오가닉 팔로워 1만명 확보'
+  },
+  {
+    id: 6,
+    emoji: '💡',
+    name: '강OO님',
+    achievement: '신규 사업 분야 개척',
+    description: '부가 수익원 3개 창출'
+  }
+];
+
+const ReviewCard = styled.div`
+  background: #f8f9fa;
+  padding: 32px;
+  border-radius: 16px;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+`;
+
+const StudentEmoji = styled.div`
+  font-size: 3rem;
+  margin-bottom: 1rem;
+`;
+
+const StudentName = styled.div`
+  font-weight: 600;
+  color: #333;
+`;
+
+const StudentRole = styled.div`
+  font-size: 0.9rem;
+  color: #666;
+`;
+
+const ReviewText = styled.p`
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: #333;
+  margin-bottom: 24px;
+`;
+
+const ResultCard = styled.div`
+  background: #f8f9fa;
+  padding: 32px;
+  border-radius: 16px;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+`;
+
+const Achievement = styled.div`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #514FE4;
+  margin-bottom: 1rem;
+`;
+
 const EventLanding = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
     try {
-      // 로컬 스토리지에 저장
-      localStorage.setItem('registration', JSON.stringify({
-        ...formData,
-        registeredAt: new Date()
-      }));
+      const scriptURL = 'https://script.google.com/macros/s/AKfycby2xTtw45V-50rbq0taqmvHLZujyTkZ7oncOtMsbcRdSkdHDVyNrDnkgE_HgjNN03_H/exec';
+      
+      // 데이터를 URL 파라미터로 변환
+      const params = new URLSearchParams({
+        timestamp: new Date().toLocaleString('ko-KR'),
+        name: formData.name,
+        email: formData.email
+      });
 
+      // GET 요청으로 변경하고 no-cors 모드 추가
+      const response = await fetch(`${scriptURL}?${params.toString()}`, {
+        method: 'GET',
+        mode: 'no-cors',
+      });
+
+      console.log('Submitting form data:', formData);
+      
+      // 폼 초기화
+      setFormData({ 
+        name: '', 
+        email: '' 
+      });
+      
+      // 성공 메시지
+      alert('등록이 완료되었습니다!');
+      
       // special-gift 페이지로 이동
       navigate('/special-gift');
+      
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Submission error:', error);
       alert('등록 중 문제가 발생했습니다. 다시 시도해 주세요.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -497,9 +668,9 @@ const EventLanding = () => {
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                 required
               />
-              <HeroButton type="submit">
-                특강 비밀 링크 전송
-              </HeroButton>
+              <SubmitButton type="submit" disabled={isSubmitting}>
+                {isSubmitting ? '처리중...' : '특강 비밀 링크 전송'}
+              </SubmitButton>
               <FormDisclaimer>
                 이메일은 특강 안내와 뉴스레터 발송을 위해서 활용되며,<br />
                 언제든 수신거부가 가능합니다.
@@ -603,65 +774,14 @@ const EventLanding = () => {
                 수강생들의 후기와 <HighlightSpan>실질적 성과</HighlightSpan>
               </SectionTitle>
               <TestimonialGrid>
-                <TestimonialCard>
-                  <TestimonialText>
-                    "팔로워 없이도 매출이 가능하다는 사실을 확인했어요. AI 툴을 활용해 수익을 극대화할 방법을 배웠습니다."
-                  </TestimonialText>
-                  <TestimonialAuthor>
-                    <AuthorImage>
-                      <img src="/images/testimonials/user1.jpg" alt="수강생 1" />
-                    </AuthorImage>
-                    <AuthorInfo>
-                      <AuthorName>김성장</AuthorName>
-                      <AuthorRole>스타트업 대표</AuthorRole>
-                    </AuthorInfo>
-                  </TestimonialAuthor>
-                </TestimonialCard>
-
-                <TestimonialCard>
-                  <TestimonialText>
-                    "정부 지원금 활용법이 정말 실용적이었어요. 자금 부담 없이 안정적인 시작을 할 수 있었습니다."
-                  </TestimonialText>
-                  <TestimonialAuthor>
-                    <AuthorImage>
-                      <img src="/images/testimonials/user2.jpg" alt="수강생 2" />
-                    </AuthorImage>
-                    <AuthorInfo>
-                      <AuthorName>이혁신</AuthorName>
-                      <AuthorRole>예비창업자</AuthorRole>
-                    </AuthorInfo>
-                  </TestimonialAuthor>
-                </TestimonialCard>
-
-                <TestimonialCard>
-                  <TestimonialText>
-                    "사업 초보자인 저에게도 매우 유용한 강의였습니다. 이제는 저만의 고객층을 구축해가는 중입니다."
-                  </TestimonialText>
-                  <TestimonialAuthor>
-                    <AuthorImage>
-                      <img src="/images/testimonials/user3.jpg" alt="수강생 3" />
-                    </AuthorImage>
-                    <AuthorInfo>
-                      <AuthorName>박창업</AuthorName>
-                      <AuthorRole>1인 사업가</AuthorRole>
-                    </AuthorInfo>
-                  </TestimonialAuthor>
-                </TestimonialCard>
-
-                <TestimonialCard>
-                  <TestimonialText>
-                    "실전에서 바로 써먹을 수 있는 팁을 많이 얻었어요. 강의 내용이 실제 상황에 도움이 되었습니다."
-                  </TestimonialText>
-                  <TestimonialAuthor>
-                    <AuthorImage>
-                      <img src="/images/testimonials/user4.jpg" alt="수강생 4" />
-                    </AuthorImage>
-                    <AuthorInfo>
-                      <AuthorName>최실전</AuthorName>
-                      <AuthorRole>프리랜서</AuthorRole>
-                    </AuthorInfo>
-                  </TestimonialAuthor>
-                </TestimonialCard>
+                {StudentReviews.map(review => (
+                  <ReviewCard key={review.id}>
+                    <StudentEmoji>{review.emoji}</StudentEmoji>
+                    <StudentName>{review.name}</StudentName>
+                    <StudentRole>{review.role}</StudentRole>
+                    <ReviewText>"{review.review}"</ReviewText>
+                  </ReviewCard>
+                ))}
               </TestimonialGrid>
             </Container>
           </TestimonialSection>
@@ -692,8 +812,8 @@ const EventLanding = () => {
                 onChange={(e) => setFormData({...formData, email: e.target.value})}
                 required
               />
-              <SubmitButton type="submit">
-                특강 비밀 링크 전송
+              <SubmitButton type="submit" disabled={isSubmitting}>
+                {isSubmitting ? '처리중...' : '특강 비밀 링크 전송'}
               </SubmitButton>
               <FormDisclaimer>
                 이메일은 특강 안내와 뉴스레터 발송을 위해서 활용되며,<br />

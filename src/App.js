@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -34,51 +34,26 @@ import { CoupangApiProvider } from './contexts/CoupangApiContext';
 function App() {
   const [isSubscribePopupOpen, setIsSubscribePopupOpen] = useState(false);
 
-  const handleSubscribeClick = () => {
-    setIsSubscribePopupOpen(true);
-  };
-
   return (
     <CoupangApiProvider>
       <EmailProvider>
-        <BrowserRouter>
+        <Router>
           <ThemeProvider theme={theme}>
             <AppContainer>
               <GlobalStyle />
-              <Header onSubscribeClick={handleSubscribeClick} />
+              <Header />
               <Main>
                 <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/services" element={<Services />} />
-                  <Route path="/store" element={<Store />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/blog/:id" element={<BlogPost />} />
-                  <Route path="/portfolio" element={<Portfolio />} />
-                  <Route path="/portfolio/:id" element={<PortfolioDetail />} />
-                  <Route path="/class" element={<Class />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/signup" element={<SignUp />} />
-                  <Route path="/inquiry" element={<Inquiry />} />
-                  <Route path="/payment" element={<Payment />} />
-                  <Route path="/free-registration" element={<EventLanding />} />
+                  <Route path="/" element={<EventLanding />} />
                   <Route path="/special-gift" element={<SpecialGift />} />
-                  <Route path="/mypage" element={<MyPage />} />
-                  <Route path="/consulting" element={<Consulting />} />
-                  <Route path="/toy-projects" element={<ToyProjects />} />
-                  <Route path="/toy-projects/:id" element={<ToyProjectsDetail />} />
-                  <Route path="/toyprojects/affili-smart" element={<AffiliSmart />} />
+                  <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
               </Main>
               <Footer />
               <BottomNav />
-              <SubscribePopup 
-                isOpen={isSubscribePopupOpen} 
-                onClose={() => setIsSubscribePopupOpen(false)} 
-              />
             </AppContainer>
           </ThemeProvider>
-        </BrowserRouter>
+        </Router>
       </EmailProvider>
     </CoupangApiProvider>
   );
