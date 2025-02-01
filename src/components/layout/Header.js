@@ -3,8 +3,9 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faTimes, faEnvelope } from '@fortawesome/free-solid-svg-icons';
+import { checkMenuAuth } from '../../utils/menuAuth';
 
-const Header = ({ onSubscribeClick }) => {
+const Header = ({ onSubscribeClick, onInquiryClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const navigate = useNavigate();
@@ -15,23 +16,38 @@ const Header = ({ onSubscribeClick }) => {
     document.body.style.overflow = !isMenuOpen ? 'hidden' : 'auto';
   };
 
-  const handleMenuClick = (e) => {
-    e.preventDefault();
+  const handleMenuClick = (path) => {
+    if (checkMenuAuth(path)) {
+      setIsMenuOpen(false);
+      navigate(path);
+      return;
+    }
+    
+    // 개발 환경에서는 팝업 표시하지 않음
+    if (process.env.NODE_ENV === 'development') {
+      setIsMenuOpen(false);
+      return;
+    }
+    
+    // 프로덕션에서만 팝업 표시
     setIsMenuOpen(false);
     setShowPopup(true);
   };
 
   const handleInquiryClick = (e) => {
-    e.preventDefault(); // 페이지 이동 방지
-    setShowPopup(true);
+    e.preventDefault();
+    setIsMenuOpen(false);
+    if (process.env.NODE_ENV === 'development') {
+      onInquiryClick && onInquiryClick();  // 개발 환경에서는 문의 페이지로 이동
+      return;
+    }
+    setShowPopup(true);  // 프로덕션에서는 팝업 표시
   };
 
-  const isActive = (path) => {
-    return location.pathname === path;
-  };
-
-  const handleOpenPopup = () => {
-    setShowPopup(true);
+  const handleSubscribeClick = (e) => {
+    e.preventDefault();
+    setIsMenuOpen(false);
+    onSubscribeClick && onSubscribeClick();
   };
 
   const handleClosePopup = () => {
@@ -42,60 +58,95 @@ const Header = ({ onSubscribeClick }) => {
     <>
       <HeaderWrapper>
         <HeaderContainer>
-          <Logo onClick={(e) => e.preventDefault()}>
+          <Logo to="/">
             <LogoImage src="/logo_growsome.png" alt="Growsome Logo" />
           </Logo>
           <MenuButton onClick={toggleMenu}>
             <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} />
           </MenuButton>
-          <NavMenu isOpen={isMenuOpen}>
+          <NavMenu $isOpen={isMenuOpen}>
             <NavItem>
-              <NavLink onClick={handleMenuClick}>
+              <NavLink onClick={() => handleMenuClick('/home')}>
+                홈
+                {!checkMenuAuth('/home') && (
+                  <>
+                    <ComingSoonChip>OPEN SOON</ComingSoonChip>
+                    <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+                  </>
+                )}
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink onClick={() => handleMenuClick('/services')}>
                 개발구독
-                <ComingSoonChip>OPEN SOON</ComingSoonChip>
-                <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+                {!checkMenuAuth('/services') && (
+                  <>
+                    <ComingSoonChip>OPEN SOON</ComingSoonChip>
+                    <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+                  </>
+                )}
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink onClick={handleMenuClick}>
+              <NavLink onClick={() => handleMenuClick('/portfolio')}>
                 포트폴리오
-                <ComingSoonChip>OPEN SOON</ComingSoonChip>
-                <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+                {!checkMenuAuth('/portfolio') && (
+                  <>
+                    <ComingSoonChip>OPEN SOON</ComingSoonChip>
+                    <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+                  </>
+                )}
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink onClick={handleMenuClick}>
+              <NavLink onClick={() => handleMenuClick('/store')}>
                 스토어
-                <ComingSoonChip>OPEN SOON</ComingSoonChip>
-                <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+                {!checkMenuAuth('/store') && (
+                  <>
+                    <ComingSoonChip>OPEN SOON</ComingSoonChip>
+                    <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+                  </>
+                )}
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink onClick={handleMenuClick}>
+              <NavLink onClick={() => handleMenuClick('/toyprojects')}>
                 토이 프로젝트
-                <ComingSoonChip>OPEN SOON</ComingSoonChip>
-                <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+                {!checkMenuAuth('/toyprojects') && (
+                  <>
+                    <ComingSoonChip>OPEN SOON</ComingSoonChip>
+                    <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+                  </>
+                )}
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink onClick={handleMenuClick}>
+              <NavLink onClick={() => handleMenuClick('/blog')}>
                 블로그
-                <ComingSoonChip>OPEN SOON</ComingSoonChip>
-                <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+                {!checkMenuAuth('/blog') && (
+                  <>
+                    <ComingSoonChip>OPEN SOON</ComingSoonChip>
+                    <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+                  </>
+                )}
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink onClick={handleMenuClick}>
+              <NavLink onClick={() => handleMenuClick('/class')}>
                 강의
-                <ComingSoonChip>OPEN SOON</ComingSoonChip>
-                <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+                {!checkMenuAuth('/class') && (
+                  <>
+                    <ComingSoonChip>OPEN SOON</ComingSoonChip>
+                    <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
+                  </>
+                )}
               </NavLink>
             </NavItem>
             <ButtonGroup>
               <InquiryButton onClick={handleInquiryClick}>
                 개발문의하기
               </InquiryButton>
-              <SubscribeButton onClick={handleMenuClick}>
+              <SubscribeButton onClick={handleSubscribeClick}>
                 <FontAwesomeIcon icon={faEnvelope} />
                 구독하기
               </SubscribeButton>
@@ -185,7 +236,8 @@ const NavMenu = styled.ul`
     flex-direction: column;
     justify-content: center;
     padding: 2rem;
-    transform: translateX(${props => props.isOpen ? '0' : '100%'});
+    display: ${props => props.$isOpen ? 'flex' : 'none'};
+    transform: translateX(${props => props.$isOpen ? '0' : '100%'});
     box-shadow: -2px 0 10px rgba(0,0,0,0.1);
   }
 `;

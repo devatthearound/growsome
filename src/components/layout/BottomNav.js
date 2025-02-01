@@ -17,23 +17,23 @@ const BottomNav = () => {
 
   return (
     <NavWrapper>
-      <NavItem to="/" active={isActive('/')}>
+      <NavItem to="/" $active={isActive('/')}>
         <FontAwesomeIcon icon={faHome} />
         <span>홈</span>
       </NavItem>
-      <NavItem to="/class" active={isActive('/class')}>
+      <NavItem to="/class" $active={isActive('/class')}>
         <FontAwesomeIcon icon={faGraduationCap} />
         <span>강의</span>
       </NavItem>
-      <NavItem to="/store" active={isActive('/store')}>
+      <NavItem to="/store" $active={isActive('/store')}>
         <FontAwesomeIcon icon={faShoppingBag} />
         <span>스토어</span>
       </NavItem>
-      <NavItem to="/inquiry" active={isActive('/inquiry')}>
+      <NavItem to="/inquiry" $active={isActive('/inquiry')}>
         <FontAwesomeIcon icon={faComments} />
         <span>문의</span>
       </NavItem>
-      <NavItem to="/mypage" active={isActive('/mypage')}>
+      <NavItem to="/mypage" $active={isActive('/mypage')}>
         <FontAwesomeIcon icon={faUser} />
         <span>MY</span>
       </NavItem>
@@ -63,7 +63,7 @@ const NavItem = styled(Link)`
   flex-direction: column;
   align-items: center;
   text-decoration: none;
-  color: ${props => props.active ? '#514FE4' : '#666'};
+  color: ${props => props.$active ? '#514FE4' : '#666'};
   font-size: 0.8rem;
   gap: 0.3rem;
 
@@ -73,7 +73,22 @@ const NavItem = styled(Link)`
 
   span {
     font-size: 0.7rem;
-    font-weight: ${props => props.active ? '600' : '400'};
+    font-weight: ${props => props.$active ? '600' : '400'};
+  }
+`;
+
+const NavLink = styled.a`
+  color: ${props => props.$active ? '#514FE4' : '#666'};
+  font-size: 0.8rem;
+  gap: 0.3rem;
+
+  svg {
+    font-size: 1.3rem;
+  }
+
+  span {
+    font-size: 0.7rem;
+    font-weight: ${props => props.$active ? '600' : '400'};
   }
 `;
 

@@ -27,6 +27,7 @@
     <title>그로우썸</title>
     <meta http-equiv="Cross-Origin-Opener-Policy" content="same-origin" />
     <meta http-equiv="Cross-Origin-Embedder-Policy" content="require-corp" />
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
   </head>
   <body>
     <noscript>AI와 함께 더 똑똑하고, 더 창의적이게</noscript>
@@ -42,5 +43,16 @@
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
     <script src="https://unpkg.com/feather-icons"></script>
+    <script>
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", user => {
+          if (!user) {
+            window.netlifyIdentity.on("login", () => {
+              document.location.href = "/admin/";
+            });
+          }
+        });
+      }
+    </script>
   </body>
 </html>

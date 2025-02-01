@@ -1,14 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const CoupangApiContext = createContext();
-
-export const useCoupangApi = () => {
-  const context = useContext(CoupangApiContext);
-  if (!context) {
-    throw new Error('useCoupangApi must be used within a CoupangApiProvider');
-  }
-  return context;
-};
 
 export const CoupangApiProvider = ({ children }) => {
   const [apiKeys, setApiKeys] = useState(() => {
@@ -20,9 +12,12 @@ export const CoupangApiProvider = ({ children }) => {
     };
   });
 
+  useEffect(() => {
+    localStorage.setItem('coupangApiKeys', JSON.stringify(apiKeys));
+  }, [apiKeys]);
+
   const updateApiKeys = (newKeys) => {
     setApiKeys(newKeys);
-    localStorage.setItem('coupangApiKeys', JSON.stringify(newKeys));
   };
 
   return (
@@ -30,4 +25,12 @@ export const CoupangApiProvider = ({ children }) => {
       {children}
     </CoupangApiContext.Provider>
   );
+};
+
+export const useCoupangApi = () => {
+  const context = useContext(CoupangApiContext);
+  if (!context) {
+    throw new Error('useCoupangApi must be used within a CoupangApiProvider');
+  }
+  return context;
 }; 

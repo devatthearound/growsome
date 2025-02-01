@@ -4,59 +4,17 @@ import axios from 'axios';
 const NAVER_CLIENT_ID = process.env.REACT_APP_NAVER_CLIENT_ID;
 const NAVER_CLIENT_SECRET = process.env.REACT_APP_NAVER_CLIENT_SECRET;
 
-export const getTopKeywords = async (category = '게이밍PC') => {
-  try {
-    // 네이버 데이터 (임시 테스트 데이터)
-    const naverKeywords = [
-      { keyword: '가성비 게이밍컴퓨터', score: 850 },
-      { keyword: 'RTX 4060 게이밍PC', score: 720 },
-      { keyword: '고사양 게이밍PC 추천', score: 650 },
-      { keyword: '20만원대 게이밍PC', score: 450 },
-      { keyword: '조립 게이밍PC 추천', score: 380 }
-    ];
-
-    // 유튜브 데이터 (임시 테스트 데이터)
-    const youtubeKeywords = [
-      { keyword: '가성비 게이밍PC 추천', videoCount: 1200, avgViews: 45000 },
-      { keyword: 'RTX 4060 게이밍컴퓨터', videoCount: 850, avgViews: 38000 },
-      { keyword: '백만원대 게이밍PC', videoCount: 920, avgViews: 32000 },
-      { keyword: '게이밍PC 조립 가이드', videoCount: 750, avgViews: 28000 },
-      { keyword: '고사양 게이밍PC 리뷰', videoCount: 680, avgViews: 25000 }
-    ];
-
-    // 데이터 결합 및 점수 계산
-    const combinedKeywords = combineKeywordData(naverKeywords, youtubeKeywords);
-
-    // 관련 영상 데이터
-    const relatedVideos = [
-      {
-        title: '200만원으로 살 수 있는 최강의 게이밍PC 추천!',
-        viewCount: '123,456',
-        channelTitle: '컴퓨터 전문가',
-        thumbnail: 'https://example.com/thumbnail1.jpg',
-        tags: ['게이밍PC', 'RTX4060', '조립컴퓨터']
-      },
-      {
-        title: '가성비 게이밍PC 추천 2024 최신버전',
-        viewCount: '98,765',
-        channelTitle: 'PC 리뷰채널',
-        thumbnail: 'https://example.com/thumbnail2.jpg',
-        tags: ['가성비PC', '게이밍컴퓨터', '추천']
-      }
-    ];
-
-    return {
-      keywords: combinedKeywords,
-      relatedVideos: relatedVideos
-    };
-
-  } catch (error) {
-    console.error('키워드 분석 오류:', error);
-    return {
-      keywords: [],
-      relatedVideos: []
-    };
-  }
+export const getTopKeywords = async (platform, timeRange = '7d') => {
+  // 임시로 더미 데이터 반환
+  return {
+    keywords: [
+      { keyword: "게이밍PC", searchVolume: 15000, competition: 0.8, trend: [10, 15, 20, 25, 30] },
+      { keyword: "RTX 4060", searchVolume: 12000, competition: 0.6, trend: [5, 10, 15, 20, 25] },
+      { keyword: "고사양 게이밍PC", searchVolume: 10000, competition: 0.7, trend: [15, 20, 25, 30, 35] },
+      { keyword: "20만원대 게이밍PC", searchVolume: 8000, competition: 0.4, trend: [8, 12, 16, 20, 24] },
+      { keyword: "가성비 게이밍PC", searchVolume: 7500, competition: 0.5, trend: [12, 14, 16, 18, 20] }
+    ]
+  };
 };
 
 const combineKeywordData = (naverData, youtubeData) => {

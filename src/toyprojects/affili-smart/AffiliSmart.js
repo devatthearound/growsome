@@ -1,22 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile } from '@ffmpeg/util';
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { testProducts } from './utils/testData';
-import { getTopKeywords } from './utils/keywordAnalyzer';
-import { crawlProducts } from './utils/productCrawler';
-import { searchCoupangProducts, generateAffiliateLink } from './utils/coupangAPI';
-import { useCoupangApi } from '../../contexts/CoupangApiContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faSearch, 
-  faYoutube, 
-  faChartLine, 
-  faShoppingCart,
-  faVideo
+  faSync,
+  faCog,
+  faArrowLeft
 } from '@fortawesome/free-solid-svg-icons';
+import { faYoutube } from '@fortawesome/free-brands-svg-icons';
+import { useCoupangApi } from '../../contexts/CoupangApiContext';
+import AffiliateSettingsPopup from './components/AffiliateSettingsPopup';
+import { getTopKeywords } from './utils/keywordAnalyzer';
 
 const initialKeywordData = {
   keywords: [
@@ -41,9 +36,15 @@ const initialProducts = [
   { id: 10, name: "프로게이머용 PC", price: 2200000, rating: 4.9 }
 ];
 
+const StyledContainer = styled.div`
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+`;
+
 const AffiliSmart = () => {
   const navigate = useNavigate();
-  const { apiKeys } = useCoupangApi();
+  const { apiKeys, updateApiKeys } = useCoupangApi();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [videoUrl, setVideoUrl] = useState(null);
@@ -68,6 +69,7 @@ const AffiliSmart = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [accessKey, setAccessKey] = useState('');
   const [secretKey, setSecretKey] = useState('');
+  const [showSettingsPopup, setShowSettingsPopup] = useState(false);
 
   const timeRanges = [
     { value: '1d', label: '1일' },
@@ -75,20 +77,13 @@ const AffiliSmart = () => {
     { value: '7d', label: '7일' },
     { value: '30d', label: '30일' },
     { value: '90d', label: '90일' },
-    { value: '12m', label: '12개월' }
   ];
 
   useEffect(() => {
-    handlePlatformChange(selectedPlatform);
+    // 첫 로드 시 네이버 쇼핑을 기본값으로 설정
+    setSelectedPlatform('naver');
+    handlePlatformChange('naver');
   }, []);
-
-  useEffect(() => {
-    if (!apiKeys.accessKey || !apiKeys.secretKey || !apiKeys.subId) {
-      setError('쿠팡 API 설정이 필요합니다.');
-    } else {
-      setError(null);
-    }
-  }, [apiKeys]);
 
   const formatNumber = (value) => {
     if (!value && value !== 0) return '0';
@@ -98,30 +93,88 @@ const AffiliSmart = () => {
   const handlePlatformChange = async (platform) => {
     setSelectedPlatform(platform);
     setIsAnalyzing(true);
+    setError(null);
     try {
-      const data = await getTopKeywords(platform, timeRange);
+      const data = await getTopKeywords(platform);
+      setKeywordData({
+        keywords: data?.keywords || initialKeywordData.keywords,
+      });
+    } catch (error) {
+      console.error('Error fetching keywords:', error);
+      setKeywordData(initialKeywordData);
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  const handleTimeRangeChange = async (range) => {
+    setTimeRange(range);
+    setIsAnalyzing(true);
+    try {
+      const data = await getTopKeywords(selectedPlatform, range);
       setKeywordData({
         keywords: data?.keywords || [],
         relatedKeywords: data?.relatedKeywords || []
       });
     } catch (error) {
       setError('키워드 분석 중 오류가 발생했습니다.');
-      setKeywordData({ keywords: [], relatedKeywords: [] });
     } finally {
       setIsAnalyzing(false);
     }
   };
 
-  const handleTimeRangeChange = (range) => {
-    setTimeRange(range);
-    setStep(2);
-  };
+  const handleKeywordSelect = async (keyword) => {
+    try {
+      setIsLoadingProducts(true);
+      setError(null);
+      setSelectedKeyword(keyword);
 
-  const handleKeywordSelect = (keyword) => {
-    if (!keyword) return;
-    setSelectedKeyword(keyword);
-    setStep(3);
-    setSelectedProducts([]);
+      const response = await fetch(
+        `http://localhost:9003/api/search/shop?query=${encodeURIComponent(keyword.keyword)}`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.items || data.items.length === 0) {
+        setError('검색 결과가 없습니다.');
+        setRelatedProducts([]);
+        return;
+      }
+
+      const products = data.items.map(item => ({
+        id: item.productId || Math.random().toString(36).substr(2, 9),
+        title: item.title.replace(/<[^>]*>?/g, ''),
+        price: parseInt(item.lprice),
+        image: item.image,
+        link: item.link,
+        mallName: item.mallName,
+        brand: item.brand || '',
+        category: item.category1 || '',
+        reviewCount: parseInt(item.reviewCount || '0'),
+        rating: parseFloat(item.rating || '0')
+      }));
+
+      setRelatedProducts(products);
+
+    } catch (error) {
+      console.error('Error:', error);
+      setError('상품 검색 중 오류가 발생했습니다: ' + error.message);
+      setRelatedProducts([]);
+    } finally {
+      setIsLoadingProducts(false);
+    }
   };
 
   const handleProductSelect = (productId) => {
@@ -238,252 +291,169 @@ const AffiliSmart = () => {
     );
   };
 
-  // 임시 더미 데이터 추가
-  useEffect(() => {
-    const dummyKeywords = [
-      { keyword: "게이밍PC", searchVolume: 15000, competition: 0.8, trend: [10, 15, 20, 25, 30] },
-      { keyword: "RTX 4060", searchVolume: 12000, competition: 0.6, trend: [5, 10, 15, 20, 25] },
-      { keyword: "고사양 게이밍PC", searchVolume: 10000, competition: 0.7, trend: [15, 20, 25, 30, 35] },
-      { keyword: "20만원대 게이밍PC", searchVolume: 8000, competition: 0.4, trend: [20, 25, 30, 35, 40] },
-      { keyword: "가성비 게이밍PC", searchVolume: 13000, competition: 0.5, trend: [25, 30, 35, 40, 45] },
-    ];
-
-    // 상위 5개 상품만 표시
-    const dummyProducts = [
-      {
-        productId: 1,
-        title: "고성능 게이밍PC 조립컴퓨터 RTX4060",
-        price: 1599000,
-        originalPrice: 1799000,
-        imageUrl: "https://via.placeholder.com/200",
-        rating: 4.8,
-        reviewCount: 2457,
-        isRocket: true
-      },
-      {
-        productId: 2,
-        title: "RTX 4060 게이밍PC 본체",
-        price: 1299000,
-        originalPrice: 1499000,
-        imageUrl: "https://via.placeholder.com/200",
-        rating: 4.7,
-        reviewCount: 1234,
-        isRocket: true
-      },
-      {
-        productId: 3,
-        title: "가성비 게이밍PC 조립컴퓨터",
-        price: 899000,
-        originalPrice: 999000,
-        imageUrl: "https://via.placeholder.com/200",
-        rating: 4.5,
-        reviewCount: 890,
-        isRocket: true
-      },
-      {
-        productId: 4,
-        title: "20만원대 게이밍PC 조립컴퓨터",
-        price: 299000,
-        originalPrice: 399000,
-        imageUrl: "https://via.placeholder.com/200",
-        rating: 4.3,
-        reviewCount: 567,
-        isRocket: false
-      },
-      {
-        productId: 5,
-        title: "고사양 게이밍PC 풀패키지",
-        price: 2199000,
-        originalPrice: 2499000,
-        imageUrl: "https://via.placeholder.com/200",
-        rating: 4.9,
-        reviewCount: 345,
-        isRocket: true
-      }
-    ];
-
-    setKeywordData({
-      keywords: dummyKeywords,
-      relatedKeywords: dummyKeywords.map(k => ({ keyword: k.keyword, score: Math.random() }))
-    });
-    setCoupangProducts(dummyProducts);
-  }, []);
-
-  // handleSetup 함수 추가
-  const handleSetup = () => {
-    // 설정 관련 로직 구현
-    console.log('Setup clicked');
-  };
-
-  const handleApiSettingsClick = () => {
-    navigate('/mypage/api-settings');
+  const handleSetupCoupang = () => {
+    navigate('/mypage/api-settings');  // API 설정 페이지로 이동
   };
 
   return (
-    <Container>
-      <Section>
-        <Title>AffiliSmart - 쿠팡 파트너스 영상 생성기</Title>
+    <StyledContainer>
+      <Navigation>
+        <NavItem>
+          <NavLink to="/toyprojects">
+            <FontAwesomeIcon icon={faArrowLeft} /> 돌아가기
+          </NavLink>
+        </NavItem>
+      </Navigation>
+      <Container>
+        <Title>AffiliSmart - AI 제휴마케팅 도우미</Title>
         
-        <ApiErrorMessage>
-          쿠팡 API 설정이 필요합니다.
-          <ApiSettingsButton onClick={handleApiSettingsClick}>
-            API 설정하러 가기
-          </ApiSettingsButton>
-        </ApiErrorMessage>
-
         <Section>
-          <SectionTitle>쿠팡 파트너스 API 키 입력</SectionTitle>
-          <ApiKeyInputContainer>
-            <InputGroup>
-              <label>Access Key:</label>
-              <input
-                type="text"
-                value={accessKey}
-                onChange={(e) => setAccessKey(e.target.value)}
-                placeholder="Access Key를 입력하세요"
-              />
-            </InputGroup>
-            <InputGroup>
-              <label>Secret Key:</label>
-              <input
-                type="password"
-                value={secretKey}
-                onChange={(e) => setSecretKey(e.target.value)}
-                placeholder="Secret Key를 입력하세요"
-              />
-            </InputGroup>
-          </ApiKeyInputContainer>
-        </Section>
+          <SectionTitle>
+            <TrendIcon>📈</TrendIcon> 
+            쇼핑 트렌드 분석
+            <RefreshButton onClick={() => handlePlatformChange(selectedPlatform)}>
+              <FontAwesomeIcon icon={faSync} /> 새로고침
+            </RefreshButton>
+          </SectionTitle>
 
-        {error && (
-          <ErrorMessage>
-            <p>{error}</p>
-            <RetryButton onClick={handleVideoGeneration}>
-              다시 시도하기
-            </RetryButton>
-          </ErrorMessage>
-        )}
-
-        <Section>
-          <SectionTitle>0. 트렌드 키워드 분석</SectionTitle>
-          
           <PlatformSelector>
-            <PlatformButton 
-              active={selectedPlatform === 'naver'}
-              onClick={() => setSelectedPlatform('naver')}
-            >
-              <FontAwesomeIcon icon={faSearch} />
-              네이버 검색량
+            <PlatformButton $active={selectedPlatform === 'naver'} onClick={() => setSelectedPlatform('naver')}>
+              <FontAwesomeIcon icon={faSearch} /> 네이버 쇼핑
             </PlatformButton>
-            <PlatformButton 
-              active={selectedPlatform === 'youtube'}
-              onClick={() => setSelectedPlatform('youtube')}
-            >
-              <FontAwesomeIcon icon={faVideo} />
-              유튜브 트렌드
+            <PlatformButton $active={selectedPlatform === 'youtube'} onClick={() => setSelectedPlatform('youtube')}>
+              <FontAwesomeIcon icon={faYoutube} /> 유튜브 쇼핑
             </PlatformButton>
           </PlatformSelector>
 
-          <TimeRangeSelector>
-            {['7일', '30일', '90일', '12개월'].map(range => (
-              <TimeButton 
-                key={range}
-                active={timeRange === range}
-                onClick={() => handleTimeRangeChange(range)}
-              >
-                {range}
-              </TimeButton>
-            ))}
-          </TimeRangeSelector>
+          <TrendDescription>
+            최근 7일간의 인기 검색어와 트렌드를 분석합니다.
+            상위 10개의 키워드를 검색량과 함께 보여드립니다.
+          </TrendDescription>
 
-          {step >= 2 && keywordData?.keywords && (
+          {isAnalyzing ? (
+            <LoadingWrapper>
+              <LoadingSpinner />
+              <LoadingText>트렌드 분석 중...</LoadingText>
+            </LoadingWrapper>
+          ) : error ? (
+            <ErrorMessage>
+              {error}
+              <RetryButton onClick={() => handlePlatformChange('naver')}>
+                다시 시도
+              </RetryButton>
+            </ErrorMessage>
+          ) : (
             <KeywordTable>
               <thead>
                 <tr>
                   <th>순위</th>
                   <th>키워드</th>
                   <th>검색량</th>
-                  <th>경쟁강도</th>
                   <th>트렌드</th>
-                  <th></th>
+                  <th>액션</th>
                 </tr>
               </thead>
               <tbody>
-                {keywordData.keywords.map((kw, index) => (
+                {keywordData.keywords.slice(0, 5).map((kw, index) => (
                   <TableRow 
                     key={index} 
                     selected={selectedKeyword === kw.keyword}
                   >
-                    <td>{index + 1}</td>
-                    <td>{kw?.keyword || 'N/A'}</td>
-                    <td>{formatNumber(kw?.searchVolume)}</td>
-                    <td><CompetitionBar value={kw?.competition || 0} /></td>
-                    <td><TrendIndicator trend={kw?.trend || []} /></td>
                     <td>
-                      <SelectButton 
-                        selected={selectedKeyword === kw?.keyword}
-                        onClick={() => handleKeywordSelect(kw?.keyword)}
+                      <RankBadge>
+                        {index + 1}
+                      </RankBadge>
+                    </td>
+                    <td>{kw.keyword}</td>
+                    <td>{formatNumber(kw.searchVolume)}</td>
+                    <td>
+                      {kw.trend && kw.trend.length > 0 ? (
+                        <TrendGraph data={kw.trend} />
+                      ) : (
+                        <div>데이터 없음</div>
+                      )}
+                    </td>
+                    <td>
+                      <ActionButton 
+                        onClick={() => handleKeywordSelect(kw)}
                       >
-                        {selectedKeyword === kw?.keyword ? '선택됨' : '선택'}
-                      </SelectButton>
+                        <FontAwesomeIcon icon={faSearch} /> 상품 검색
+                      </ActionButton>
                     </td>
                   </TableRow>
                 ))}
               </tbody>
             </KeywordTable>
           )}
+        </Section>
 
-          {step >= 3 && relatedProducts && (
-            <RelatedProducts>
-              <SubTitle>
-                연관 상품 선택 
-                <SelectedCount>
-                  (선택된 상품: {selectedProducts.length}개)
-                </SelectedCount>
-              </SubTitle>
+        {selectedKeyword && (
+          <Section>
+            <SectionTitle>
+              "{selectedKeyword.keyword}" 관련 상품
+            </SectionTitle>
+            
+            {isLoadingProducts ? (
+              <LoadingWrapper>
+                <LoadingSpinner />
+                <LoadingText>상품을 검색하고 있습니다...</LoadingText>
+              </LoadingWrapper>
+            ) : relatedProducts.length > 0 ? (
               <ProductGrid>
-                {relatedProducts.map(product => (
+                {relatedProducts.map((product) => (
                   <ProductCard 
                     key={product.id}
-                    selected={selectedProducts.some(p => p.id === product.id)}
+                    selected={selectedProducts.includes(product)}
+                    onClick={() => handleProductSelect(product.id)}
                   >
-                    {getProductRank(product.id) && (
-                      <ProductRank>
-                        {getProductRank(product.id)}순위
-                      </ProductRank>
-                    )}
+                    <ProductImage src={product.image} alt={product.title} />
                     <ProductInfo>
-                      <ProductName>{product.name}</ProductName>
-                      <ProductPrice>
-                        {formatNumber(product.price)}원
-                      </ProductPrice>
-                      <ProductRating>★ {product.rating}</ProductRating>
+                      <ProductName>{product.title}</ProductName>
+                      <ProductPrice>{formatNumber(product.price)}원</ProductPrice>
+                      <ProductMall>{product.mallName}</ProductMall>
                     </ProductInfo>
-                    <SelectButton 
-                      selected={selectedProducts.some(p => p.id === product.id)}
-                      onClick={() => handleProductSelect(product.id)}
-                    >
-                      {selectedProducts.some(p => p.id === product.id) ? 
-                        `${getProductRank(product.id)}순위` : '선택'}
-                    </SelectButton>
                   </ProductCard>
                 ))}
               </ProductGrid>
+            ) : (
+              <EmptyMessage>검색된 상품이 없습니다.</EmptyMessage>
+            )}
+          </Section>
+        )}
 
-              {selectedProducts.length > 0 && (
-                <SelectedProductsSummary>
-                  <h3>선택된 상품 순서</h3>
-                  {selectedProducts.map((product, index) => (
-                    <ProductSummaryItem key={product.id}>
-                      <span>{index + 1}순위:</span> {product.name}
-                      <ProductPrice>{formatNumber(product.price)}원</ProductPrice>
-                    </ProductSummaryItem>
-                  ))}
-                </SelectedProductsSummary>
-              )}
-            </RelatedProducts>
-          )}
+        <Section>
+          <SettingsBox>
+            <SettingsHeader>
+              <h3>제휴 플랫폼 설정</h3>
+              <SettingsButton onClick={() => setShowSettingsPopup(true)}>
+                <FontAwesomeIcon icon={faCog} /> 설정하기
+              </SettingsButton>
+            </SettingsHeader>
+            <PlatformStatus>
+              <StatusItem>
+                <StatusIcon $connected={apiKeys.accessKey}>🛒</StatusIcon>
+                <StatusText>쿠팡 파트너스: {apiKeys.accessKey ? '연동됨' : '미연동'}</StatusText>
+              </StatusItem>
+              {/* Add more platform status items */}
+            </PlatformStatus>
+          </SettingsBox>
         </Section>
+
+        {showSettingsPopup && (
+          <AffiliateSettingsPopup
+            currentSettings={{
+              coupang: {
+                accessKey: apiKeys.accessKey,
+                secretKey: apiKeys.secretKey
+              }
+            }}
+            onSubmit={(settings) => {
+              updateApiKeys(settings.coupang);
+              setShowSettingsPopup(false);
+            }}
+            onClose={() => setShowSettingsPopup(false)}
+          />
+        )}
 
         {isLoading ? (
           <LoadingMessage>
@@ -533,8 +503,8 @@ const AffiliSmart = () => {
             </CommentSection>
           </>
         )}
-      </Section>
-    </Container>
+      </Container>
+    </StyledContainer>
   );
 };
 
@@ -562,52 +532,57 @@ const SectionTitle = styled.h2`
 
 const ProductGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 20px;
   margin-top: 20px;
 `;
 
 const ProductCard = styled.div`
-  position: relative;
-  border: 1px solid ${props => props.selected ? '#514FE4' : '#eee'};
+  border: 1px solid #eee;
   border-radius: 8px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  background: ${props => props.selected ? '#f8f9ff' : 'white'};
+  padding: 10px;
+  cursor: pointer;
   transition: all 0.2s;
+  background: ${props => props.selected ? '#f3f0ff' : 'white'};
 
   &:hover {
-    border-color: #514FE4;
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 `;
 
-const ProductImage = styled.div`
+const ProductImage = styled.img`
   width: 100%;
   height: 200px;
-  background: #f8f9fa;
+  object-fit: cover;
   border-radius: 4px;
 `;
 
 const ProductInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  margin-top: 10px;
 `;
 
 const ProductName = styled.h3`
-  font-size: 1rem;
+  font-size: 0.9rem;
   margin: 0;
+  color: #333;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 `;
 
 const ProductPrice = styled.div`
   font-weight: bold;
   color: #514FE4;
+  margin-top: 4px;
 `;
 
-const ProductRating = styled.div`
-  color: #fab005;
+const ProductMall = styled.div`
+  font-size: 0.8rem;
+  color: #666;
+  margin-top: 4px;
 `;
 
 const ErrorMessage = styled.div`
@@ -915,14 +890,14 @@ const PlatformButton = styled.button`
   padding: 12px 20px;
   border: none;
   border-radius: 8px;
-  background: ${props => props.active ? '#514FE4' : '#f8f9fa'};
-  color: ${props => props.active ? 'white' : '#666'};
+  background: ${props => props.$active ? '#514FE4' : '#f8f9fa'};
+  color: ${props => props.$active ? 'white' : '#666'};
   font-size: 16px;
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover {
-    background: ${props => props.active ? '#4340c0' : '#e9ecef'};
+    background: ${props => props.$active ? '#4340c0' : '#e9ecef'};
   }
 
   svg {
@@ -1031,6 +1006,241 @@ const ApiSettingsButton = styled.button`
 
   &:hover {
     background-color: #4340c0;
+  }
+`;
+
+const PlatformGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+`;
+
+const PlatformCard = styled.div`
+  background: white;
+  border: 1px solid ${props => props.active ? '#514FE4' : '#eee'};
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  opacity: ${props => props.disabled ? 0.6 : 1};
+  position: relative;
+`;
+
+const PlatformIcon = styled.div`
+  font-size: 2rem;
+  margin-bottom: 10px;
+`;
+
+const PlatformName = styled.h3`
+  font-size: 1.1rem;
+  color: #333;
+  margin-bottom: 10px;
+`;
+
+const PlatformStatus = styled.div`
+  font-size: 0.9rem;
+  color: #666;
+  margin-bottom: 15px;
+`;
+
+const SetupButton = styled.button`
+  background: #514FE4;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+
+  &:hover {
+    background: #4340c0;
+  }
+`;
+
+const ComingSoonBadge = styled.div`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ff922b;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+`;
+
+const TrendIcon = styled.span`
+  font-size: 1.5rem;
+  margin-right: 8px;
+`;
+
+const RefreshButton = styled.button`
+  background: none;
+  border: none;
+  color: #514FE4;
+  cursor: pointer;
+  margin-left: 12px;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const TrendDescription = styled.p`
+  color: #666;
+  margin-bottom: 24px;
+  line-height: 1.6;
+`;
+
+const LoadingWrapper = styled.div`
+  text-align: center;
+  padding: 40px;
+`;
+
+const LoadingText = styled.div`
+  color: #514FE4;
+  margin-top: 12px;
+  font-weight: 500;
+`;
+
+const RankBadge = styled.span`
+  background: ${props => props.children <= 3 ? '#514FE4' : '#e9ecef'};
+  color: ${props => props.children <= 3 ? 'white' : '#666'};
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+`;
+
+const TrendGraph = styled.div`
+  width: 100px;
+  height: 30px;
+  background: ${props => {
+    const trend = props.data || [];
+    const lastValue = trend[trend.length - 1];
+    const firstValue = trend[0];
+    return lastValue > firstValue ? '#e8f5e9' : '#fff3f3';
+  }};
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+
+  &::after {
+    content: '${props => {
+      const trend = props.data || [];
+      const lastValue = trend[trend.length - 1];
+      const firstValue = trend[0];
+      return lastValue > firstValue ? '↑' : '↓';
+    }}';
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: ${props => {
+      const trend = props.data || [];
+      const lastValue = trend[trend.length - 1];
+      const firstValue = trend[0];
+      return lastValue > firstValue ? '#2e7d32' : '#c62828';
+    }};
+  }
+`;
+
+const ActionButton = styled.button`
+  background: #514FE4;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  &:hover {
+    background: #4340c0;
+  }
+`;
+
+const SettingsBox = styled.div`
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+`;
+
+const SettingsHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
+const SettingsButton = styled.button`
+  background: none;
+  border: none;
+  color: #514FE4;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+const StatusItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const StatusIcon = styled.div`
+  font-size: 1.5rem;
+  color: ${props => props.$connected ? '#514FE4' : '#666'};
+`;
+
+const StatusText = styled.span`
+  font-size: 0.9rem;
+  color: #666;
+`;
+
+const ShoppingIcon = styled.span`
+  font-size: 1.5rem;
+  margin-right: 8px;
+`;
+
+const EmptyMessage = styled.div`
+  text-align: center;
+  padding: 20px;
+  color: #666;
+`;
+
+const Navigation = styled.nav`
+  padding: 1rem;
+  background: white;
+  border-bottom: 1px solid #eee;
+`;
+
+const NavItem = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const NavLink = styled(Link)`
+  color: #514FE4;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  
+  &:hover {
+    text-decoration: underline;
   }
 `;
 
