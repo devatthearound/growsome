@@ -320,10 +320,6 @@ const AuthorName = styled.div`
   color: #333;
 `;
 
-const AuthorRole = styled.div`
-  font-size: 0.9rem;
-  color: #666;
-`;
 
 const RegistrationSection = styled.section`
   padding: 100px 0;
