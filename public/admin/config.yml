@@ -1,7 +1,6 @@
 backend:
-  name: github
-  repo: hyunjucho/growsome
-  branch: main
+  name: git-gateway
+  branch: master # 또는 사용 중인 브랜치 이름
   base_url: https://api.netlify.com
   auth_endpoint: oauth/auth # auth_endpoint 수정
 
