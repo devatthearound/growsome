@@ -693,6 +693,7 @@ const LockIcon = styled.span`
 `;
 
 // Vimeo 관련 컴포넌트 추가
+// eslint-disable-next-line no-unused-vars
 const VimeoWrapper = styled.div`
   position: relative;
   padding-top: 56.25%; /* 16:9 Aspect Ratio */
@@ -707,6 +708,7 @@ const VimeoWrapper = styled.div`
   }
 `;
 
+// eslint-disable-next-line no-unused-vars
 const LockedContent = styled.div`
   display: flex;
   flex-direction: column;

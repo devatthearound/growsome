@@ -1,19 +1,17 @@
 import React, { useState } from 'react';
-import { Routes, Route, Navigate, useNavigate, Outlet } from 'react-router-dom';
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
-import Home from './pages/Home';
-import Services from './pages/Services';
-import Store from './pages/Store';
 import { ThemeProvider } from 'styled-components';
 import GlobalStyle from './styles/GlobalStyle';
 import theme from './styles/theme';
-import Blog from './pages/Blog';
-import BlogPost from './pages/BlogPost';
+import BlogList from './components/blog/BlogList';
+import BlogPost from './components/blog/BlogPost';
 import Portfolio from './pages/Portfolio';
 import PortfolioDetail from './pages/PortfolioDetail';
 import SubscribePopup from './components/common/SubscribePopup';
+import Home from './pages/Home'; 
 import Class from './pages/Class';
 import Auth from './pages/Auth';
 import SignUp from './pages/SignUp';
@@ -30,6 +28,8 @@ import AffiliSmart from './toyprojects/affili-smart/AffiliSmart';
 import { EmailProvider } from './contexts/EmailContext';
 import { CoupangApiProvider } from './contexts/CoupangApiContext';
 import { checkMenuAuth } from './utils/menuAuth';
+import Services from './components/home/Services';
+import Store from './components/home/Store';
 
 function AppContent() {
   const [isSubscribePopupOpen, setIsSubscribePopupOpen] = useState(false);
@@ -63,8 +63,8 @@ function AppContent() {
           {checkMenuAuth('/consulting') && <Route path="/consulting" element={<Consulting />} />}
           {checkMenuAuth('/services') && <Route path="/services" element={<Services />} />}
           {checkMenuAuth('/store') && <Route path="/store" element={<Store />} />}
-          {checkMenuAuth('/blog') && <Route path="/blog" element={<Blog />} />}
-          {checkMenuAuth('/blog') && <Route path="/blog/:id" element={<BlogPost />} />}
+          {checkMenuAuth('/blog') && <Route path="/blog" element={<BlogList />} />}
+          {checkMenuAuth('/blog') && <Route path="/blog/:slug" element={<BlogPost />} />}
           {checkMenuAuth('/portfolio') && <Route path="/portfolio" element={<Portfolio />} />}
           {checkMenuAuth('/portfolio') && <Route path="/portfolio/:id" element={<PortfolioDetail />} />}
           {checkMenuAuth('/class') && <Route path="/class" element={<Class />} />}

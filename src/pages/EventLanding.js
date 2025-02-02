@@ -3,9 +3,12 @@ import styled from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRocket, faCheck } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
-import { Routes, Route } from 'react-router-dom';
-import Home from './Home';
-import SpecialGift from './SpecialGift';
+// eslint-disable-next-line no-unused-vars
+// import { Routes, Route } from 'react-router-dom';
+// eslint-disable-next-line no-unused-vars
+// import Home from './Home';
+// eslint-disable-next-line no-unused-vars
+// import SpecialGift from './SpecialGift';
 
 const WhiteBox = styled.div`
   background: white;

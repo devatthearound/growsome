@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowRight, faDownload } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { useNavigate } from 'react-router-dom';
 
 const Store = () => {
@@ -71,6 +71,7 @@ const Store = () => {
     });
   };
 
+  // eslint-disable-next-line no-unused-vars
   const handleDownload = (product) => {
     window.open(`/downloads/store/${product.id}`, '_blank');
   };

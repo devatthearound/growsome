@@ -6,7 +6,6 @@ const Container = styled.div`
 `;
 
 const Consulting = () => {
-  const [selectedOption, setSelectedOption] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     company: '',
@@ -25,6 +24,9 @@ const Consulting = () => {
     { value: 'manager', label: '팀장 / 리드' },
     { value: 'employee', label: '실무자' }
   ];
+
+  // eslint-disable-next-line no-unused-vars
+  const [selectedOption, setSelectedOption] = useState(null);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

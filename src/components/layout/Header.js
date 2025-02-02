@@ -9,6 +9,7 @@ const Header = ({ onSubscribeClick, onInquiryClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const navigate = useNavigate();
+  // eslint-disable-next-line no-unused-vars
   const location = useLocation();
 
   const toggleMenu = () => {

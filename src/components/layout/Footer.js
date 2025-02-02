@@ -1,8 +1,10 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGithub, faInstagram, faLinkedin, faBehance } from '@fortawesome/free-brands-svg-icons';
+// eslint-disable-next-line no-unused-vars
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// eslint-disable-next-line no-unused-vars
+// import { faGithub, faInstagram, faLinkedin, faBehance } from '@fortawesome/free-brands-svg-icons';
 
 const Footer = () => {
   return (
@@ -43,152 +45,152 @@ const ComingSoon = styled.div`
   letter-spacing: 1px;
 `;
 
-const FooterContainer = styled.div`
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 2rem;
-`;
+// const FooterContainer = styled.div`
+//   max-width: 1440px;
+//   margin: 0 auto;
+//   padding: 0 2rem;
+// `;
 
-const TopSection = styled.div`
-  display: flex;
-  gap: 4rem;
-  margin-bottom: 4rem;
+// const TopSection = styled.div`
+//   display: flex;
+//   gap: 4rem;
+//   margin-bottom: 4rem;
 
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    gap: 3rem;
-  }
-`;
+//   @media (max-width: 1024px) {
+//     flex-direction: column;
+//     gap: 3rem;
+//   }
+// `;
 
-const LogoSection = styled.div`
-  flex: 1;
-  max-width: 300px;
-`;
+// const LogoSection = styled.div`
+//   flex: 1;
+//   max-width: 300px;
+// `;
 
-const FooterLogo = styled.h2`
-  font-size: 1.8rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: #514FE4;
-`;
+// const FooterLogo = styled.h2`
+//   font-size: 1.8rem;
+//   font-weight: 700;
+//   margin-bottom: 1rem;
+//   color: #514FE4;
+// `;
 
-const LogoDescription = styled.p`
-  color: #666;
-  line-height: 1.6;
-  margin-bottom: 2rem;
-`;
+// const LogoDescription = styled.p`
+//   color: #666;
+//   line-height: 1.6;
+//   margin-bottom: 2rem;
+// `;
 
-const SocialLinks = styled.div`
-  display: flex;
-  gap: 1.5rem;
-`;
+// const SocialLinks = styled.div`
+//   display: flex;
+//   gap: 1.5rem;
+// `;
 
-const SocialLink = styled.a`
-  color: #666;
-  font-size: 1.2rem;
-  transition: color 0.3s ease;
+// const SocialLink = styled.a`
+//   color: #666;
+//   font-size: 1.2rem;
+//   transition: color 0.3s ease;
 
-  &:hover {
-    color: #514FE4;
-  }
-`;
+//   &:hover {
+//     color: #514FE4;
+//   }
+// `;
 
-const LinksSection = styled.div`
-  flex: 2;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
+// const LinksSection = styled.div`
+//   flex: 2;
+//   display: grid;
+//   grid-template-columns: repeat(4, 1fr);
+//   gap: 2rem;
 
-  @media (max-width: 1440px) {
-    padding: 0 1rem;
-  }
+//   @media (max-width: 1440px) {
+//     padding: 0 1rem;
+//   }
 
-  @media (max-width: 768px) {
-    grid-template-columns: repeat(2, 1fr);
-  }
+//   @media (max-width: 768px) {
+//     grid-template-columns: repeat(2, 1fr);
+//   }
 
-  @media (max-width: 480px) {
-    grid-template-columns: 1fr;
-  }
-`;
+//   @media (max-width: 480px) {
+//     grid-template-columns: 1fr;
+//   }
+// `;
 
-const LinkColumn = styled.div``;
+// const LinkColumn = styled.div``;
 
-const ColumnTitle = styled.h3`
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-  color: #333;
-`;
+// const ColumnTitle = styled.h3`
+//   font-size: 1rem;
+//   font-weight: 600;
+//   margin-bottom: 1.5rem;
+//   color: #333;
+// `;
 
-const LinkList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-`;
+// const LinkList = styled.div`
+//   display: flex;
+//   flex-direction: column;
+//   gap: 0.8rem;
+// `;
 
-const StyledLink = styled(Link)`
-  color: #666;
-  text-decoration: none;
-  transition: color 0.3s ease;
-  font-size: 0.9rem;
+// const StyledLink = styled(Link)`
+//   color: #666;
+//   text-decoration: none;
+//   transition: color 0.3s ease;
+//   font-size: 0.9rem;
 
-  &:hover {
-    color: #514FE4;
-  }
-`;
+//   &:hover {
+//     color: #514FE4;
+//   }
+// `;
 
-const ContactInfo = styled.div`
-  margin-bottom: 1.5rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-`;
+// const ContactInfo = styled.div`
+//   margin-bottom: 1.5rem;
+//   display: flex;
+//   flex-direction: column;
+//   gap: 0.5rem;
+// `;
 
-const ContactText = styled.p`
-  color: #666;
-  font-size: 0.9rem;
-  margin: 0;
-`;
+// const ContactText = styled.p`
+//   color: #666;
+//   font-size: 0.9rem;
+//   margin: 0;
+// `;
 
-const Divider = styled.hr`
-  border: none;
-  border-top: 1px solid #ddd;
-  margin: 2rem 0;
-`;
+// const Divider = styled.hr`
+//   border: none;
+//   border-top: 1px solid #ddd;
+//   margin: 2rem 0;
+// `;
 
-const BottomSection = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+// const BottomSection = styled.div`
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: center;
   
-  @media (max-width: 768px) {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-`;
+//   @media (max-width: 768px) {
+//     flex-direction: column;
+//     gap: 1rem;
+//     text-align: center;
+//   }
+// `;
 
-const CopyrightText = styled.p`
-  color: #666;
-  font-size: 0.9rem;
-`;
+// const CopyrightText = styled.p`
+//   color: #666;
+//   font-size: 0.9rem;
+// `;
 
-const LegalLinks = styled.div`
-  display: flex;
-  gap: 2rem;
-`;
+// const LegalLinks = styled.div`
+//   display: flex;
+//   gap: 2rem;
+// `;
 
-const LegalLink = styled.a`
-  color: #666;
-  font-size: 0.9rem;
-  text-decoration: none;
-  cursor: pointer;
-  transition: color 0.3s ease;
+// const LegalLink = styled.a`
+//   color: #666;
+//   font-size: 0.9rem;
+//   text-decoration: none;
+//   cursor: pointer;
+//   transition: color 0.3s ease;
 
-  &:hover {
-    color: #514FE4;
-  }
-`;
+//   &:hover {
+//     color: #514FE4;
+//   }
+// `;
 
 export default Footer;

@@ -51,8 +51,10 @@ const AffiliSmart = () => {
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [generatedComment, setGeneratedComment] = useState('');
   const [selectedPlatform, setSelectedPlatform] = useState('naver');
+  // eslint-disable-next-line no-unused-vars
   const [timeRange, setTimeRange] = useState(null);
   const [selectedKeyword, setSelectedKeyword] = useState(null);
+  // eslint-disable-next-line no-unused-vars
   const [step, setStep] = useState(1);
   const [keywordData, setKeywordData] = useState(initialKeywordData);
   const [relatedProducts, setRelatedProducts] = useState(initialProducts);

@@ -1,7 +1,10 @@
-import axios from 'axios';
+// eslint-disable-next-line no-unused-vars
+// import axios from 'axios';
 
 // 네이버 API 키 설정
+// eslint-disable-next-line no-unused-vars
 const NAVER_CLIENT_ID = process.env.REACT_APP_NAVER_CLIENT_ID;
+// eslint-disable-next-line no-unused-vars
 const NAVER_CLIENT_SECRET = process.env.REACT_APP_NAVER_CLIENT_SECRET;
 
 export const getTopKeywords = async (platform, timeRange = '7d') => {
