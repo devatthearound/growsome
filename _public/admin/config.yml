@@ -1,0 +1,57 @@
+backend:
+  name: git-gateway
+  branch: master # 또는 사용 중인 브랜치 이름
+  base_url: https://api.netlify.com
+  auth_endpoint: oauth/auth # auth_endpoint 수정
+
+site_url: https://growsome.netlify.app
+display_url: https://growsome.netlify.app
+
+# OAuth 관련 설정 추가
+oauth_client_id: YOUR_GITHUB_OAUTH_CLIENT_ID
+oauth_scope: repo,user
+
+local_backend: true
+publish_mode: editorial_workflow
+
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: "blog"
+    label: "Blog"
+    folder: "content/blog"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Publish Date", name: "date", widget: "datetime"}
+      - {label: "Description", name: "description", widget: "text"}
+      - {label: "Featured Image", name: "thumbnail", widget: "image", required: false}
+      - {label: "Body", name: "body", widget: "markdown"}
+      - {label: "Tags", name: "tags", widget: "list", required: false}
+
+  - name: "works"
+    label: "Works"
+    folder: "content/works"
+    create: true
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Description", name: "description", widget: "text"}
+      - {label: "Featured Image", name: "thumbnail", widget: "image"}
+      - {label: "Project URL", name: "projectUrl", widget: "string", required: false}
+      - {label: "Technologies", name: "technologies", widget: "list"}
+      - {label: "Body", name: "body", widget: "markdown"}
+
+  - name: "toyprojects"
+    label: "Toy Projects"
+    folder: "content/toyprojects"
+    create: true
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Description", name: "description", widget: "text"}
+      - {label: "Featured Image", name: "thumbnail", widget: "image"}
+      - {label: "GitHub URL", name: "githubUrl", widget: "string"}
+      - {label: "Demo URL", name: "demoUrl", widget: "string", required: false}
+      - {label: "Technologies", name: "technologies", widget: "list"}
+      - {label: "Body", name: "body", widget: "markdown"} 

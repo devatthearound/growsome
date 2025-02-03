@@ -1,8 +1,10 @@
-name: Deploy React Appkk
+
+# github/workflows/deploy.yml
+name: Deploy Coupas
 
 on:
-  push:
-    branches: [ master ]  # 또는 main
+ push:
+   branches: [ master ]
 
 env:
   AWS_REGION: ap-northeast-2
@@ -11,34 +13,33 @@ env:
   ECS_SERVICE: growsome-service  # ECS 서비스 이름
 
 jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
+ deploy:
+   runs-on: ubuntu-latest
+   steps:
+   - uses: actions/checkout@v2
+   - name: Configure AWS credentials
+     uses: aws-actions/configure-aws-credentials@v1
+     with:
+       aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+       aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+       aws-region: ${{ env.AWS_REGION }}
+   
+   - name: Login to Amazon ECR
+     id: login-ecr
+     uses: aws-actions/amazon-ecr-login@v1
 
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-    
-    - name: Login to Amazon ECR
-      id: login-ecr
-      uses: aws-actions/amazon-ecr-login@v1
-
-    - name: Create env file
-      run: |
-        echo "${{ secrets.ENV_PRODUCTION }}" > .env
-
-    - name: Build and push image to Amazon ECR
-      env:
-        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        IMAGE_TAG: growsome-landing-latest
-      run: |
-        docker build --platform=linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        
-    - name: Force new deployment
-      run: |
-        aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
+   - name: Create env file
+     run: |
+       echo "${{ secrets.ENV_PRODUCTION }}" > .env.production
+       
+   - name: Build and push image to Amazon ECR
+     env:
+       ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+       IMAGE_TAG: coupas-latest
+     run: |
+       docker build --platform=linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+       
+   - name: Force new deployment  
+     run: |
+       aws ecs update-service --cluster $ECS_CLUSTER --service $ECS_SERVICE --force-new-deployment
