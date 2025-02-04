@@ -7,7 +7,17 @@ export async function POST(request: Request) {
   const client = await pool.connect();
   
   try {
-    const { email, password, rememberMe, isExtension } = await request.json();
+    let email, password, rememberMe, isExtension = false; // isExtension의 기본값을 false로 설정
+    
+    try {
+      const body = await request.json();
+      ({ email, password, rememberMe, isExtension = false } = body); // 구조 분해 할당에서 기본값 설정
+    } catch (error) {
+      return NextResponse.json(
+        { error: '잘못된 요청 형식입니다. 유효한 JSON 데이터를 전송해주세요.' },
+        { status: 400 }
+      );
+    }
 
     // 이메일 유효성 검사
     if (!email || !password) {
