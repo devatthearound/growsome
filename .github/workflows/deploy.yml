@@ -35,7 +35,7 @@ jobs:
    - name: Build and push image to Amazon ECR
      env:
        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-       IMAGE_TAG: coupas-latest
+       IMAGE_TAG: growsome-landing-latest
      run: |
        docker build --platform=linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG

@@ -47,7 +47,7 @@ COPY --from=builder /usr/src/app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /usr/src/app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /usr/src/app/.next/static ./.next/static
  
-# 컨테이너의 수신 대기 포트를 3000으로 설정
+# 컨테이너의 수신 대기 포트를 80으로 설정
 EXPOSE 80
 
 # node로 애플리케이션 실행
