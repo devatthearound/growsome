@@ -11,10 +11,17 @@ export async function POST(request: Request) {
     try {
       client = await pool.connect();
       console.log('DB 연결 성공');
-    } catch (dbError) {
-      console.error('DB 연결 실패:', dbError);
+    } catch (dbError: any) {
+      console.error('DB 연결 실패:', {
+        message: dbError.message,
+        code: dbError.code,
+        stack: dbError.stack
+      });
       return NextResponse.json(
-        { error: 'DB 연결에 실패했습니다. 잠시 후 다시 시도해주세요.' },
+        { 
+          error: 'DB 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
+          details: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+        },
         { status: 500 }
       );
     }
