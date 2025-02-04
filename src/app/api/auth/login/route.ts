@@ -4,11 +4,21 @@ import pool from '@/lib/db';
 import { generateToken } from '@/app/utils/jwt';
 
 export async function POST(request: Request) {
-  const client = await pool.connect();
+  let client;
 
-  console.log('client', client);
-  
   try {
+    // DB 연결 시도
+    try {
+      client = await pool.connect();
+      console.log('DB 연결 성공');
+    } catch (dbError) {
+      console.error('DB 연결 실패:', dbError);
+      return NextResponse.json(
+        { error: 'DB 연결에 실패했습니다. 잠시 후 다시 시도해주세요.' },
+        { status: 500 }
+      );
+    }
+
     let email, password, rememberMe, isExtension = false; // isExtension의 기본값을 false로 설정
     
     try {
@@ -129,14 +139,23 @@ export async function POST(request: Request) {
     });
 
     return response;
-
-  } catch (error) {
-    console.error('로그인 에러:', error);
+  } catch (error: any) {
+    console.error('로그인 처리 중 에러:', error);
     return NextResponse.json(
-      { error: `로그인 중 오류가 발생했습니다. ${error}` },
+      { 
+        error: '로그인 처리 중 오류가 발생했습니다.',
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      },
       { status: 500 }
     );
   } finally {
-    client.release();
+    if (client) {
+      try {
+        await client.release();
+        console.log('DB 연결 해제 성공');
+      } catch (releaseError) {
+        console.error('DB 연결 해제 실패:', releaseError);
+      }
+    }
   }
 }
