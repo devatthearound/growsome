@@ -1,12 +1,12 @@
 'use client'
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, Suspense } from 'react';
 import styled from 'styled-components';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { getCookie } from '@/app/utils/cookie';
 
-const Login = () => {
+function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, setUser } = useAuth();
@@ -217,7 +217,19 @@ const Login = () => {
       </RightPanel>
     </LoginContainer>
   );
-};
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <p>로딩중...</p>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
+  );
+}
 
 const LoginContainer = styled.div`
   display: flex;
@@ -383,6 +395,4 @@ const OutlineButton = styled(SolidButton)`
   &:hover {
     background: #f0f0ff;
   }
-`;
-
-export default Login; 
+`; 
