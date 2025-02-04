@@ -7,6 +7,7 @@ import InquiryStep2 from './InquiryStep2';
 import InquiryStep3 from './InquiryStep3';
 import InquiryFinal from './InquiryFinal';
 import { useSearchParams } from 'next/navigation';
+import { useAuth } from '@/app/contexts/AuthContext';
 // analytics 서비스가 있다면 import
 // import analytics from '../services/analytics';
 
@@ -16,6 +17,7 @@ const SearchParamsComponent = () => {
   const type = searchParams.get('type');
   const productInfo = searchParams.get('productInfo') ? JSON.parse(searchParams.get('productInfo') || '{}') : undefined;
 
+  const { isLoggedIn } = useAuth();
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [projectDescription, setProjectDescription] = useState('');
@@ -26,7 +28,6 @@ const SearchParamsComponent = () => {
   const [references, setReferences] = useState(['']);
   const [selectedBusinessModel, setSelectedBusinessModel] = useState('');
   const [selectedFeatures, setSelectedFeatures] = useState<string[]>([]);
-  const isLoggedIn = false; // 실제 로그인 상태를 확인하는 로직으로 변경 필요
 
   useEffect(() => {
     if (!isLoggedIn) {

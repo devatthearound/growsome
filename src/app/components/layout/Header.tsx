@@ -1,59 +1,35 @@
+'use client';
+
+import React, { useState } from 'react';
 import styled from 'styled-components';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faBars, faTimes, faEnvelope } from '@fortawesome/free-solid-svg-icons';
-import { checkMenuAuth } from '../../utils/menuAuth';
+import { faUser, faRocket, faSignOutAlt, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { useAuth } from '@/app/contexts/AuthContext';
+import { checkMenuAuth } from '@/app/utils/menuAuth';
 
 interface HeaderProps {
-  onSubscribeClick?: () => void;
-  onInquiryClick?: () => void;
+  onSubscribeClick: () => void;
+  onInquiryClick: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const [showPopup, setShowPopup] = useState<boolean>(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
   const router = useRouter();
+  const { user, isLoggedIn, isLoading, logout } = useAuth();
 
-  const toggleMenu = (): void => {
-    setIsMenuOpen(!isMenuOpen);
-    document.body.style.overflow = !isMenuOpen ? 'hidden' : 'auto';
-  };
-
-  const handleMenuClick = (path: string): void => {
-    if (checkMenuAuth(path)) {
-      setIsMenuOpen(false);
-      router.push(path);
+  const handleMenuClick = (path: string) => {
+    if (!checkMenuAuth(path)) {
+      setShowPopup(true);
       return;
     }
-    
-    if (process.env.NODE_ENV === 'development') {
-      setIsMenuOpen(false);
-      return;
-    }
-    
+    router.push(path);
     setIsMenuOpen(false);
-    setShowPopup(true);
   };
 
-  const handleInquiryClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
-    e.preventDefault();
-    setIsMenuOpen(false);
-    if (process.env.NODE_ENV === 'development') {
-      onInquiryClick?.();
-      return;
-    }
-    setShowPopup(true);
-  };
-
-  const handleSubscribeClick = (e: React.MouseEvent<HTMLButtonElement>): void => {
-    e.preventDefault();
-    setIsMenuOpen(false);
-    onSubscribeClick?.();
-  };
-
-  const handleClosePopup = (): void => {
+  const handleClosePopup = () => {
     setShowPopup(false);
   };
 
@@ -62,16 +38,18 @@ const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick }) => 
       <HeaderWrapper>
         <HeaderContainer>
           <Logo href="/">
-            <LogoImage src="/logo_growsome.png" alt="Growsome Logo" />
+            <LogoImage src="/logo_growsome.png" alt="Growsome" />
           </Logo>
-          <MenuButton onClick={toggleMenu}>
-            <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} />
+
+          <MenuButton onClick={() => setIsMenuOpen(!isMenuOpen)}>
+            <FontAwesomeIcon icon={isMenuOpen ? faSignOutAlt : faUser} />
           </MenuButton>
+
           <NavMenu $isOpen={isMenuOpen}>
             <NavItem>
-              <NavLink onClick={() => handleMenuClick('/home')}>
-                홈
-                {!checkMenuAuth('/home') && (
+              <NavLink onClick={() => handleMenuClick('/portfolio')}>
+                포트폴리오
+                {!checkMenuAuth('/portfolio') && (
                   <>
                     <ComingSoonChip>OPEN SOON</ComingSoonChip>
                     <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
@@ -91,18 +69,7 @@ const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick }) => 
               </NavLink>
             </NavItem>
             <NavItem>
-              <NavLink onClick={() => handleMenuClick('/portfolio')}>
-                포트폴리오
-                {!checkMenuAuth('/portfolio') && (
-                  <>
-                    <ComingSoonChip>OPEN SOON</ComingSoonChip>
-                    <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
-                  </>
-                )}
-              </NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink onClick={() => handleMenuClick('/store')}>
+              {/* <NavLink onClick={() => handleMenuClick('/store')}> */}
                 스토어
                 {!checkMenuAuth('/store') && (
                   <>
@@ -110,7 +77,7 @@ const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick }) => 
                     <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
                   </>
                 )}
-              </NavLink>
+              {/* </NavLink> */}
             </NavItem>
             <NavItem>
               <NavLink onClick={() => handleMenuClick('/toyprojects')}>
@@ -145,15 +112,51 @@ const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick }) => 
                 )}
               </NavLink>
             </NavItem>
+
             <ButtonGroup>
-              <InquiryButton onClick={handleInquiryClick}>
-                개발문의하기
+              <InquiryButton onClick={onInquiryClick}>
+                문의하기
               </InquiryButton>
-              <SubscribeButton onClick={handleSubscribeClick}>
-                <FontAwesomeIcon icon={faEnvelope} />
+              <SubscribeButton onClick={onSubscribeClick}>
+                <FontAwesomeIcon icon={faRocket} />
                 구독하기
               </SubscribeButton>
             </ButtonGroup>
+
+            {isLoading ? (
+              <LoadingSpinner>
+                <FontAwesomeIcon icon={faSpinner} spin />
+              </LoadingSpinner>
+            ) : isLoggedIn ? (
+              <UserSection>
+                <UserInfo>
+                  <UserName>{user?.username}</UserName>
+                  <CompanyInfo>{user?.company_name} | {user?.position}</CompanyInfo>
+                </UserInfo>
+                <IconButton 
+                  onClick={() => router.push('/mypage')}
+                  title="마이페이지"
+                >
+                  <FontAwesomeIcon icon={faUser} />
+                </IconButton>
+                <IconButton 
+                  onClick={logout}
+                  title="로그아웃"
+                >
+                  <FontAwesomeIcon icon={faSignOutAlt} />
+                </IconButton>
+              </UserSection>
+            ) : (
+              <AuthButtons>
+                <NavButton onClick={() => router.push('/login')}>로그인</NavButton>
+                <NavButton 
+                  onClick={() => router.push('/signup')}
+                  
+                >
+                  회원가입
+                </NavButton>
+              </AuthButtons>
+            )}
           </NavMenu>
         </HeaderContainer>
       </HeaderWrapper>
@@ -438,6 +441,76 @@ const CloseButton = styled.button`
   @media (max-width: 1280px) {
     width: 100%;
   }
+`;
+
+const UserSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const UserInfo = styled.div`
+  text-align: right;
+`;
+
+const UserName = styled.div`
+  font-weight: bold;
+`;
+
+const CompanyInfo = styled.div`
+  font-size: 0.8rem;
+  color: #666;
+`;
+
+const AuthButtons = styled.div`
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+
+  @media (max-width: 1280px) {
+    flex-direction: column;
+    width: 100%;
+  }
+`;
+
+const NavButton = styled.button`
+  padding: 0.75rem 1.5rem;
+  background: #514FE4;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #4340c0;
+    transform: translateY(-2px);
+  }
+
+  @media (max-width: 1280px) {
+    width: 100%;
+  }
+`;
+
+const IconButton = styled.button`
+  background: none;
+  border: none;
+  color: #514FE4;
+  cursor: pointer;
+  padding: 0.5rem;
+  font-size: 1.1rem;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #3D39A1;
+  }
+`;
+
+const LoadingSpinner = styled.div`
+  color: #514FE4;
+  font-size: 1.2rem;
 `;
 
 export default Header;

@@ -38,8 +38,8 @@ const PopupContent = styled.div`
   background: white;
   padding: 2rem;
   border-radius: 8px;
-  max-width: 500px;
-  width: 500px;
+  /* max-width: 500px;
+  width: 500px; */
   height: 670px;
   margin: 20px;
   overflow-y: auto;

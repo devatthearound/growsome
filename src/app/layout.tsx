@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import "./globals.css";
 import styled from 'styled-components';
 import StyledComponentsRegistry from './registry';
+import { AuthProvider } from './contexts/AuthContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -48,20 +49,22 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <StyledComponentsRegistry>
-          <AppContainer>
-            <Header 
-              onSubscribeClick={handleSubscribeClick}
-              onInquiryClick={() => router.push('/inquiry')}  
-            />
-            <Main>
-              {children}
-            </Main>
-          <Footer />
-          <BottomNav />
-          {isSubscribePopupOpen && (
-          <SubscribePopup onClose={handleCloseSubscribe} />
-          )}
-        </AppContainer>
+          <AuthProvider>
+            <AppContainer>
+              <Header 
+                onSubscribeClick={handleSubscribeClick}
+                onInquiryClick={() => router.push('/inquiry')}  
+              />
+              <Main>
+                {children}
+              </Main>
+            <Footer />
+            <BottomNav />
+            {isSubscribePopupOpen && (
+            <SubscribePopup onClose={handleCloseSubscribe} />
+            )}
+          </AppContainer>
+          </AuthProvider>
         </StyledComponentsRegistry>
       </body>
     </html>

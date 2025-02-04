@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 import styled from 'styled-components';
+import { ValidationError } from '@/app/utils/validators';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/contexts/AuthContext';
 
 const SignUp = () => {
   const [step, setStep] = useState(1);
@@ -33,6 +36,9 @@ const SignUp = () => {
 
   const [verificationSent, setVerificationSent] = useState(false);
 
+  const router = useRouter();
+  const { setUser } = useAuth();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     setFormData({
@@ -63,10 +69,39 @@ const SignUp = () => {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // TODO: 회원가입 처리 로직
-    console.log('Sign Up Data:', formData);
+    try {
+      const response = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        if (data.validationErrors) {
+          // 각 필드별 에러 메시지 설정
+          const newMessages = { ...messages };
+          data.validationErrors.forEach((error: ValidationError) => {
+            newMessages[error.field as keyof typeof messages] = error.message;
+          });
+          setMessages(newMessages);
+          return;
+        }
+        throw new Error(data.error || '회원가입 실패');
+      }
+      
+      setUser(data.user);
+      router.push('/');
+      
+    } catch (error) {
+      console.error('회원가입 에러:', error);
+      // 에러 처리
+    }
   };
 
   const handleVerification = () => {
@@ -87,7 +122,7 @@ const SignUp = () => {
         <Form onSubmit={handleSubmit}>
           <StepIndicator>
             {Array.from({ length: 4 }, (_, i) => (
-              <StepDot key={i} active={i + 1 === step} />
+              <StepDot key={i} $isActive={i + 1 === step} />
             ))}
           </StepIndicator>
           {step === 1 && (
@@ -239,7 +274,9 @@ const SignUp = () => {
             {step === 4 && <SolidButton type="submit">제출</SolidButton>}
           </ButtonGroup>
           {(step === 1 || step === 2) && (
-            <LoginLink>이미 그로우썸 회원이신가요? 로그인 하러가기</LoginLink>
+            <LoginLink onClick={() => router.push('/login')}>
+              이미 그로우썸 회원이신가요? 로그인 하러가기
+            </LoginLink>
           )}
         </Form>
       </RightPanel>
@@ -296,10 +333,10 @@ const StepIndicator = styled.div`
   margin-bottom: 1rem;
 `;
 
-const StepDot = styled.div<{ active: boolean }>`
+const StepDot = styled.div<{ $isActive: boolean }>`
   width: 10px;
   height: 10px;
-  background: ${props => (props.active ? '#514FE4' : '#ddd')};
+  background: ${({ $isActive }) => ($isActive ? '#514FE4' : '#ddd')};
   border-radius: 50%;
 `;
 
