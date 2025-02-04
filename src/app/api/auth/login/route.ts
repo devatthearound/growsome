@@ -8,7 +8,7 @@ export async function POST(request: Request) {
   const client = await pool.connect();
   
   try {
-    const { email, password, rememberMe } = await request.json();
+    const { email, password, rememberMe, isExtension } = await request.json();
 
     // 이메일 유효성 검사
     if (!email || !password) {
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
 
     // 사용자 정보에서 민감한 정보 제거
     delete user.password;
-
+    // 일반 로그인 응답
     const response = NextResponse.json({
       success: true,
       message: '로그인이 완료되었습니다.',
@@ -99,7 +99,8 @@ export async function POST(request: Request) {
         email: user.email,
         username: user.username,
         company_name: user.company_name,
-        position: user.position
+        position: user.position,
+        isExtension: isExtension
       }
     });
 

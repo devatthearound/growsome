@@ -100,7 +100,10 @@ export async function POST(request: Request) {
     const response = NextResponse.json({
       success: true,
       message: '회원가입이 완료되었습니다.',
-      user: user
+      user: {
+        ...user,
+        isExtension: data.isExtension
+      }
     });
 
     response.cookies.set({

@@ -1,14 +1,20 @@
 'use client'
 
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { ValidationError } from '@/app/utils/validators';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 
 const SignUp = () => {
   const [step, setStep] = useState(1);
   const isPopup = false;
+  const searchParams = useSearchParams();
+  const { user, setUser } = useAuth();
+  const isExtension = searchParams.get('isExtension') === 'true';
+  const [isChecking, setIsChecking] = useState(true);
+  const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState(false);
+
   // const [isPopup, _setIsPopup] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -37,7 +43,28 @@ const SignUp = () => {
   const [verificationSent, setVerificationSent] = useState(false);
 
   const router = useRouter();
-  const { setUser } = useAuth();
+
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogout = useCallback(async () => {
+    try {
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+
+      if (response.ok) {
+        setUser(null);
+        setIsAlreadyLoggedIn(false);
+        // 로그아웃 후 페이지 새로고침
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('로그아웃 오류:', error);
+    }
+  }, [setUser]);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -69,7 +96,7 @@ const SignUp = () => {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       const response = await fetch('/api/auth/signup', {
@@ -77,7 +104,10 @@ const SignUp = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({
+          ...formData,
+          isExtension
+        })
       });
       
       const data = await response.json();
@@ -96,19 +126,97 @@ const SignUp = () => {
       }
       
       setUser(data.user);
-      router.push('/');
-      
+
+      if (!data.user.isExtension) {
+        router.push('/');
+      } else {
+        window.location.href = `/auth/extension-callback?token=${data.token}`;
+      }
     } catch (error) {
       console.error('회원가입 에러:', error);
       // 에러 처리
     }
-  };
+  }, [formData, isExtension, router, setUser]);
 
   const handleVerification = () => {
     // TODO: 전화번호 인증 로직
     console.log('Verification code sent to:', formData.phone);
     setVerificationSent(true);
   };
+
+  useEffect(() => {
+    const checkAuthAndRedirect = async () => {
+      try {
+        const response = await fetch('/api/auth/check', {
+          credentials: 'include'
+        });
+        const data = await response.json();
+
+        if (response.ok && data.isLoggedIn) {
+          if (isExtension) {
+            // 토큰을 별도로 가져오기
+            const tokenResponse = await fetch('/api/auth/token', {
+              credentials: 'include'
+            });
+            const tokenData = await tokenResponse.json();
+
+            if (tokenResponse.ok && tokenData.token) {
+              console.log('Token retrieved successfully');
+              window.location.href = `/auth/extension-callback?token=${tokenData.token}`;
+              return;
+            } else {
+              console.error('Failed to retrieve token:', tokenData.error);
+            }
+          } else {
+            setUser(data.user);
+            setIsAlreadyLoggedIn(true);
+          }
+        }
+      } catch (error) {
+        console.error('인증 확인 오류:', error);
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    checkAuthAndRedirect();
+  }, [isExtension, setUser]);
+
+
+  // 로딩 중이거나 인증 체크 중일 때 표시할 내용
+  if (isChecking) {
+    return (
+      <SignUpContainer>
+        <div className="flex items-center justify-center">
+          <p>잠시만 기다려주세요...</p>
+        </div>
+      </SignUpContainer>
+    );
+  }
+
+  if (isAlreadyLoggedIn) {
+    return (
+      <SignUpContainer>
+        <AlreadyLoggedInPanel>
+          <LoggedInMessage>
+            <Title>이미 로그인되어 있습니다</Title>
+            <UserInfo>
+              <p><strong>이메일:</strong> {user?.email}</p>
+              <p><strong>이름:</strong> {user?.username}</p>
+            </UserInfo>
+            <ButtonGroup>
+              <SolidButton onClick={() => router.push('/')}>
+                홈으로 가기
+              </SolidButton>
+              <OutlineButton onClick={handleLogout}>
+                로그아웃
+              </OutlineButton>
+            </ButtonGroup>
+          </LoggedInMessage>
+        </AlreadyLoggedInPanel>
+      </SignUpContainer>
+    );
+  }
 
   return (
     <SignUpContainer>
@@ -497,5 +605,37 @@ const LoginLink = styled.p`
   text-decoration: underline;
   margin-top: 1rem;
 `;
+
+const AlreadyLoggedInPanel = styled.div`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+`;
+
+const LoggedInMessage = styled.div`
+  max-width: 400px;
+  width: 100%;
+  padding: 2rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  text-align: center;
+`;
+
+const UserInfo = styled.div`
+  margin: 1.5rem 0;
+  text-align: left;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+
+  p {
+    margin: 0.5rem 0;
+    color: #333;
+  }
+`;
+
 
 export default SignUp; 
