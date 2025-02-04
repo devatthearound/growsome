@@ -5,6 +5,8 @@ import { generateToken } from '@/app/utils/jwt';
 
 export async function POST(request: Request) {
   const client = await pool.connect();
+
+  console.log('client', client);
   
   try {
     let email, password, rememberMe, isExtension = false; // isExtension의 기본값을 false로 설정
