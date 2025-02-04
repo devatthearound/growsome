@@ -391,7 +391,7 @@ function SignupContent() {
 }
 
 // 메인 컴포넌트
-export default function Signup() {
+const SignupPage = () => {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center min-h-screen">
@@ -401,7 +401,7 @@ export default function Signup() {
       <SignupContent />
     </Suspense>
   );
-}
+};
 
 const SignUpContainer = styled.div`
   display: flex;
@@ -648,5 +648,4 @@ const UserInfo = styled.div`
   }
 `;
 
-
-export default Signup; 
+export default SignupPage; 
