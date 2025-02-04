@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     
   } catch (error) {
     return NextResponse.json(
-      { error: '이메일 확인 중 오류가 발생했습니다.' },
+      { error: `이메일 확인 중 오류가 발생했습니다. ${error}` },
       { status: 500 }
     );
   } finally {

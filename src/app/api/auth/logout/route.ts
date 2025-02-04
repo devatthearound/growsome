@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import pool from '@/lib/db';
 import { verifyToken } from '@/app/utils/jwt';
 
-export async function POST(request: Request) {
+export async function POST() {
   const client = await pool.connect();
   
   try {
@@ -19,9 +19,9 @@ export async function POST(request: Request) {
           'DELETE FROM sessions WHERE user_id = $1 AND token = $2',
           [payload.userId, token]
         );
-      } catch (error: any) {
+      } catch (error) {
         // 토큰이 유효하지 않아도 계속 진행
-        console.error('Invalid token during logout:', error.message);
+        console.error('Invalid token during logout:', error);
       }
     }
 
@@ -40,8 +40,8 @@ export async function POST(request: Request) {
 
     return response;
 
-  } catch (error: any) {
-    console.error('로그아웃 에러:', error.message);
+  } catch (error) {
+    console.error('로그아웃 에러:', error);
     return NextResponse.json(
       { error: '로그아웃 중 오류가 발생했습니다.' },
       { status: 500 }

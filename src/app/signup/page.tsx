@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, Suspense } from 'react';
 import styled from 'styled-components';
 import { ValidationError } from '@/app/utils/validators';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 
-const SignUp = () => {
+// SearchParams를 사용하는 실제 컴포넌트
+function SignupContent() {
   const [step, setStep] = useState(1);
   const isPopup = false;
   const searchParams = useSearchParams();
@@ -43,9 +44,6 @@ const SignUp = () => {
   const [verificationSent, setVerificationSent] = useState(false);
 
   const router = useRouter();
-
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogout = useCallback(async () => {
     try {
@@ -390,7 +388,20 @@ const SignUp = () => {
       </RightPanel>
     </SignUpContainer>
   );
-};
+}
+
+// 메인 컴포넌트
+export default function Signup() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <p>로딩중...</p>
+      </div>
+    }>
+      <SignupContent />
+    </Suspense>
+  );
+}
 
 const SignUpContainer = styled.div`
   display: flex;
@@ -638,4 +649,4 @@ const UserInfo = styled.div`
 `;
 
 
-export default SignUp; 
+export default Signup; 

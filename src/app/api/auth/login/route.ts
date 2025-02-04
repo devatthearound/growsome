@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
 import bcrypt from 'bcrypt';
 import pool from '@/lib/db';
 import { generateToken } from '@/app/utils/jwt';
@@ -122,7 +121,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('로그인 에러:', error);
     return NextResponse.json(
-      { error: '로그인 중 오류가 발생했습니다.' },
+      { error: `로그인 중 오류가 발생했습니다. ${error}` },
       { status: 500 }
     );
   } finally {
