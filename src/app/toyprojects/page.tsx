@@ -1,10 +1,12 @@
+'use client';
+
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight, faTag, faRocket } from '@fortawesome/free-solid-svg-icons';
-import { EmailContext } from '../_contexts/EmailContext';
+import { EmailContext } from '@/app/contexts/EmailContext';
 
 const Container = styled.div`
   max-width: 1200px;
@@ -138,7 +140,13 @@ const ProjectTag = styled.span`
 `;
 
 const ToyProjects = () => {
-  const { setShowEmailPopup } = useContext(EmailContext);
+  const emailContext = useContext(EmailContext);
+  
+  if (!emailContext) {
+    throw new Error('EmailContext must be used within EmailProvider');
+  }
+
+  const { setShowEmailPopup } = emailContext;
   
   const projects = [
     {
@@ -176,7 +184,7 @@ const ToyProjects = () => {
           우리가 먼저 만들어보았습니다.
           당신의 일상을 더 효율적이고 재미있게 만들어줄 프로젝트들을 만나보세요.
         </HeroDescription>
-        <CTA onClick={() => setShowEmailPopup(true)}>
+        <CTA href="#" onClick={() => setShowEmailPopup(true)}>
           제일 먼저 만나보기 <FontAwesomeIcon icon={faArrowRight} />
         </CTA>
       </HeroSection>
@@ -202,7 +210,7 @@ const ToyProjects = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <ProjectLink to={project.path}>
+            <ProjectLink href={project.path}>
               <ProjectContent>
                 <ProjectTag>{project.tag}</ProjectTag>
                 <ProjectTitle>{project.title}</ProjectTitle>

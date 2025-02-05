@@ -10,7 +10,14 @@ const nextConfig = {
   },
   output: 'standalone',
   hostname: '0.0.0.0',
-  reactStrictMode: true
+  reactStrictMode: true,
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /\.css$/,
+      use: ['style-loader', 'css-loader'],
+    });
+    return config;
+  },
 };
 
 module.exports = nextConfig; 

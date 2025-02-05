@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
-import pool from '@/lib/db';
+import pool from '@/app/lib/db';
 import { generateToken } from '@/app/utils/jwt';
 
 export async function POST(request: Request) {

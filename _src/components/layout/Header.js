@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faBars, faTimes, faEnvelope } from '@fortawesome/free-solid-svg-icons';
-import { checkMenuAuth } from '../../utils/menuAuth';
+import { checkMenuAuth } from '../../_utils/menuAuth';
 
 const Header = ({ onSubscribeClick, onInquiryClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

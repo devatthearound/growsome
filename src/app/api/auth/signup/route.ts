@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import { validateSignupData } from '@/app/utils/validators';
-import pool from '@/lib/db';
+import pool from '@/app/lib/db';
 import { generateToken } from '@/app/utils/jwt';
 
 export async function POST(request: Request) {

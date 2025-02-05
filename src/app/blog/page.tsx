@@ -1,22 +1,38 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import styled from 'styled-components';
-import { getContent } from '../../_utils/content';
+import { getContent } from '@/app/utils/content';
 
 const BlogList = () => {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<{
+    slug: string;
+    title: string;
+    date: string;
+    description: string;
+    thumbnail: string;
+  }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPosts = async () => {
-      const data = await getContent('blog');
-      setPosts(data);
-      setLoading(false);
+      try {
+        const data = await getContent('blog');
+        setPosts(data);
+      } catch (err) {
+        setError('블로그 포스트를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.');
+        console.error('Error fetching blog posts:', err);
+      } finally {
+        setLoading(false);
+      }
     };
     fetchPosts();
   }, []);
 
   if (loading) return <div>Loading...</div>;
+  if (error) return <div style={{ color: 'red', padding: '2rem' }}>{error}</div>;
 
   return (
     <BlogGrid>
@@ -29,7 +45,7 @@ const BlogList = () => {
             <PostTitle>{post.title}</PostTitle>
             <PostDate>{new Date(post.date).toLocaleDateString()}</PostDate>
             <PostDescription>{post.description}</PostDescription>
-            <ReadMore to={`/blog/${post.slug}`}>Read More</ReadMore>
+            <ReadMore href={`/blog/${post.slug}`}>Read More</ReadMore>
           </PostContent>
         </BlogCard>
       ))}

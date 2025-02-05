@@ -69,7 +69,7 @@ const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick }) => 
               </NavLink>
             </NavItem>
             <NavItem>
-              {/* <NavLink onClick={() => handleMenuClick('/store')}> */}
+              <NavLink onClick={() => handleMenuClick('/store')}>
                 스토어
                 {!checkMenuAuth('/store') && (
                   <>
@@ -77,7 +77,7 @@ const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick }) => 
                     <ComingSoonTooltip>서비스 준비중</ComingSoonTooltip>
                   </>
                 )}
-              {/* </NavLink> */}
+              </NavLink>
             </NavItem>
             <NavItem>
               <NavLink onClick={() => handleMenuClick('/toyprojects')}>

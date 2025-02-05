@@ -1,15 +1,16 @@
+'use client';
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faUser, faHistory, faPlus, faPencilAlt, faDownload, 
   faShoppingBag, faGraduationCap, faGift, faCreditCard, faTicket, faArrowLeft, faCog 
 } from '@fortawesome/free-solid-svg-icons';
-import { useCoupangApi } from '../_contexts/CoupangApiContext';
+import { useCoupangApi } from '@/app/contexts/CoupangApiContext';
 
 const MyPage = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('menu');
   const { apiKeys, updateApiKeys } = useCoupangApi();
   const [isEditing, setIsEditing] = useState(false);
@@ -161,10 +162,10 @@ const MyPage = () => {
   ];
 
   const handleNewInquiry = () => {
-    navigate('/inquiry');
+    router.push('/inquiry');
   };
 
-  const handleDownload = (downloadUrl) => {
+  const handleDownload = (downloadUrl: string) => {
     // 실제 구현에서는 인증 토큰을 확인하고 다운로드 처리
     window.open(downloadUrl, '_blank');
   };
@@ -342,7 +343,7 @@ const MyPage = () => {
                     <td>{payment.amount}</td>
                     <td>{payment.method}</td>
                     <td>
-                      <PaymentStatus>{payment.status}</PaymentStatus>
+                      <PaymentStatus status={payment.status}>{payment.status}</PaymentStatus>
                     </td>
                   </tr>
                 ))}
@@ -687,7 +688,7 @@ const Sidebar = styled.div`
   }
 `;
 
-const TabButton = styled.button`
+const TabButton = styled.button<{ active: boolean }>`
   width: 100%;
   padding: 1rem;
   display: flex;
@@ -858,7 +859,7 @@ const ProjectType = styled.div`
   font-weight: 600;
 `;
 
-const ProjectStatus = styled.div`
+const ProjectStatus = styled.div<{ status: string }>`
   padding: 0.2rem 0.5rem;
   background: ${props => props.status === '진행중' ? '#514FE4' : '#f0f0f0'};
   color: ${props => props.status === '진행중' ? 'white' : '#333'};
@@ -988,7 +989,7 @@ const CourseProgress = styled.div`
   margin-bottom: 0.5rem;
 `;
 
-const ProgressBar = styled.div`
+const ProgressBar = styled.div<{ progress: number }>`
   height: 10px;
   background: #f0f0f0;
   border-radius: 5px;
@@ -1078,7 +1079,7 @@ const EventInfo = styled.div`
   flex: 1;
 `;
 
-const EventStatus = styled.div`
+const EventStatus = styled.div<{ status: string }>`
   padding: 0.2rem 0.5rem;
   background: ${props => props.status === '진행중' ? '#514FE4' : '#f0f0f0'};
   color: ${props => props.status === '진행중' ? 'white' : '#333'};
@@ -1113,7 +1114,7 @@ const PaymentTable = styled.table`
   border-collapse: collapse;
 `;
 
-const PaymentStatus = styled.div`
+const PaymentStatus = styled.div<{ status: string }>`
   padding: 0.2rem 0.5rem;
   background: ${props => props.status === '결제완료' ? '#514FE4' : '#f0f0f0'};
   color: ${props => props.status === '결제완료' ? 'white' : '#333'};
@@ -1212,7 +1213,7 @@ const CancelButton = styled.button`
   color: #514FE4;
 `;
 
-const Message = styled.div`
+const Message = styled.div<{ error: boolean }>`
   margin-top: 16px;
   padding: 12px;
   border-radius: 6px;

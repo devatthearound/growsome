@@ -25,9 +25,9 @@ import Consulting from './pages/Consulting.js';
 import ToyProjects from './pages/ToyProjects.js';
 import ToyProjectsDetail from './pages/ToyProjectsDetail.js';
 import AffiliSmart from './toyprojects/affili-smart/AffiliSmart.js';
-import { EmailProvider } from './contexts/EmailContext.js';
-import { CoupangApiProvider } from './contexts/CoupangApiContext.js';
-import { checkMenuAuth } from './utils/menuAuth.js';
+import { EmailProvider } from './_contexts/EmailContext.js';
+import { CoupangApiProvider } from './_contexts/CoupangApiContext.js';
+import { checkMenuAuth } from './_utils/menuAuth.js';
 import Services from './components/home/Services.js';
 import Store from './components/home/Store.js';
 
@@ -52,25 +52,25 @@ function AppContent() {
       />
       <Main>
         <Routes>
-          <Route path="/" element={<EventLanding />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/special-gift" element={<SpecialGift />} />
-          <Route path="/inquiry" element={<Inquiry />} />
-          {checkMenuAuth('/auth') && <Route path="/auth" element={<Auth />} />}
-          {checkMenuAuth('/signup') && <Route path="/signup" element={<SignUp />} />}
-          {checkMenuAuth('/mypage') && <Route path="/mypage" element={<MyPage />} />}
-          {checkMenuAuth('/payment') && <Route path="/payment" element={<Payment />} />}
-          {checkMenuAuth('/consulting') && <Route path="/consulting" element={<Consulting />} />}
-          {checkMenuAuth('/services') && <Route path="/services" element={<Services />} />}
-          {checkMenuAuth('/store') && <Route path="/store" element={<Store />} />}
-          {checkMenuAuth('/blog') && <Route path="/blog" element={<BlogList />} />}
-          {checkMenuAuth('/blog') && <Route path="/blog/:slug" element={<BlogPost />} />}
-          {checkMenuAuth('/portfolio') && <Route path="/portfolio" element={<Portfolio />} />}
-          {checkMenuAuth('/portfolio') && <Route path="/portfolio/:id" element={<PortfolioDetail />} />}
-          {checkMenuAuth('/class') && <Route path="/class" element={<Class />} />}
+          {/* <Route path="/" element={<EventLanding />} />
+          <Route path="/home" element={<Home />} /> */}
+          {/* <Route path="/special-gift" element={<SpecialGift />} /> */}
+          {/* <Route path="/inquiry" element={<Inquiry />} /> */}
+          {/* {checkMenuAuth('/auth') && <Route path="/auth" element={<Auth />} />} */}
+          {/* {checkMenuAuth('/signup') && <Route path="/signup" element={<SignUp />} />} */}
+          {/* {checkMenuAuth('/mypage') && <Route path="/mypage" element={<MyPage />} />} */}
+          {/* {checkMenuAuth('/payment') && <Route path="/payment" element={<Payment />} />} */}
+          {/* {checkMenuAuth('/consulting') && <Route path="/consulting" element={<Consulting />} />} */}
+          {/* {checkMenuAuth('/services') && <Route path="/services" element={<Services />} />} */}
+          {/* {checkMenuAuth('/store') && <Route path="/store" element={<Store />} />} */}
+          {/* {checkMenuAuth('/blog') && <Route path="/blog" element={<BlogList />} />} */}
+          {/* {checkMenuAuth('/blog') && <Route path="/blog/:slug" element={<BlogPost />} />} */}
+          {/* {checkMenuAuth('/portfolio') && <Route path="/portfolio" element={<Portfolio />} />} */}
+          {/* {checkMenuAuth('/portfolio') && <Route path="/portfolio/:id" element={<PortfolioDetail />} />} */}
+          {/* {checkMenuAuth('/class') && <Route path="/class" element={<Class />} />} */}
           <Route path="/toyprojects">
-            <Route index element={<ToyProjects />} />
-            <Route path=":id" element={<ToyProjectsDetail />} />
+            {/* <Route index element={<ToyProjects />} /> */}
+            {/* <Route path=":id" element={<ToyProjectsDetail />} /> */}
             <Route path="affili-smart" element={<AffiliSmart />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
