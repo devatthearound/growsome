@@ -102,6 +102,7 @@ const ContentTitle = styled.h2`
   font-weight: 700;
   text-align: center;
   margin-bottom: 3rem;
+  color: #333;
 `;
 
 const ContentText = styled.p`
