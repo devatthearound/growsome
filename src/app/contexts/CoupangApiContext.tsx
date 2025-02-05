@@ -14,17 +14,23 @@ interface CoupangApiContextType {
 const CoupangApiContext = createContext<CoupangApiContextType | undefined>(undefined);
 
 export const CoupangApiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [apiKeys, setApiKeys] = useState<ApiKeys>(() => {
-    const savedKeys = localStorage.getItem('coupangApiKeys');
-    return savedKeys ? JSON.parse(savedKeys) : {
-      accessKey: '',
-      secretKey: '',
-      subId: ''
-    };
+  const [apiKeys, setApiKeys] = useState<ApiKeys>({
+    accessKey: '',
+    secretKey: '',
+    subId: ''
   });
 
   useEffect(() => {
-    localStorage.setItem('coupangApiKeys', JSON.stringify(apiKeys));
+    const savedKeys = localStorage.getItem('coupangApiKeys');
+    if (savedKeys) {
+      setApiKeys(JSON.parse(savedKeys));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('coupangApiKeys', JSON.stringify(apiKeys));
+    }
   }, [apiKeys]);
 
   const updateApiKeys = (newKeys: ApiKeys) => {

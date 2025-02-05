@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Link from 'next/link';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
@@ -139,38 +139,53 @@ const ProjectTag = styled.span`
   margin-bottom: 12px;
 `;
 
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  url: string;
+  tags: string[];
+  is_active: boolean;
+}
+
 const ToyProjects = () => {
   const emailContext = useContext(EmailContext);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   if (!emailContext) {
     throw new Error('EmailContext must be used within EmailProvider');
   }
 
   const { setShowEmailPopup } = emailContext;
-  
-  const projects = [
-    {
-      id: 'affili-smart',
-      title: '🎥 AffiliSmart',
-      description: '클릭 한 번으로 매력적인 상품 홍보 영상을 자동으로 생성하세요. AI가 당신의 마케팅을 더 스마트하게 만들어줍니다.',
-      path: '/toyprojects/affili-smart',
-      tag: '수익화'
-    },
-    {
-      id: 'time-block',
-      title: '⏰ 타임블록',
-      description: '시간을 블록처럼 쌓아가세요. 하루 24시간이 더 가치있게 변화합니다.',
-      path: '/toyprojects/time-block',
-      tag: '생산성'
-    },
-    {
-      id: 'blog-auto',
-      title: '✍️ 블로그 오토파일럿',
-      description: 'AI가 당신의 블로그를 24시간 운영합니다. 잠자는 동안에도 성장하는 블로그를 경험하세요.',
-      path: '/toyprojects/blog-auto',
-      tag: '자동화'
-    }
-  ];
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('/api/toyprojects');
+        if (!response.ok) {
+          throw new Error('프로젝트를 불러오는데 실패했습니다.');
+        }
+        const data = await response.json();
+        setProjects(data.projects);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  if (loading) {
+    return <div>로딩 중...</div>;
+  }
+
+  if (error) {
+    return <div>에러: {error}</div>;
+  }
 
   return (
     <Container>
@@ -210,9 +225,9 @@ const ToyProjects = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <ProjectLink href={project.path}>
+            <ProjectLink href={`${project.url}`}>
               <ProjectContent>
-                <ProjectTag>{project.tag}</ProjectTag>
+                <ProjectTag>{project.tags[0]}</ProjectTag>
                 <ProjectTitle>{project.title}</ProjectTitle>
                 <ProjectDescription>{project.description}</ProjectDescription>
                 <TryButton>
