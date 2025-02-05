@@ -1,6 +1,9 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useNavigate, Link } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faSearch, 
@@ -9,11 +12,11 @@ import {
   faArrowLeft
 } from '@fortawesome/free-solid-svg-icons';
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
-import { useCoupangApi } from '../../_contexts/CoupangApiContext';
-import AffiliateSettingsPopup from './components/AffiliateSettingsPopup';
-import { getTopKeywords } from './utils/keywordAnalyzer';
+import { useCoupangApi } from '@/app/contexts/CoupangApiContext';
+import AffiliateSettingsPopup from '@/app/components/affilate-smart/AffiliateSettingsPopup';
+import { getTopKeywords } from '@/app/utils/keywordAnalyzer';
 
-const initialKeywordData = {
+const initialKeywordData: { keywords: Keyword[] } = {
   keywords: [
     { keyword: "게이밍PC", searchVolume: 15000, competition: 0.8, trend: [10, 15, 20, 25, 30] },
     { keyword: "RTX 4060", searchVolume: 12000, competition: 0.6, trend: [5, 10, 15, 20, 25] },
@@ -23,17 +26,97 @@ const initialKeywordData = {
   ]
 };
 
-const initialProducts = [
-  { id: 1, name: "고성능 게이밍PC i7", price: 1500000, rating: 4.5 },
-  { id: 2, name: "RTX 4060 게이밍 데스크탑", price: 1200000, rating: 4.3 },
-  { id: 3, name: "조립 게이밍PC 풀패키지", price: 900000, rating: 4.7 },
-  { id: 4, name: "고사양 게이밍 컴퓨터", price: 1800000, rating: 4.6 },
-  { id: 5, name: "가성비 게이밍PC 세트", price: 800000, rating: 4.4 },
-  { id: 6, name: "프리미엄 게이밍 데스크탑", price: 2000000, rating: 4.8 },
-  { id: 7, name: "게이밍용 조립PC", price: 1100000, rating: 4.2 },
-  { id: 8, name: "고성능 RTX PC", price: 1600000, rating: 4.5 },
-  { id: 9, name: "게임용 컴퓨터 풀세트", price: 1300000, rating: 4.4 },
-  { id: 10, name: "프로게이머용 PC", price: 2200000, rating: 4.9 }
+interface Product {
+  id: number;
+  title: string;
+  name?: string;  // 초기 데이터용
+  price: number;
+  rating: number;
+  image?: string;
+  mallName?: string;
+}
+
+const initialProducts: Product[] = [
+  { 
+    id: 1, 
+    title: "고성능 게이밍PC i7", 
+    name: "고성능 게이밍PC i7",
+    price: 1500000, 
+    rating: 4.5,
+    image: "/placeholder-pc.jpg"  // 기본 이미지 경로 설정
+  },
+  { 
+    id: 2, 
+    title: "RTX 4060 게이밍 데스크탑", 
+    name: "RTX 4060 게이밍 데스크탑",
+    price: 1200000, 
+    rating: 4.3,
+    image: "/placeholder-pc.jpg"  // 기본 이미지 경로 설정
+  },
+  { 
+    id: 3, 
+    title: "조립 게이밍PC 풀패키지", 
+    name: "조립 게이밍PC 풀패키지",
+    price: 900000, 
+    rating: 4.7,
+    image: "/placeholder-pc.jpg"  // 기본 이미지 경로 설정
+  },
+  { 
+    id: 4, 
+    title: "고사양 게이밍 컴퓨터", 
+    name: "고사양 게이밍 컴퓨터",
+    price: 1800000, 
+    rating: 4.6,
+    image: "/placeholder-pc.jpg"  // 기본 이미지 경로 설정
+  },
+  { 
+    id: 5, 
+    title: "가성비 게이밍PC 세트", 
+    name: "가성비 게이밍PC 세트",
+    price: 800000, 
+    rating: 4.4,
+    image: "/placeholder-pc.jpg"  // 기본 이미지 경로 설정
+  },
+  { 
+    id: 6, 
+    title: "프리미엄 게이밍 데스크탑", 
+    name: "프리미엄 게이밍 데스크탑",
+    price: 2000000, 
+    rating: 4.8,
+    image: "/placeholder-pc.jpg"  // 기본 이미지 경로 설정
+  },
+  { 
+    id: 7, 
+    title: "게이밍용 조립PC", 
+    name: "게이밍용 조립PC",
+    price: 1100000, 
+    rating: 4.2,
+    image: "/placeholder-pc.jpg"  // 기본 이미지 경로 설정
+  },
+  { 
+    id: 8, 
+    title: "고성능 RTX PC", 
+    name: "고성능 RTX PC",
+    price: 1600000, 
+    rating: 4.5,
+    image: "/placeholder-pc.jpg"  // 기본 이미지 경로 설정
+  },
+  { 
+    id: 9, 
+    title: "게임용 컴퓨터 풀세트", 
+    name: "게임용 컴퓨터 풀세트",
+    price: 1300000, 
+    rating: 4.4,
+    image: "/placeholder-pc.jpg"  // 기본 이미지 경로 설정
+  },
+  { 
+    id: 10, 
+    title: "프로게이머용 PC", 
+    name: "프로게이머용 PC",
+    price: 2200000, 
+    rating: 4.9,
+    image: "/placeholder-pc.jpg"  // 기본 이미지 경로 설정
+  }
 ];
 
 const StyledContainer = styled.div`
@@ -42,18 +125,25 @@ const StyledContainer = styled.div`
   margin: 0 auto;
 `;
 
+interface Keyword {
+  keyword: string;
+  searchVolume: number;
+  competition: number;
+  trend: number[];
+}
+
 const AffiliSmart = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { apiKeys, updateApiKeys } = useCoupangApi();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [videoUrl, setVideoUrl] = useState(null);
-  const [selectedProducts, setSelectedProducts] = useState([]);
-  const [generatedComment, setGeneratedComment] = useState('');
-  const [selectedPlatform, setSelectedPlatform] = useState('naver');
+  const [error, setError] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [selectedProducts, setSelectedProducts] = useState<any[]>([]);
+  const [generatedComment, setGeneratedComment] = useState<string>('');
+  const [selectedPlatform, setSelectedPlatform] = useState<string>('naver');
   // eslint-disable-next-line no-unused-vars
   const [timeRange, setTimeRange] = useState(null);
-  const [selectedKeyword, setSelectedKeyword] = useState(null);
+  const [selectedKeyword, setSelectedKeyword] = useState<Keyword | null>(null);
   // eslint-disable-next-line no-unused-vars
   const [step, setStep] = useState(1);
   const [keywordData, setKeywordData] = useState(initialKeywordData);
@@ -87,12 +177,12 @@ const AffiliSmart = () => {
     handlePlatformChange('naver');
   }, []);
 
-  const formatNumber = (value) => {
+  const formatNumber = (value: any) => {
     if (!value && value !== 0) return '0';
     return String(value).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
 
-  const handlePlatformChange = async (platform) => {
+  const handlePlatformChange = async (platform: string) => {
     setSelectedPlatform(platform);
     setIsAnalyzing(true);
     setError(null);
@@ -109,23 +199,23 @@ const AffiliSmart = () => {
     }
   };
 
-  const handleTimeRangeChange = async (range) => {
-    setTimeRange(range);
-    setIsAnalyzing(true);
-    try {
-      const data = await getTopKeywords(selectedPlatform, range);
-      setKeywordData({
-        keywords: data?.keywords || [],
-        relatedKeywords: data?.relatedKeywords || []
-      });
-    } catch (error) {
-      setError('키워드 분석 중 오류가 발생했습니다.');
-    } finally {
-      setIsAnalyzing(false);
-    }
-  };
+//   const handleTimeRangeChange = async (range: string) => {
+//     setTimeRange(range);
+//     setIsAnalyzing(true);
+//     try {
+//       const data = await getTopKeywords(selectedPlatform, range);
+//       setKeywordData({
+//         keywords: data?.keywords || [],
+//         relatedKeywords: data?.relatedKeywords || []
+//       });
+//     } catch (error) {
+//       setError('키워드 분석 중 오류가 발생했습니다.');
+//     } finally {
+//       setIsAnalyzing(false);
+//     }
+//   };
 
-  const handleKeywordSelect = async (keyword) => {
+  const handleKeywordSelect = async (keyword: Keyword) => {
     try {
       setIsLoadingProducts(true);
       setError(null);
@@ -155,7 +245,7 @@ const AffiliSmart = () => {
         return;
       }
 
-      const products = data.items.map(item => ({
+      const products = data.items.map((item: any) => ({
         id: item.productId || Math.random().toString(36).substr(2, 9),
         title: item.title.replace(/<[^>]*>?/g, ''),
         price: parseInt(item.lprice),
@@ -172,14 +262,14 @@ const AffiliSmart = () => {
 
     } catch (error) {
       console.error('Error:', error);
-      setError('상품 검색 중 오류가 발생했습니다: ' + error.message);
+      setError('상품 검색 중 오류가 발생했습니다: ' + (error as Error).message);
       setRelatedProducts([]);
     } finally {
       setIsLoadingProducts(false);
     }
   };
 
-  const handleProductSelect = (productId) => {
+  const handleProductSelect = (productId: any) => {
     if (!productId) return;
     
     setSelectedProducts(prev => {
@@ -195,13 +285,13 @@ const AffiliSmart = () => {
     });
   };
 
-  const getProductRank = (productId) => {
-    if (!productId) return null;
-    const index = selectedProducts.findIndex(p => p.id === productId);
-    return index > -1 ? index + 1 : null;
-  };
+//   const getProductRank = (productId) => {
+//     if (!productId) return null;
+//     const index = selectedProducts.findIndex(p => p.id === productId);
+//     return index > -1 ? index + 1 : null;
+//   };
 
-  const generateComment = (products) => {
+  const generateComment = (products: any) => {
     if (!Array.isArray(products) || products.length === 0) {
       return '';
     }
@@ -219,7 +309,7 @@ const AffiliSmart = () => {
       return `${rank}위: ${product.title || product.name || '상품명 없음'}
 가격: ${formatNumber(product.price)}원
 평점: ${stars} (${formatNumber(product.reviewCount || 0)}개 상품평)
-특징: ${(product.features || []).map(feature => `- ${feature}`).join('\n') || '정보 없음'}
+특징: ${(product.features || []).map((feature: any) => `- ${feature}`).join('\n') || '정보 없음'}
 구매링크: ${product.affiliateLink || '#'}`;
     }).filter(Boolean).join('\n\n');
 
@@ -260,7 +350,7 @@ const AffiliSmart = () => {
   // 임시 비디오 미리보기 컴포넌트
   const VideoPreviewMock = () => {
     const selectedProductDetails = selectedProducts
-      .map(id => relatedProducts.find(p => p?.id === id))
+      .map((id: any) => relatedProducts.find((p: any) => p?.id === id))
       .filter(Boolean);
 
     return (
@@ -271,7 +361,7 @@ const AffiliSmart = () => {
         textAlign: 'center'
       }}>
         <h3>선택된 상품 목록</h3>
-        {selectedProductDetails.map((product, index) => {
+        {selectedProductDetails.map((product: any, index: number) => {
           if (!product) return null;
           
           return (
@@ -294,14 +384,14 @@ const AffiliSmart = () => {
   };
 
   const handleSetupCoupang = () => {
-    navigate('/mypage/api-settings');  // API 설정 페이지로 이동
+    router.push('/mypage/api-settings');  // API 설정 페이지로 이동
   };
 
   return (
     <StyledContainer>
       <Navigation>
         <NavItem>
-          <NavLink to="/toyprojects">
+          <NavLink href="/toyprojects">
             <FontAwesomeIcon icon={faArrowLeft} /> 돌아가기
           </NavLink>
         </NavItem>
@@ -359,7 +449,7 @@ const AffiliSmart = () => {
                 {keywordData.keywords.slice(0, 5).map((kw, index) => (
                   <TableRow 
                     key={index} 
-                    selected={selectedKeyword === kw.keyword}
+                    aria-selected={selectedKeyword?.keyword === kw.keyword}
                   >
                     <td>
                       <RankBadge>
@@ -405,14 +495,17 @@ const AffiliSmart = () => {
                 {relatedProducts.map((product) => (
                   <ProductCard 
                     key={product.id}
-                    selected={selectedProducts.includes(product)}
+                    $selected={selectedProducts.includes(product)}
                     onClick={() => handleProductSelect(product.id)}
                   >
-                    <ProductImage src={product.image} alt={product.title} />
+                    <ProductImage 
+                      src={product.image || '/placeholder-pc.jpg'} 
+                      alt={product.title || product.name || '제품 이미지'} 
+                    />
                     <ProductInfo>
-                      <ProductName>{product.title}</ProductName>
+                      <ProductName>{product.title || product.name}</ProductName>
                       <ProductPrice>{formatNumber(product.price)}원</ProductPrice>
-                      <ProductMall>{product.mallName}</ProductMall>
+                      {product.mallName && <ProductMall>{product.mallName}</ProductMall>}
                     </ProductInfo>
                   </ProductCard>
                 ))}
@@ -433,7 +526,7 @@ const AffiliSmart = () => {
             </SettingsHeader>
             <PlatformStatus>
               <StatusItem>
-                <StatusIcon $connected={apiKeys.accessKey}>🛒</StatusIcon>
+                <StatusIcon $connected={!!apiKeys.accessKey}>🛒</StatusIcon>
                 <StatusText>쿠팡 파트너스: {apiKeys.accessKey ? '연동됨' : '미연동'}</StatusText>
               </StatusItem>
               {/* Add more platform status items */}
@@ -539,13 +632,13 @@ const ProductGrid = styled.div`
   margin-top: 20px;
 `;
 
-const ProductCard = styled.div`
+const ProductCard = styled.div<{ $selected: boolean }>`
   border: 1px solid #eee;
   border-radius: 8px;
   padding: 10px;
   cursor: pointer;
   transition: all 0.2s;
-  background: ${props => props.selected ? '#f3f0ff' : 'white'};
+  background: ${props => props.$selected ? '#f3f0ff' : 'white'};
 
   &:hover {
     transform: translateY(-2px);
@@ -808,15 +901,15 @@ const KeywordTable = styled.table`
 `;
 
 const TableRow = styled.tr`
-  background: ${props => props.selected ? '#f0f0ff' : 'white'};
-  transition: all 0.2s;
+  background: ${props => props['aria-selected'] ? '#f0f0ff' : 'white'};
+  transition: all 0.3s ease;
 
   &:hover {
-    background: ${props => props.selected ? '#f0f0ff' : '#f8f9fa'};
+    background: ${props => props['aria-selected'] ? '#f0f0ff' : '#f8f9fa'};
   }
 `;
 
-const CompetitionBar = styled.div`
+const CompetitionBar = styled.div<{ value: number }>`
   width: 100px;
   height: 4px;
   background: #eee;
@@ -839,7 +932,7 @@ const CompetitionBar = styled.div`
   }
 `;
 
-const TrendIndicator = styled.div`
+const TrendIndicator = styled.div<{ trend: number[] }>`
   display: flex;
   align-items: center;
   gap: 2px;
@@ -859,17 +952,17 @@ const TrendIndicator = styled.div`
   })}
 `;
 
-const SelectButton = styled.button`
+const SelectButton = styled.button<{ $selected: boolean }>`
   padding: 8px 16px;
   border: none;
   border-radius: 6px;
-  background: ${props => props.selected ? '#514FE4' : '#e9ecef'};
-  color: ${props => props.selected ? 'white' : '#666'};
+  background: ${props => props.$selected ? '#514FE4' : '#e9ecef'};
+  color: ${props => props.$selected ? 'white' : '#666'};
   cursor: pointer;
   transition: all 0.2s;
 
   &:hover {
-    background: ${props => props.selected ? '#4340c0' : '#dee2e6'};
+    background: ${props => props.$selected ? '#4340c0' : '#dee2e6'};
   }
 `;
 
@@ -885,7 +978,7 @@ const PlatformSelector = styled.div`
   margin-bottom: 20px;
 `;
 
-const PlatformButton = styled.button`
+const PlatformButton = styled.button<{ $active: boolean }>`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -914,19 +1007,19 @@ const TimeRangeSelector = styled.div`
   flex-wrap: wrap;
 `;
 
-const TimeButton = styled.button`
+const TimeButton = styled.button<{ $active: boolean }>`
   padding: 8px 16px;
   border: none;
   border-radius: 20px;
-  background: ${props => props.active ? '#514FE4' : '#f8f9fa'};
-  color: ${props => props.active ? 'white' : '#666'};
+  background: ${props => props.$active ? '#514FE4' : '#f8f9fa'};
+  color: ${props => props.$active ? 'white' : '#666'};
   cursor: pointer;
   transition: all 0.2s;
   font-size: 14px;
   min-width: 70px;
 
   &:hover {
-    background: ${props => props.active ? '#4340c0' : '#e9ecef'};
+    background: ${props => props.$active ? '#4340c0' : '#e9ecef'};
   }
 `;
 
@@ -1018,13 +1111,13 @@ const PlatformGrid = styled.div`
   margin-top: 20px;
 `;
 
-const PlatformCard = styled.div`
+const PlatformCard = styled.div<{ $active: boolean; $disabled: boolean }>`
   background: white;
-  border: 1px solid ${props => props.active ? '#514FE4' : '#eee'};
+  border: 1px solid ${props => props.$active ? '#514FE4' : '#eee'};
   border-radius: 12px;
   padding: 20px;
   text-align: center;
-  opacity: ${props => props.disabled ? 0.6 : 1};
+  opacity: ${props => props.$disabled ? 0.6 : 1};
   position: relative;
 `;
 
@@ -1109,7 +1202,7 @@ const LoadingText = styled.div`
   font-weight: 500;
 `;
 
-const RankBadge = styled.span`
+const RankBadge = styled.span<{ children: number }>`
   background: ${props => props.children <= 3 ? '#514FE4' : '#e9ecef'};
   color: ${props => props.children <= 3 ? 'white' : '#666'};
   padding: 4px 8px;
@@ -1117,7 +1210,7 @@ const RankBadge = styled.span`
   font-weight: bold;
 `;
 
-const TrendGraph = styled.div`
+const TrendGraph = styled.div<{ data: number[] }>`
   width: 100px;
   height: 30px;
   background: ${props => {
@@ -1202,7 +1295,7 @@ const StatusItem = styled.div`
   gap: 8px;
 `;
 
-const StatusIcon = styled.div`
+const StatusIcon = styled.div<{ $connected: boolean }>`
   font-size: 1.5rem;
   color: ${props => props.$connected ? '#514FE4' : '#666'};
 `;

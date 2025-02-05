@@ -9,8 +9,10 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import "./globals.css";
 import styled from 'styled-components';
-import StyledComponentsRegistry from './registry';
+import StyledComponentsRegistry from './lib/registry';
 import { AuthProvider } from './contexts/AuthContext';
+import { CoupangApiProvider } from './contexts/CoupangApiContext';
+import { EmailProvider } from './contexts/EmailContext';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,9 +49,15 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      
+      <body 
+      // className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
         <StyledComponentsRegistry>
           <AuthProvider>
+          <CoupangApiProvider>
+            <EmailProvider>
+
             <AppContainer>
               <Header 
                 onSubscribeClick={handleSubscribeClick}
@@ -61,9 +69,11 @@ export default function RootLayout({
             <Footer />
             <BottomNav />
             {isSubscribePopupOpen && (
-            <SubscribePopup onClose={handleCloseSubscribe} />
+              <SubscribePopup onClose={handleCloseSubscribe} />
             )}
           </AppContainer>
+          </EmailProvider>
+          </CoupangApiProvider>
           </AuthProvider>
         </StyledComponentsRegistry>
       </body>

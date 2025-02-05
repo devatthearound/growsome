@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import pool from '@/lib/db';
+import pool from '@/app/lib/db';
 import { verifyToken } from '@/app/utils/jwt';
 
 export async function GET() {

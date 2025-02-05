@@ -1,4 +1,4 @@
-import { ACTIVE_MENUS } from '../config/menuConfig';
+import { ACTIVE_MENUS } from '../_config/menuConfig';
 
 export const checkMenuAuth = (path) => {
   // 현재 환경 확인 (development 또는 production)

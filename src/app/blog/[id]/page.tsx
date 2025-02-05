@@ -1,22 +1,36 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams } from 'next/navigation';
 import styled from 'styled-components';
-import { getContentBySlug } from '../../_utils/content';
+import { getContentBySlug } from '@/app/utils/content';
 import ReactMarkdown from 'react-markdown';
 
-const BlogPost = () => {
-  const { slug } = useParams();
-  const [post, setPost] = useState(null);
+export default async function BlogPost({
+    params,
+}: {
+    params: Promise<{ id: string }>
+}) {
+    const { id } = await params;
+  const [post, setPost] = useState<{
+    slug: string;
+    title: string;
+    date: string;
+    description: string;
+    thumbnail: string;
+    body: string;
+    tags: string[];
+  } | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPost = async () => {
-      const data = await getContentBySlug('blog', slug);
+      const data = await getContentBySlug('blog', id);
       setPost(data);
       setLoading(false);
     };
     fetchPost();
-  }, [slug]);
+  }, [id]);
 
   if (loading) return <div>Loading...</div>;
   if (!post) return <div>Post not found</div>;
@@ -102,5 +116,3 @@ const Tag = styled.span`
   font-size: 0.9rem;
   color: #666;
 `;
-
-export default BlogPost; 
