@@ -40,16 +40,21 @@ const projectData = {
     // 다른 프로젝트 데이터도 추가
 };
 
-export default function ProjectPage({
+
+// export default async function PortfolioDetailPage({ params, searchParams }: Props) {
+//   const resolvedParams = await params;
+export default async function PortfolioDetailPage({
     params,
 }: {
-    params: { id: string }
+    params: Promise<{ id: string }>
 }) {
-    const project = projectData[params.id as keyof typeof projectData];
+    const { id } = await params;
+  
+  const project = projectData[id as keyof typeof projectData];
 
-    if (!project) {
-        return <div>Project not found</div>;
-    }
+  if (!project) {
+    return <div>Project not found</div>;
+  }
 
-    return <ClientProjectDetail project={project} />;
+  return <ClientProjectDetail project={project} />;
 }

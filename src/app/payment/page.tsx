@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import styled from 'styled-components';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -8,7 +8,7 @@ import { faCheck, faLock } from '@fortawesome/free-solid-svg-icons';
 import * as PortOne from "@portone/browser-sdk/v2";
 
 // ?productId=123"
-const Payment = () => {
+const PaymentContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const productId = searchParams.get('productId');
@@ -367,6 +367,20 @@ const Payment = () => {
         </PaymentGrid>
       </Container>
     </PaymentPage>
+  );
+};
+
+const Payment = () => {
+  return (
+    <Suspense fallback={
+      <PaymentPage>
+        <Container>
+          <div>로딩 중...</div>
+        </Container>
+      </PaymentPage>
+    }>
+      <PaymentContent />
+    </Suspense>
   );
 };
 
