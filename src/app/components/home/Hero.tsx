@@ -15,13 +15,13 @@ const Hero = () => {
     <HeroSection id="hero">
       <FloatingAgents>
         <FloatingAgent left="20%" top="15%">
-          <Image src="images/home/ai-agent1.png" alt="Floating Agent 1" width={200} height={200} />
+          <Image src="/images/home/ai-agent1.png" alt="Floating Agent 1" width={200} height={200} />
         </FloatingAgent>
         <FloatingAgent right="25%" top="40%">
-          <Image src="images/home/ai-agent2.png" alt="Floating Agent 2" width={200} height={200} />
+          <Image src="/images/home/ai-agent2.png" alt="Floating Agent 2" width={200} height={200} />
         </FloatingAgent>
         <FloatingAgent left="35%" bottom="20%">
-          <Image src="images/home/ai-agent3.png" alt="Floating Agent 3" width={200} height={200} />
+          <Image src="/images/home/ai-agent3.png" alt="Floating Agent 3" width={200} height={200} />
         </FloatingAgent>
       </FloatingAgents>
       <HeroContent>
