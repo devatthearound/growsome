@@ -137,7 +137,7 @@ const Store = () => {
 
 const StoreSection = styled.section`
   padding: 8rem 0;
-  background: #f8f9fa;
+  background-color: #fff;
 `;
 
 const Container = styled.div`
