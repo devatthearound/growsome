@@ -640,7 +640,7 @@ const Services = () => {
         {Object.keys(mainTabs).map((key) => (
           <MainTab
             key={key}
-            active={activeMainTab === key}
+            isActive={activeMainTab === key}
             onClick={() => handleMainTabClick(key as MainTabKey)}
           >
             {mainTabs[key as MainTabKey].title}
@@ -653,7 +653,7 @@ const Services = () => {
             {mainTabs[activeMainTab as MainTabKey].subTabs.map((tab) => (
               <SubTab
                 key={tab.id}
-                active={activeSubTab === tab.id}
+                isActive={activeSubTab === tab.id}
                 onClick={() => {
                   setActiveSubTab(tab.id);
                   scrollToSection(tab.id);
@@ -709,14 +709,14 @@ const MainTabContainer = styled.div`
   }
 `;
 
-const MainTab = styled.button<{ active: boolean }>`
+const MainTab = styled.button<{ isActive: boolean }>`
   flex: 1;
   background: none;
-  color: ${props => props.active ? '#514FE4' : '#666'};
+  color: ${props => props.isActive ? '#514FE4' : '#666'};
   border: none;
   padding: 1.5rem 0;
   font-size: 2rem;
-  font-weight: ${props => props.active ? '700' : '500'};
+  font-weight: ${props => props.isActive ? '700' : '500'};
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
@@ -739,7 +739,7 @@ const MainTab = styled.button<{ active: boolean }>`
     left: 0;
     width: 100%;
     height: 3px;
-    background-color: ${props => props.active ? '#514FE4' : 'transparent'};
+    background-color: ${props => props.isActive ? '#514FE4' : 'transparent'};
     transition: background-color 0.3s ease;
   }
 `;
@@ -794,12 +794,12 @@ const SubTabContainer = styled.div`
   }
 `;
 
-const SubTab = styled.button<{ active: boolean }>`
+const SubTab = styled.button<{ isActive: boolean }>`
   background: none;
-  color: ${props => props.active ? '#514FE4' : '#666'};
+  color: ${props => props.isActive ? '#514FE4' : '#666'};
   border: none;
   font-size: 1rem;
-  font-weight: ${props => props.active ? '700' : '500'};
+  font-weight: ${props => props.isActive ? '700' : '500'};
   cursor: pointer;
   transition: color 0.3s ease;
   text-align: left;
@@ -812,7 +812,7 @@ const SubTab = styled.button<{ active: boolean }>`
     width: 20%;
     font-size: 0.9rem;
     background: none;
-    color: ${props => props.active ? '#514FE4' : '#666'};
+    color: ${props => props.isActive ? '#514FE4' : '#666'};
 
     &:hover {
       background: none;
@@ -844,6 +844,7 @@ const QuestionBox = styled.div`
   padding: 0;
   text-align: left;
   max-width: 1000px;
+  margin: 0 auto;
 `;
 
 const Question = styled.h3`

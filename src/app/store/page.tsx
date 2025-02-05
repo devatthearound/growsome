@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
-import { useRouter } from 'next/navigation'; // 이 부분 수정
+import { useRouter } from 'next/navigation';
 
 const Store = () => {
   const router = useRouter();
@@ -63,18 +63,18 @@ const Store = () => {
     }
   ];
 
+  const handleDetailNavigation = (productId: number) => {
+    // Navigate to the product detail page
+    router.push(`/store/${productId}`);
+  };
+
   const handlePurchase = (productId: number) => {
-    // 결제 페이지로 이동
+    // Navigate to the payment page
     router.push('/payment', {
       // state: {
       //   product: products.find(p => p.id === productId)
       // }
     });
-  };
-
-  // eslint-disable-next-line no-unused-vars
-  const handleDownload = (product: any) => {
-    window.open(`/downloads/store/${product.id}`, '_blank');
   };
 
   return (
@@ -104,7 +104,7 @@ const Store = () => {
               variants={fadeIn}
               transition={{ delay: index * 0.2 }}
             >
-              <ProductImage>
+              <ProductImage onClick={() => handleDetailNavigation(product.id)}>
                 <img src={product.image} alt={product.title} />
               </ProductImage>
               <ProductInfo>
@@ -113,7 +113,9 @@ const Store = () => {
                     <Tag key={index}>{tag}</Tag>
                   ))}
                 </TagList>
-                <ProductTitle>{product.title}</ProductTitle>
+                <ProductTitle onClick={() => handleDetailNavigation(product.id)}>
+                  {product.title}
+                </ProductTitle>
               </ProductInfo>
               <ProductFooter>
                 <Price>{product.price.toLocaleString()}원</Price>
@@ -200,6 +202,7 @@ const ProductCard = styled.div`
 const ProductImage = styled.div`
   aspect-ratio: 1;
   overflow: hidden;
+  cursor: pointer;
 
   img {
     width: 100%;
@@ -220,6 +223,7 @@ const ProductInfo = styled.div`
     font-size: 1.1rem;
     font-weight: 600;
     margin-bottom: 1rem;
+    cursor: pointer;
   }
 `;
 
@@ -297,6 +301,7 @@ const ProductTitle = styled.h3`
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 1rem;
+  cursor: pointer;
 `;
 
 export default Store;

@@ -107,7 +107,7 @@ const Store = () => {
               transition={{ delay: index * 0.2 }}
             >
               <ProductImage>
-                <Image src={product.image} alt={product.title} />
+                <Image src={product.image} alt={product.title} width={300} height={200} />
               </ProductImage>
               <ProductInfo>
                 <TagList>
