@@ -7,9 +7,6 @@ backend:
 site_url: https://growsome.netlify.app
 display_url: https://growsome.netlify.app
 
-# OAuth 관련 설정 추가
-oauth_client_id: Ov23li9PD1I70h491mOP
-oauth_scope: repo,user
 
 local_backend: true
 publish_mode: editorial_workflow
