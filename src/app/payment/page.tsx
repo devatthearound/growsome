@@ -79,6 +79,7 @@ const PaymentContent = () => {
       return;
     }
 
+    console.log(user);
     try {
       await processPayment(
         {
