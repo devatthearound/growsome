@@ -78,7 +78,8 @@ function LoginContent() {
       setUser(data.user);
       
       if (!isExtension) {
-        router.push('/');
+        const redirectTo = searchParams.get('redirect_to') || '/';
+        router.push(redirectTo);
       } else {
         window.location.href = `/auth/extension-callback?token=${data.token}`;
       }
@@ -88,7 +89,7 @@ function LoginContent() {
     } finally {
       setIsLoading(false);
     }
-  }, [formData, isExtension, router, setUser]);
+  }, [formData, isExtension, router, setUser, searchParams]);
 
   useEffect(() => {
     const checkAuthAndRedirect = async () => {
@@ -99,6 +100,8 @@ function LoginContent() {
         const data = await response.json();
 
         if (response.ok && data.isLoggedIn) {
+          setUser(data.user);
+          
           if (isExtension) {
             // 토큰을 별도로 가져오기
             const tokenResponse = await fetch('/api/auth/token', {
@@ -110,11 +113,16 @@ function LoginContent() {
               console.log('Token retrieved successfully');
               window.location.href = `/auth/extension-callback?token=${tokenData.token}`;
               return;
-            } else {
-              console.error('Failed to retrieve token:', tokenData.error);
             }
           } else {
-            setUser(data.user);
+            // 이미 로그인된 경우 원래 가려던 페이지로 리다이렉트
+            const redirectTo = searchParams.get('redirect_to');
+            if (redirectTo) {
+              console.log('Redirecting to:', redirectTo);
+              router.push(redirectTo);
+              return;
+            }
+            // redirect_to가 없는 경우에만 isAlreadyLoggedIn 설정
             setIsAlreadyLoggedIn(true);
           }
         }
@@ -126,7 +134,7 @@ function LoginContent() {
     };
 
     checkAuthAndRedirect();
-  }, [isExtension, setUser]);
+  }, [isExtension, setUser, router, searchParams]);
 
   // 로딩 중이거나 인증 체크 중일 때 표시할 내용
   if (isChecking) {

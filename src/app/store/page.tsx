@@ -22,6 +22,7 @@ const Store = () => {
       title: '자연스러운 동정 결렉션',
       tags: ['Midjourney', '동정', '자연'],
       price: 25000,
+      originalPrice: 30000,
       description: 'AI로 제작된 자연스러운 동정 컬렉션입니다.'
     },
     {
@@ -30,6 +31,7 @@ const Store = () => {
       title: '미니멀 로고 디자인',
       tags: ['DALL-E', '로고', '브랜딩'],
       price: 35000,
+      originalPrice: 40000,
       description: 'AI로 제작된 미니멀한 로고 디자인 템플릿입니다.'
     },
     {
@@ -118,7 +120,10 @@ const Store = () => {
                 </ProductTitle>
               </ProductInfo>
               <ProductFooter>
-                <Price>{product.price.toLocaleString()}원</Price>
+                <PriceWrapper>
+                  <OriginalPrice>{product.originalPrice?.toLocaleString() || 'N/A'}원</OriginalPrice>
+                  <Price>{product.price.toLocaleString()}원</Price>
+                </PriceWrapper>
                 <PurchaseButton onClick={() => handlePurchase(product.id)}>
                   구매하기
                 </PurchaseButton>
@@ -247,6 +252,18 @@ const ProductFooter = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+`;
+
+const PriceWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
+const OriginalPrice = styled.span`
+  font-size: 0.9rem;
+  color: #999;
+  text-decoration: line-through;
 `;
 
 const Price = styled.span`

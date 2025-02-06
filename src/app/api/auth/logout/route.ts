@@ -12,7 +12,7 @@ export async function POST() {
 
     if (token) {
       try {
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
         
         // 세션 삭제
         await client.query(

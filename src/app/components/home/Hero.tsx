@@ -38,11 +38,11 @@ const Hero = () => {
           </MainTitle>
           <SubTitle>우리는 문제를 해결합니다</SubTitle>
           <ContactButton 
-            href="https://pf.kakao.com/_sxfxmxjb" 
+            href="https://discord.gg/W8dZjdEa3w" 
             target="_blank"
             rel="noopener noreferrer"
           >
-            자동화 참여
+            비밀연구소 입장 🚀
           </ContactButton>
         </motion.div>
       </HeroContent>
