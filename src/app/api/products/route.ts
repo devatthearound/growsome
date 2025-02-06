@@ -24,6 +24,8 @@ export async function GET(request: Request) {
           json_build_object(
             'id', pp.id,
             'name', pp.name,
+            'origin_price', pp.origin_price,
+            'discount_amount', pp.discount_amount,
             'price', pp.price,
             'billing_type', pp.billing_type,
             'billing_cycle', pp.billing_cycle,
@@ -114,18 +116,20 @@ export async function POST(request: Request) {
           `INSERT INTO product_plans (
             product_id,
             name,
-            price,
+            origin_price,
+            discount_amount,
             billing_type,
             billing_cycle,
             features,
             created_at,
             updated_at
           )
-          VALUES ($1, $2, $3, $4, $5, $6, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+          VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
           [
             productId,
             plan.name,
-            plan.price,
+            plan.origin_price,
+            plan.discount_amount || null,
             plan.billing_type,
             plan.billing_cycle || null,
             plan.features || {}

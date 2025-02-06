@@ -20,7 +20,7 @@ export async function GET() {
     }
 
     // 토큰 검증
-    const payload = verifyToken(token);
+    const payload = await verifyToken(token);
 
     // 세션 확인
     const sessionResult = await client.query(

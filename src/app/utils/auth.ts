@@ -11,7 +11,7 @@ export async function validateAuth(client: any) {
     throw new Error('인증되지 않은 사용자입니다.');
   }
 
-  const payload = verifyToken(token);
+  const payload = await verifyToken(token);
   const userId = payload.userId;
 
   const sessionResult = await client.query(

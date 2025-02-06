@@ -70,18 +70,27 @@ CREATE TABLE products (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
--- 상품 요금제 테이블
-CREATE TABLE product_plans (
-    id SERIAL PRIMARY KEY,
-    product_id INTEGER REFERENCES products(id) ON DELETE CASCADE,
-    name VARCHAR(100) NOT NULL,
-    price INTEGER NOT NULL,
-    billing_type VARCHAR(20) NOT NULL, -- 'subscription' 또는 'one_time'
-    billing_cycle INTEGER, -- subscription인 경우 청구 주기(월 단위)
-    features JSONB, -- 요금제에 포함된 기능들
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE public.product_plans (
+    id serial4 NOT NULL,
+    product_id int4 NULL,
+    "name" varchar(100) NOT NULL,
+    origin_price int4 NOT NULL,
+    discount_amount int4 NULL,
+    price int4 GENERATED ALWAYS AS (
+        CASE 
+            WHEN discount_amount IS NOT NULL AND discount_amount > 0 
+            THEN origin_price - discount_amount
+            ELSE origin_price 
+        END
+    ) STORED,
+    billing_type varchar(20) NOT NULL,
+    billing_cycle int4 NULL,
+    features jsonb NULL,
+    created_at timestamptz NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamptz NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT product_plans_pkey PRIMARY KEY (id)
 );
+
 
 -- 결제 내역 테이블
 CREATE TABLE payments (

@@ -15,7 +15,7 @@ export async function GET() {
 
   try {
     // 토큰 검증
-    verifyToken(token);
+    await verifyToken(token);
     
     return NextResponse.json({ token });
   } catch (error) {

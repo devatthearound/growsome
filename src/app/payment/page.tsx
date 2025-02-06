@@ -50,10 +50,12 @@ const PaymentContent = () => {
           id: productData.id,
           title: productData.name,
           description: productData.description,
+          originPrice: productData.plans?.[0]?.origin_price?.toLocaleString() || '가격 정보 없음',
+          discountAmount: productData.plans?.[0]?.discount_amount || 0,
           price: productData.plans?.[0]?.price?.toLocaleString() || '가격 정보 없음',
           features: productData.plans?.[0]?.features?.features || [],
           image: productData.image || '',
-          type: productData.plans?.[0]?.billing_type || 'one_time'
+          type: productData.plans?.[0]?.billing_type || 'one_time',
         });
       } catch (err: any) {
         console.error('상품 정보 로딩 중 에러:', err);
@@ -130,9 +132,9 @@ const PaymentContent = () => {
 
   // 결제 금액 계산 로직 추가
   const calculateFinalAmount = () => {
-    const originalPrice = parseInt(product.price.replace(/,/g, ''));
-    const discountAmount = appliedCoupon?.discount || 0;
-    return originalPrice - discountAmount;
+    const price = parseInt(product.price.replace(/,/g, ''));
+    const couponDiscount = appliedCoupon?.discount || 0;
+    return price - couponDiscount;
   };
 
   if (loading) {
@@ -174,7 +176,15 @@ const PaymentContent = () => {
               )}
               <h3>{product.title}</h3>
               <PriceWrapper>
-                <OriginalPrice>{product.originalPrice?.toLocaleString() || 'N/A'}원</OriginalPrice>
+                <OriginalPrice>{product.originPrice}원</OriginalPrice>
+                {product.discountAmount > 0 && (
+                  <DiscountBadge>
+                    {calculateDiscountPercentage(
+                      parseInt(product.originPrice.replace(/,/g, '')), 
+                      product.discountAmount
+                    )}% 할인
+                  </DiscountBadge>
+                )}
                 <Price>{product.price}원</Price>
               </PriceWrapper>
               {product.description && (
@@ -230,13 +240,17 @@ const PaymentContent = () => {
             <TotalSection>
               <div>
                 <TotalLabel>정가</TotalLabel>
-                <div>{product.price}원</div>
+                <div>{product.originPrice}원</div>
+                {product.discountAmount > 0 && (
+                  <>
+                    <TotalLabel>상품 할인</TotalLabel>
+                    <div>-{product.discountAmount.toLocaleString()}원</div>
+                  </>
+                )}
                 {appliedCoupon && (
                   <>
-                    <TotalLabel>할인 금액</TotalLabel>
+                    <TotalLabel>쿠폰 할인</TotalLabel>
                     <div>-{appliedCoupon.discount.toLocaleString()}원</div>
-                    <TotalLabel>할인 퍼센트</TotalLabel>
-                    <div>{calculateDiscountPercentage(parseInt(product.price.replace(/,/g, '')), appliedCoupon.discount)}%</div>
                   </>
                 )}
                 <TotalLabel>최종 결제 금액</TotalLabel>
@@ -561,6 +575,16 @@ const Description = styled.p`
   color: #666;
   font-size: 0.9rem;
   margin: 12px 0;
+`;
+
+const DiscountBadge = styled.span`
+  background: #FF4B4B;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 4px 0;
 `;
 
 export default Payment;
