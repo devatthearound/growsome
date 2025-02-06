@@ -11,7 +11,7 @@ import * as PortOne from "@portone/browser-sdk/v2";
 const PaymentContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const productId = searchParams.get('productId');
+  const productId = searchParams.get('product_id');
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
