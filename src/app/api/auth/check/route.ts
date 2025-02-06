@@ -45,7 +45,8 @@ export async function GET() {
         u.email,
         u.username,
         u.company_name,
-        u.position
+        u.position,
+        u.phone_number
       FROM users u
       WHERE u.id = $1`,
       [payload.userId]
