@@ -39,7 +39,7 @@ const Hero = () => {
             target="_blank"
             rel="noopener noreferrer"
           >
-            자동화 참여
+            비밀연구소 입장
           </ContactButton>
         </motion.div>
       </HeroContent>

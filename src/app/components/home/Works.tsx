@@ -80,6 +80,12 @@ const Works = () => {
     return () => clearInterval(autoSlide);
   }, [nextSlide]);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // Client-side code
+    }
+  }, []);
+
   return (
     <WorksSection id="works">
       <Container>
@@ -112,7 +118,7 @@ const Works = () => {
           </SlideButton>
         </WorksSliderContainer>
 
-        <ViewAllButton href="/projects">
+        <ViewAllButton href="/portfolio">
           전체 프로젝트 보기 <FontAwesomeIcon icon={faArrowRight} />
         </ViewAllButton>
       </Container>

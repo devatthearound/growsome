@@ -124,6 +124,10 @@ const PaymentContent = () => {
     }
   };
 
+  const calculateDiscountPercentage = (originalPrice: number, discountAmount: number) => {
+    return ((discountAmount / originalPrice) * 100).toFixed(1);
+  };
+
   // 결제 금액 계산 로직 추가
   const calculateFinalAmount = () => {
     const originalPrice = parseInt(product.price.replace(/,/g, ''));
@@ -169,7 +173,10 @@ const PaymentContent = () => {
                 <ProductImage src={product.image} alt={product.title} />
               )}
               <h3>{product.title}</h3>
-              <Price>{product.price}원</Price>
+              <PriceWrapper>
+                <OriginalPrice>{product.originalPrice?.toLocaleString() || 'N/A'}원</OriginalPrice>
+                <Price>{product.price}원</Price>
+              </PriceWrapper>
               {product.description && (
                 <Description>{product.description}</Description>
               )}
@@ -222,12 +229,14 @@ const PaymentContent = () => {
 
             <TotalSection>
               <div>
-                <TotalLabel>상품 금액</TotalLabel>
+                <TotalLabel>정가</TotalLabel>
                 <div>{product.price}원</div>
                 {appliedCoupon && (
                   <>
                     <TotalLabel>할인 금액</TotalLabel>
                     <div>-{appliedCoupon.discount.toLocaleString()}원</div>
+                    <TotalLabel>할인 퍼센트</TotalLabel>
+                    <div>{calculateDiscountPercentage(parseInt(product.price.replace(/,/g, '')), appliedCoupon.discount)}%</div>
                   </>
                 )}
                 <TotalLabel>최종 결제 금액</TotalLabel>
@@ -337,6 +346,18 @@ const ProductCard = styled.div`
   padding: 20px;
   background: white;
   border-radius: 12px;
+`;
+
+const PriceWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
+const OriginalPrice = styled.span`
+  font-size: 0.9rem;
+  color: #999;
+  text-decoration: line-through;
 `;
 
 const Price = styled.div`
@@ -469,7 +490,8 @@ const PayButton = styled.button`
 
 const ProductImage = styled.img`
   width: 100%;
-  height: 200px;
+  height: auto;
+  max-height: 150px;
   object-fit: cover;
   border-radius: 8px;
   margin-bottom: 16px;

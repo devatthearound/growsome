@@ -68,7 +68,7 @@ const ToyProjects = () => {
       >
         <Title>토이 프로젝트</Title>
         <Description>
-          실험적이고 혁신적인 아이디어를 실현하는 우리의 토이 프로젝트들을 소개합니다.
+          실험적이고 혁신적인 아이디어를 실현하는 <br />우리의 토이 프로젝트들을 소개합니다.
         </Description>
       </PageHeader>
 
