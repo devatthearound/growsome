@@ -7,7 +7,6 @@ backend:
 site_url: https://growsome.netlify.app
 display_url: https://growsome.netlify.app
 
-
 local_backend: true
 publish_mode: editorial_workflow
 
@@ -15,6 +14,42 @@ media_folder: "public/images/uploads"
 public_folder: "/images/uploads"
 
 collections:
+  - name: "store"
+    label: "Store"
+    folder: "content/store"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Price", name: "price", widget: "number"}
+      - {label: "Description", name: "description", widget: "text"}
+      - {label: "Image", name: "image", widget: "image"}
+      - {label: "Tags", name: "tags", widget: "list", required: false}
+
+  - name: "toyprojects"
+    label: "Toy Projects"
+    folder: "content/toyprojects"
+    create: true
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Description", name: "description", widget: "text"}
+      - {label: "Image", name: "image", widget: "image"}
+      - {label: "GitHub URL", name: "githubUrl", widget: "string"}
+      - {label: "Demo URL", name: "demoUrl", widget: "string", required: false}
+      - {label: "Tags", name: "tags", widget: "list"}
+
+  - name: "portfolio"
+    label: "Portfolio"
+    folder: "content/portfolio"
+    create: true
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Client", name: "client", widget: "string"}
+      - {label: "Year", name: "year", widget: "string"}
+      - {label: "Description", name: "description", widget: "text"}
+      - {label: "Main Image", name: "mainImage", widget: "image"}
+      - {label: "Tags", name: "tags", widget: "list"}
+
   - name: "blog"
     label: "Blog"
     folder: "content/blog"
@@ -27,28 +62,3 @@ collections:
       - {label: "Featured Image", name: "thumbnail", widget: "image", required: false}
       - {label: "Body", name: "body", widget: "markdown"}
       - {label: "Tags", name: "tags", widget: "list", required: false}
-
-  - name: "works"
-    label: "Works"
-    folder: "content/works"
-    create: true
-    fields:
-      - {label: "Title", name: "title", widget: "string"}
-      - {label: "Description", name: "description", widget: "text"}
-      - {label: "Featured Image", name: "thumbnail", widget: "image"}
-      - {label: "Project URL", name: "projectUrl", widget: "string", required: false}
-      - {label: "Technologies", name: "technologies", widget: "list"}
-      - {label: "Body", name: "body", widget: "markdown"}
-
-  - name: "toyprojects"
-    label: "Toy Projects"
-    folder: "content/toyprojects"
-    create: true
-    fields:
-      - {label: "Title", name: "title", widget: "string"}
-      - {label: "Description", name: "description", widget: "text"}
-      - {label: "Featured Image", name: "thumbnail", widget: "image"}
-      - {label: "GitHub URL", name: "githubUrl", widget: "string"}
-      - {label: "Demo URL", name: "demoUrl", widget: "string", required: false}
-      - {label: "Technologies", name: "technologies", widget: "list"}
-      - {label: "Body", name: "body", widget: "markdown"} 
