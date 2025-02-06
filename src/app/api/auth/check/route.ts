@@ -67,7 +67,8 @@ export async function GET() {
         email: user.email,
         username: user.username,
         company_name: user.company_name,
-        position: user.position
+        position: user.position,
+        phone_number : user.phone_number
       }
     });
 
