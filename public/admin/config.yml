@@ -1,6 +1,6 @@
 backend:
   name: git-gateway
-  branch: main # or your default branch
+  branch: master # or your actual default branch
   base_url: https://api.netlify.com
   auth_endpoint: oauth/auth # auth_endpoint 수정
 
