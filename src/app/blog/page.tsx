@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import styled from 'styled-components';
-import { getContent } from '@/app/utils/content';
+import { getContent } from '@/lib/getContent';
 
 const BlogList = () => {
   const [posts, setPosts] = useState<{
@@ -19,11 +19,21 @@ const BlogList = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const data = await getContent('blog');
-        setPosts(data);
+        const data = getContent('blog');
+        if (data && Array.isArray(data)) {
+          setPosts(data.map(post => ({
+            slug: post.data.slug,
+            title: post.data.title,
+            date: post.data.date,
+            description: post.data.description,
+            thumbnail: post.data.thumbnail
+          })));
+        } else {
+          setError('Content not found or invalid format');
+        }
       } catch (err) {
-        setError('블로그 포스트를 불러오는데 실패했습니다. 잠시 후 다시 시도해주세요.');
-        console.error('Error fetching blog posts:', err);
+        console.error('Failed to fetch content:', err);
+        setError('Failed to fetch content');
       } finally {
         setLoading(false);
       }
