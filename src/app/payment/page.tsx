@@ -1,15 +1,18 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, Suspense, useCallback } from 'react';
 import styled from 'styled-components';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faLock } from '@fortawesome/free-solid-svg-icons';
-import * as PortOne from "@portone/browser-sdk/v2";
+import { processPayment } from '@/services/paymentService';
+import { validateCoupon } from '@/services/couponService';
+import { useAuth } from '../contexts/AuthContext';
 
 // ?productId=123"
 const PaymentContent = () => {
   const router = useRouter();
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const productId = searchParams.get('product_id');
   const [product, setProduct] = useState<any>(null);
@@ -63,136 +66,39 @@ const PaymentContent = () => {
     fetchProduct();
   }, [productId]);
 
-  const handlePayment = async () => {
+  const handlePayment = useCallback(async () => {
+    if (!user) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+
     if (!agreed) {
       alert('구매조건 확인 및 결제진행 동의가 필요합니다.');
       return;
     }
 
-    // try {
-    //     // 1. 빌링키 발급
-    //     const issueResponse = await PortOne.requestIssueBillingKey({
-    //         storeId: process.env.NEXT_PUBLIC_PORTONE_STORE_ID!,
-    //         channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY!,
-    //         billingKeyMethod: "CARD",
-    //         issueName: '스마트로 일반결제',
-    //         issueId: new Date().toISOString().replace(/[^0-9]/g, ""),
-    //         customer: {
-    //             customerId: '1234567890'
-    //         },
-    //     });
-
-    //     if(!issueResponse) {
-    //         return alert('빌링키 발급 실패');
-    //     }
-
-    //     // 빌링키가 제대로 발급되지 않은 경우 에러 코드가 존재합니다
-    //     if (issueResponse && issueResponse.code !== undefined) {
-    //         return alert(issueResponse.message);
-    //     }
-
-    //     // 3. 구독 결제 API 호출
-    //     const subscriptionResponse = await fetch('/api/payments/subscription', {
-    //         method: 'POST',
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         },
-    //         body: JSON.stringify({
-    //             billingKey: issueResponse.billingKey,
-    //             productPlanId: 4,
-    //             couponCode
-    //         }),
-    //     });
-
-    //     if (!subscriptionResponse.ok) {
-    //         const errorData = await subscriptionResponse.json();
-    //         throw new Error(errorData.error || '구독 결제 중 오류가 발생했습니다.');
-    //     }
-    // } catch (error: any) {
-    //     console.error('결제 처리 중 에러:', error);
-    //     alert(error.message || '결제 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
-    // }
-
     try {
-      // 1. 주문 준비 API 호출
-      const prepareResponse = await fetch('/api/payments/one-time/prepare', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      await processPayment(
+        {
           productPlanId: 4,
           quantity: 1,
-          couponCode: appliedCoupon?.code
-        })
-      });
-
-      if (!prepareResponse.ok) {
-        const errorData = await prepareResponse.json();
-        throw new Error(errorData.error || '주문 준비 중 오류가 발생했습니다.');
-      }
-
-      const { order } = await prepareResponse.json();
-
-      // 2. 포트원 결제 요청
-      const response = await PortOne.requestPayment({
-        // Store ID 설정 (관리자 콘솔의 결제 연동 페이지에서 확인)
-        storeId: process.env.NEXT_PUBLIC_PORTONE_STORE_ID!,
-        // 채널 키 설정 (관리자 콘솔의 결제 연동 페이지에서 확인)
-        channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY!,
-        // 결제 고유 ID (주문 준비 API에서 받은 값 사용)
-        paymentId: order.paymentId,
-        // 주문명
-        orderName: product.title,
-        // 결제 금액 (할인 적용된 최종 금액)
-        totalAmount: order.amount,
-        // 화폐 단위
-        currency: "CURRENCY_KRW",
-        // 결제 수단 (카카오페이)
-        payMethod: "CARD",
-        // 구매자 정보 (옵션)
-        customer: {
-          customerId: "CUSTOMER_ID", // 구매자 고유 ID
-        //   name: "구매자명", // 구매자 이름
-          email: "customer@example.com", // 구매자 이메일
-          phoneNumber: "01012341234" // 구매자 전화번호
+          couponCode: appliedCoupon?.code,
+          customerInfo: {
+            customerId: user.id.toString(),
+            email: user.email,
+            phoneNumber: user.phone_number
+          }
         },
-        // 모바일 환경에서 결제 후 돌아올 URL
-        // redirectUrl: `${window.location.origin}/payment/complete`,
-      });
+        product.title
+      );
 
-      // 3. 결제 요청 결과 처리
-      if (response && response.code !== undefined) {
-        // 결제 실패 시
-        throw new Error(response.message);
-      }
-
-      // 4. 결제 완료 API 호출
-      const completeResponse = await fetch('/api/payments/one-time', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          paymentId: order.paymentId,
-          orderId: order.id
-        })
-      });
-
-      if (!completeResponse.ok) {
-        const errorData = await completeResponse.json();
-        throw new Error(errorData.error || '결제 완료 처리 중 오류가 발생했습니다.');
-      }
-
-      // 5. 결제 성공 처리
       alert('결제가 완료되었습니다.');
-      router.push('/payment/complete'); // 결제 완료 페이지로 이동
-
+      router.push('/payment/complete');
     } catch (error: any) {
       console.error('결제 처리 중 오류가 발생했습니다:', error);
       alert(error.message || '결제 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
     }
-  };
+  }, [user, agreed, appliedCoupon, product, router]);
 
   const handleCouponApply = async () => {
     if (!couponCode) {
@@ -201,27 +107,15 @@ const PaymentContent = () => {
     }
     
     try {
-      const response = await fetch('/api/coupons/validate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          code: couponCode,
-          productId: product.id
-        })
+      const { coupon } = await validateCoupon({
+        code: couponCode,
+        productId: product.id
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '쿠폰 적용에 실패했습니다.');
-      }
-
-      const data = await response.json();
       setAppliedCoupon({
-        code: data.coupon.code,
-        discount: data.coupon.discountAmount,
-        name: data.coupon.name
+        code: coupon.code,
+        discount: coupon.discountAmount,
+        name: coupon.name
       });
       setCouponCode('');
     } catch (error: any) {
