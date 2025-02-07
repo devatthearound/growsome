@@ -1,121 +1,153 @@
-'use client';
-
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
+"use client"
+import React from 'react';
 import styled from 'styled-components';
-import { getContent } from '@/lib/getContent';
+import { motion } from 'framer-motion';
 
-const BlogList = () => {
-  const [posts, setPosts] = useState<{
-    slug: string;
-    title: string;
-    date: string;
-    description: string;
-    thumbnail: string;
-  }[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface BlogPost {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  category: string;
+  readTime: string;
+}
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const data = getContent('blog');
-        if (data && Array.isArray(data)) {
-          setPosts(data.map(post => ({
-            slug: post.data.slug,
-            title: post.data.title,
-            date: post.data.date,
-            description: post.data.description,
-            thumbnail: post.data.thumbnail
-          })));
-        } else {
-          setError('Content not found or invalid format');
-        }
-      } catch (err) {
-        console.error('Failed to fetch content:', err);
-        setError('Failed to fetch content');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPosts();
-  }, []);
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div style={{ color: 'red', padding: '2rem' }}>{error}</div>;
+export default function BlogPage() {
+  const samplePosts: BlogPost[] = [
+    {
+      id: "1",
+      title: "Next.js와 TypeScript로 블로그 만들기",
+      description: "현대적인 웹 개발 스택을 활용하여 개인 블로그를 만드는 방법을 소개합니다.",
+      date: "2024.03.15",
+      category: "개발",
+      readTime: "5분"
+    },
+    {
+      id: "2",
+      title: "AI 프롬프트 엔지니어링 기초",
+      description: "ChatGPT와 같은 AI 모델을 효과적으로 활용하기 위한 프롬프트 작성법을 알아봅니다.",
+      date: "2024.03.14",
+      category: "AI",
+      readTime: "7분"
+    },
+    {
+      id: "3",
+      title: "프리랜서 개발자 생존기",
+      description: "1년간의 프리랜서 개발자 경험과 노하우를 공유합니다.",
+      date: "2024.03.13",
+      category: "커리어",
+      readTime: "10분"
+    }
+  ];
 
   return (
-    <BlogGrid>
-      {posts.map(post => (
-        <BlogCard key={post.slug}>
-          {post.thumbnail && (
-            <PostImage src={post.thumbnail} alt={post.title} />
-          )}
-          <PostContent>
-            <PostTitle>{post.title}</PostTitle>
-            <PostDate>{new Date(post.date).toLocaleDateString()}</PostDate>
-            <PostDescription>{post.description}</PostDescription>
-            <ReadMore href={`/blog/${post.slug}`}>Read More</ReadMore>
-          </PostContent>
-        </BlogCard>
-      ))}
-    </BlogGrid>
+    <Container>
+      <Header>
+        <h1>블로그</h1>
+        <p>개발, AI, 그리고 디지털 노마드 라이프스타일</p>
+      </Header>
+      <BlogGrid>
+        {samplePosts.map((post) => (
+          <BlogCard 
+            key={post.id}
+            whileHover={{ y: -5 }}
+            transition={{ duration: 0.2 }}
+          >
+            <CategoryTag>{post.category}</CategoryTag>
+            <Title>{post.title}</Title>
+            <Description>{post.description}</Description>
+            <MetaInfo>
+              <span>{post.date}</span>
+              <span>•</span>
+              <span>{post.readTime} 읽기</span>
+            </MetaInfo>
+          </BlogCard>
+        ))}
+      </BlogGrid>
+    </Container>
   );
-};
+}
+
+const Container = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 150px 20px 100px 20px;
+  
+  @media (min-width: 700px) {
+    padding: 150px 20px;
+  }
+`;
+
+const Header = styled.div`
+  text-align: center;
+  margin-bottom: 60px;
+
+  h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: #333;
+  }
+
+  p {
+    font-size: 1.1rem;
+    color: #666;
+  }
+`;
 
 const BlogGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
-  padding: 2rem;
+  gap: 30px;
+  padding: 20px 0;
 `;
 
-const BlogCard = styled.article`
+const BlogCard = styled(motion.div)`
   background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
+  border-radius: 15px;
+  padding: 25px;
+  cursor: pointer;
+  border: 1px solid #eaeaea;
+  transition: all 0.3s ease;
 
   &:hover {
-    transform: translateY(-4px);
+    border-color: #ddd;
   }
 `;
 
-const PostImage = styled.img`
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-`;
-
-const PostContent = styled.div`
-  padding: 1.5rem;
-`;
-
-const PostTitle = styled.h2`
-  margin: 0 0 0.5rem;
-  font-size: 1.5rem;
-`;
-
-const PostDate = styled.div`
+const CategoryTag = styled.span`
+  background: #f3f4f6;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
   color: #666;
+  display: inline-block;
+  margin-bottom: 15px;
+`;
+
+const Title = styled.h2`
+  font-size: 1.4rem;
+  margin-bottom: 12px;
+  color: #333;
+  line-height: 1.4;
+`;
+
+const Description = styled.p`
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 20px;
+`;
+
+const MetaInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.9rem;
-  margin-bottom: 1rem;
-`;
+  color: #888;
 
-const PostDescription = styled.p`
-  color: #444;
-  margin-bottom: 1.5rem;
-`;
-
-const ReadMore = styled(Link)`
-  color: #514FE4;
-  text-decoration: none;
-  font-weight: 500;
-
-  &:hover {
-    text-decoration: underline;
+  span {
+    &:nth-child(2) {
+      color: #ddd;
+    }
   }
-`;
-
-export default BlogList; 
+`; 

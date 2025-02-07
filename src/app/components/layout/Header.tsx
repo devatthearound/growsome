@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faRocket, faSignOutAlt, faSpinner } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faBars, faTimes, faSignOutAlt, faRocket } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/app/contexts/AuthContext';
 import { checkMenuAuth } from '@/app/utils/menuAuth';
 
@@ -16,135 +16,86 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showPopup, setShowPopup] = useState(false);
   const router = useRouter();
-  const { user, isLoggedIn, isLoading, logout } = useAuth();
+  const { user, isLoggedIn, logout } = useAuth();
+  const currentPath = usePathname();
 
   const handleMenuClick = (path: string) => {
     if (!checkMenuAuth(path)) {
-      setShowPopup(true);
       return;
     }
     router.push(path);
     setIsMenuOpen(false);
   };
 
-  const handleClosePopup = () => {
-    setShowPopup(false);
-  };
-
-  const currentPath = usePathname();
-
   return (
     <>
       <HeaderWrapper>
         <HeaderContainer>
-          <Logo href="/">
+          <LogoLink href="/">
             <LogoImage src="/logo_growsome.png" alt="Growsome" />
-          </Logo>
+          </LogoLink>
+
+          <BasicNav>
+            <NavButton onClick={() => handleMenuClick('/home')}>그로우썸 소개</NavButton>
+            <NavButton onClick={() => handleMenuClick('/toyprojects')}>토이 프로젝트</NavButton>
+            <NavButton onClick={() => handleMenuClick('/portfolio')}>포트폴리오</NavButton>
+            <NavButton onClick={() => handleMenuClick('/store')}>스토어</NavButton>
+            <NavButton onClick={() => handleMenuClick('/blog')}>블로그</NavButton>
+          </BasicNav>
+
+          <UserNav>
+            {isLoggedIn ? (
+              <>
+                <NavButton onClick={() => handleMenuClick('/mypage')}>
+                  <FontAwesomeIcon icon={faUser} /> 마이페이지
+                </NavButton>
+                <NavButton onClick={logout}>
+                  <FontAwesomeIcon icon={faSignOutAlt} /> 로그아웃
+                </NavButton>
+                <InquiryButton onClick={() => window.open('https://discord.gg/W8dZjdEa3w', '_blank')}>
+                  <FontAwesomeIcon icon={faRocket} /> 비밀연구소 입장
+                </InquiryButton>
+              </>
+            ) : (
+              <NavButton onClick={() => router.push('/login')}>로그인</NavButton>
+            )}
+          </UserNav>
 
           <MenuButton onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            <FontAwesomeIcon icon={isMenuOpen ? faSignOutAlt : faUser} />
+            <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} />
           </MenuButton>
-
-          <NavMenu $isOpen={isMenuOpen}>
-            <NavItem>
-              <NavLink
-                onClick={() => handleMenuClick('/home')}
-                $active={currentPath === '/home'}
-              >
-                그로우썸 소개
-              </NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink
-                onClick={() => handleMenuClick('/toyprojects')}
-                $active={currentPath === '/toyprojects'}
-              >
-                토이 프로젝트
-              </NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink
-                onClick={() => handleMenuClick('/portfolio')}
-                $active={currentPath === '/portfolio'}
-              >
-                포트폴리오
-              </NavLink>
-            </NavItem>
-            {/*<NavItem>
-              <NavLink onClick={() => handleMenuClick('/class')}>
-                강의
-              </NavLink>
-            </NavItem>*/}
-            <NavItem>
-              <NavLink
-                onClick={() => handleMenuClick('/store')}
-                $active={currentPath === '/store'}
-              >
-                스토어
-              </NavLink>
-            </NavItem>
-            <NavItem>
-              <NavLink
-                onClick={() => handleMenuClick('/blog')}
-                $active={currentPath === '/blog'}
-              >
-                블로그
-              </NavLink>
-            </NavItem>
-          </NavMenu>
-
-          <AuthSection>
-            {isLoggedIn ? (
-              <UserSection>
-                <UserInfo>
-                  <UserName>{user?.username}</UserName>
-                  <CompanyInfo>{user?.company_name} | {user?.position}</CompanyInfo>
-                </UserInfo>
-                <IconButton 
-                  onClick={() => router.push('/mypage')}
-                  title="마이페이지"
-                >
-                  <FontAwesomeIcon icon={faUser} />
-                </IconButton>
-                <IconButton 
-                  onClick={logout}
-                  title="로그아웃"
-                >
-                  <FontAwesomeIcon icon={faSignOutAlt} />
-                </IconButton>
-              </UserSection>
-            ) : (
-              <AuthButtons>
-                <TextLink onClick={() => router.push('/login')}>로그인</TextLink>
-                {/* 회원가입 버튼을 숨깁니다 */}
-                {/* <NavButton onClick={() => router.push('/signup')}>회원가입</NavButton> */}
-              </AuthButtons>
-            )}
-            <ButtonGroup>
-              <InquiryButton onClick={() => window.open('https://discord.gg/W8dZjdEa3w', '_blank')}>
-                비밀연구소 입장 🚀
-              </InquiryButton>
-              {/*<SubscribeButton onClick={onSubscribeClick}>
-                <FontAwesomeIcon icon={faRocket} />
-                구독하기
-              </SubscribeButton>*/}
-            </ButtonGroup>
-          </AuthSection>
         </HeaderContainer>
-      </HeaderWrapper>
 
+        <MobileNavMenu $isOpen={isMenuOpen}>
+          <NavButton onClick={() => handleMenuClick('/home')}>그로우썸 소개</NavButton>
+          <NavButton onClick={() => handleMenuClick('/toyprojects')}>토이 프로젝트</NavButton>
+          <NavButton onClick={() => handleMenuClick('/portfolio')}>포트폴리오</NavButton>
+          <NavButton onClick={() => handleMenuClick('/store')}>스토어</NavButton>
+          <NavButton onClick={() => handleMenuClick('/blog')}>블로그</NavButton>
+          {isLoggedIn ? (
+            <>
+              <NavButton onClick={() => handleMenuClick('/mypage')}>
+                <FontAwesomeIcon icon={faUser} /> 마이페이지
+              </NavButton>
+              <NavButton onClick={logout}>
+                <FontAwesomeIcon icon={faSignOutAlt} /> 로그아웃
+              </NavButton>
+              <InquiryButton onClick={() => window.open('https://discord.gg/W8dZjdEa3w', '_blank')}>
+                <FontAwesomeIcon icon={faRocket} /> 비밀연구소 입장
+              </InquiryButton>
+            </>
+          ) : (
+            <NavButton onClick={() => router.push('/login')}>로그인</NavButton>
+          )}
+        </MobileNavMenu>
+      </HeaderWrapper>
     </>
   );
 };
 
 interface StyledNavMenuProps {
   $isOpen: boolean;
-}
-
-interface StyledNavLinkProps {
-  $active?: boolean;
 }
 
 const HeaderWrapper = styled.header`
@@ -163,14 +114,14 @@ const HeaderContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
 `;
 
-const Logo = styled(Link)`
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #514FE4;
+const LogoLink = styled(Link)`
   text-decoration: none;
-  margin-right: 1rem;
 `;
 
 const LogoImage = styled.img`
@@ -179,179 +130,177 @@ const LogoImage = styled.img`
 `;
 
 const MenuButton = styled.button`
-  display: none;
   background: none;
   border: none;
   font-size: 1.5rem;
   color: #333;
+  margin-right: 20px;
+  margin-left: 20px;
+  margin-top: 20px;
   cursor: pointer;
-  z-index: 1001;
-
-  @media (max-width: 1280px) {
-    display: block;
+  @media (min-width: 1280px) {
+    display: none;
   }
 `;
 
-const NavMenu = styled.ul<StyledNavMenuProps>`
-  display: flex;
-  align-items: center;
-  gap: 2.5rem;
-  list-style: none;
-  justify-content: flex-start;
+const BasicNav = styled.div`
+  display: none;
 
-  @media (max-width: 1280px) {
-    position: fixed;
-    top: 0;
-    right: 0;
-    width: 100%;
-    height: 100vh;
-    background: white;
-    flex-direction: column;
-    justify-content: center;
-    padding: 2rem;
-    display: ${props => props.$isOpen ? 'flex' : 'none'};
-    transform: translateX(${props => props.$isOpen ? '0' : '100%'});
-    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+  @media (min-width: 1280px) {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
   }
 `;
 
-const NavItem = styled.li``;
+const UserNav = styled.div`
+  display: none;
 
-const NavLink = styled.span<StyledNavLinkProps>`
-  position: relative;
-  color: ${props => props.$active ? '#514FE4' : '#999'};
-  font-size: 1rem;
-  font-weight: 400;
-  transition: all 0.3s ease;
+  @media (min-width: 1280px) {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+`;
+
+const MobileNavMenu = styled.div<StyledNavMenuProps>`
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100vh;
+  background: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: translateX(${props => (props.$isOpen ? '0' : '100%')});
+  transition: transform 0.3s ease-in-out;
+  box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+
+  @media (min-width: 1280px) {
+    display: none;
+  }
+`;
+
+const NavButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+  cursor: pointer;
   display: flex;
   align-items: center;
-  cursor: pointer;
+  gap: 10px;
 
   &:hover {
     color: #514FE4;
   }
 `;
 
-const ButtonGroup = styled.div`
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-
-  @media (max-width: 1280px) {
-    flex-direction: column;
-    width: 100%;
-  }
-`;
-
 const InquiryButton = styled.button`
-  padding: 0.75rem 1.5rem;
+  padding: 10px 20px;
   background: #514FE4;
   color: white;
   border: none;
   border-radius: 50px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: #4340c0;
-    transform: translateY(-2px);
-  }
-
-  @media (max-width: 1280px) {
-    width: 100%;
-  }
-`;
-
-const SubscribeButton = styled.button`
+  font-size: 1.2rem;
+  font-weight: bold;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  background: white;
-  color: #514FE4;
-  border: 2px solid #514FE4;
-  border-radius: 50px;
-  font-size: 1rem;
-  font-weight: 500;
+  gap: 10px;
   cursor: pointer;
-  transition: all 0.3s ease;
 
   &:hover {
-    background: #f0f4ff;
-    transform: translateY(-2px);
-  }
-
-  @media (max-width: 1280px) {
-    width: 100%;
+    background: #3D39A1;
   }
 `;
 
-const PopupOverlay = styled.div`
+const Nav = styled.nav`
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  transition: all 0.3s ease;
+`;
+
+const NavContainer = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 2rem;
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
 `;
 
-const PopupContent = styled.div`
-  background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  max-width: 600px;
-  width: 100%;
-  text-align: center;
-`;
-
-const PopupEmoji = styled.div`
-  font-size: 3rem;
-  margin-bottom: 1rem;
-`;
-
-const PopupTitle = styled.h3`
+const LogoWrapper = styled.div`
   font-size: 1.5rem;
-  color: #333;
-  margin-bottom: 1.5rem;
-  line-height: 1.4;
-`;
-
-const PopupText = styled.p`
-  color: #666;
-  line-height: 1.6;
-  margin-bottom: 2rem;
-`;
-
-const PopupHighlight = styled.span`
-  color: #514FE4;
-  font-weight: 600;
-  display: block;
-  margin-top: 0.5rem;
-`;
-
-const CloseButton = styled.button`
-  padding: 0.75rem 1.5rem;
-  background: #514FE4;
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-size: 1rem;
-  font-weight: 500;
+  font-weight: 700;
+  color: #4F46E5;
   cursor: pointer;
-  transition: all 0.3s ease;
-
+  
   &:hover {
-    background: #4340c0;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
+  }
+`;
+
+const MenuItems = styled.div`
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+`;
+
+const MenuItem = styled.a`
+  font-size: 0.95rem;
+  color: #4B5563;
+  text-decoration: none;
+  padding: 0.5rem 0;
+  position: relative;
+  transition: all 0.2s ease;
+
+  &:after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: #4F46E5;
+    transition: width 0.2s ease;
   }
 
-  @media (max-width: 1280px) {
-    width: 100%;
+  &:hover {
+    color: #4F46E5;
+    
+    &:after {
+      width: 100%;
+    }
+  }
+`;
+
+const ActionButton = styled.button`
+  background: #4F46E5;
+  color: white;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #4338CA;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   }
 `;
 
@@ -361,86 +310,20 @@ const UserSection = styled.div`
   gap: 1rem;
 `;
 
-const UserInfo = styled.div`
-  text-align: right;
-`;
-
-const UserName = styled.div`
-  font-weight: bold;
-`;
-
-const CompanyInfo = styled.div`
-  font-size: 0.8rem;
-  color: #666;
-`;
-
-const AuthButtons = styled.div`
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-
-  @media (max-width: 1280px) {
-    flex-direction: column;
-    width: 100%;
-  }
-`;
-
-const NavButton = styled.button`
-  padding: 0.75rem 1.5rem;
-  background: #514FE4;
-  color: white;
-  border: none;
-  border-radius: 50px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    background: #4340c0;
-    transform: translateY(-2px);
-  }
-
-  @media (max-width: 1280px) {
-    width: 100%;
-  }
-`;
-
-const IconButton = styled.button`
-  background: none;
-  border: none;
-  color: #514FE4;
-  cursor: pointer;
-  padding: 0.5rem;
-  font-size: 1.1rem;
-  transition: color 0.2s;
-
-  &:hover {
-    color: #3D39A1;
-  }
-`;
-
-const LoadingSpinner = styled.div`
-  color: #514FE4;
-  font-size: 1.2rem;
-`;
-
-const TextLink = styled.span`
-  color: #514FE4;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: color 0.3s ease;
-
-  &:hover {
-    color: #4340c0;
-  }
-`;
-
-const AuthSection = styled.div`
+const UserAvatar = styled.div`
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  background: #F3F4F6;
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #E5E7EB;
+  }
 `;
 
 export default Header;
