@@ -1,45 +1,29 @@
 'use client';
 
 import React from 'react';
-import { useParams } from 'next/navigation';
 import styled from 'styled-components';
+import { getProductData } from '@/lib/getProductData';
 
-// Sample data, replace with actual data fetching logic
-const products = [
-  {
-    id: 1,
-    image: '/images/store/product1.jpg',
-    title: '자연스러운 동정 결렉션',
-    tags: ['Midjourney', '동정', '자연'],
-    price: 25000,
-    description: 'AI로 제작된 자연스러운 동정 컬렉션입니다.'
-  },
-  // Add other products here...
-];
+const ProductDetail = async ({ params }: { params: { id: string } }) => {
+  const data = await getProductData(params.id);
 
-const ProductDetail = () => {
-  const { id } = useParams(); // Use useParams to get the dynamic route parameter
-
-  // Find the product by ID
-  const product = products.find((p) => p.id === Number(id));
-
-  if (!product) {
+  if (!data) {
     return <p>Product not found</p>;
   }
 
   return (
     <DetailContainer>
       <ImageWrapper>
-        <img src={product.image} alt={product.title} />
+        <img src={data.image || '/default-image.jpg'} alt={data.title || 'Product'} />
       </ImageWrapper>
       <InfoWrapper>
-        <h1>{product.title}</h1>
-        <p>{product.description}</p>
-        <Price>{product.price.toLocaleString()}원</Price>
+        <h1>{data.title || 'No Title'}</h1>
+        <p>{data.description || 'No Description'}</p>
+        <Price>{data.price ? `${data.price.toLocaleString()}원` : 'Price not available'}</Price>
         <TagList>
-          {product.tags.map((tag, index) => (
+          {data.tags?.map((tag: string, index: number) => (
             <Tag key={index}>{tag}</Tag>
-          ))}
+          )) || <Tag>No Tags</Tag>}
         </TagList>
       </InfoWrapper>
     </DetailContainer>
@@ -91,4 +75,4 @@ const Tag = styled.span`
   color: #666;
 `;
 
-export default ProductDetail; 
+export default ProductDetail;
