@@ -1,7 +1,7 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faUser, faHistory, faPlus, faPencilAlt, faDownload, 
@@ -11,12 +11,21 @@ import { useCoupangApi } from '@/app/contexts/CoupangApiContext';
 
 const MyPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState('menu');
   const { apiKeys, updateApiKeys } = useCoupangApi();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [editableKeys, setEditableKeys] = useState(apiKeys);
+
+  useEffect(() => {
+    // URL의 tab 파라미터를 확인하여 해당 탭 활성화
+    const tab = searchParams.get('tab');
+    if (tab) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   const handleSave = () => {
     setIsSaving(true);
