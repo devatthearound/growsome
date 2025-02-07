@@ -74,9 +74,11 @@ export const processPayment = async (
 
   console.log(process.env.PORTONE_STORE_ID);
   console.log(process.env.PORTONE_CHANNEL_KEY);
-  
+  console.log("POSTGRES_PORT", process.env.PORTONE_STORE_ID);
+
   // 2. 포트원 결제 요청
   const response = await PortOne.requestPayment({
+    
     storeId: process.env.PORTONE_STORE_ID || '',
     channelKey: process.env.PORTONE_CHANNEL_KEY || '',
     paymentId: order.paymentId,
