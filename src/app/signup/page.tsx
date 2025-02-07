@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useState, Suspense } from 'react';
 import styled from 'styled-components';
-import { ValidationError } from '@/app/utils/validators';
+import { ValidationError } from '@/utils/validators';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
 

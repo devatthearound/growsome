@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import pool from '@/app/lib/db';
-import { verifyToken } from '@/app/utils/jwt';
+import pool from '@/lib/db';
+import { verifyToken } from '@/utils/jwt';
 
 export async function GET() {
   const client = await pool.connect();

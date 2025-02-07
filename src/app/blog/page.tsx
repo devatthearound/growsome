@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import styled from 'styled-components';
-import { getContent } from '@/lib/getContent';
 
 const BlogList = () => {
   const [posts, setPosts] = useState<{
@@ -16,30 +15,30 @@ const BlogList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const data = getContent('blog');
-        if (data && Array.isArray(data)) {
-          setPosts(data.map(post => ({
-            slug: post.data.slug,
-            title: post.data.title,
-            date: post.data.date,
-            description: post.data.description,
-            thumbnail: post.data.thumbnail
-          })));
-        } else {
-          setError('Content not found or invalid format');
-        }
-      } catch (err) {
-        console.error('Failed to fetch content:', err);
-        setError('Failed to fetch content');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPosts();
-  }, []);
+  // useEffect(() => {
+  //   const fetchPosts = async () => {
+  //     try {
+  //       const data = getContent('blog');
+  //       if (data && Array.isArray(data)) {
+  //         setPosts(data.map(post => ({
+  //           slug: post.data.slug,
+  //           title: post.data.title,
+  //           date: post.data.date,
+  //           description: post.data.description,
+  //           thumbnail: post.data.thumbnail
+  //         })));
+  //       } else {
+  //         setError('Content not found or invalid format');
+  //       }
+  //     } catch (err) {
+  //       console.error('Failed to fetch content:', err);
+  //       setError('Failed to fetch content');
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
+  //   fetchPosts();
+  // }, []);
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div style={{ color: 'red', padding: '2rem' }}>{error}</div>;

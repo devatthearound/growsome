@@ -14,7 +14,7 @@ import {
 import { faYoutube } from '@fortawesome/free-brands-svg-icons';
 import { useCoupangApi } from '@/app/contexts/CoupangApiContext';
 import AffiliateSettingsPopup from '@/app/components/affilate-smart/AffiliateSettingsPopup';
-import { getTopKeywords } from '@/app/utils/keywordAnalyzer';
+import { getTopKeywords } from '@/utils/keywordAnalyzer';
 
 const initialKeywordData: { keywords: Keyword[] } = {
   keywords: [

@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import { verifyToken } from './jwt';
-import pool from '@/app/lib/db';
+import pool from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export async function validateAuth(client: any) {

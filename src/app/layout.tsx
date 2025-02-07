@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import "./globals.css";
 import styled from 'styled-components';
-import StyledComponentsRegistry from './lib/registry';
+import StyledComponentsRegistry from '../lib/registry';
 import { AuthProvider } from './contexts/AuthContext';
 import { CoupangApiProvider } from './contexts/CoupangApiContext';
 import { EmailProvider } from './contexts/EmailContext';
