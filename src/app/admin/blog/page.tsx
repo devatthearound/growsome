@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import CategoryModal from './CategoryModal';
 
 // 마크다운 에디터를 클라이언트 사이드에서만 로드
 const MDEditor = dynamic(
@@ -22,22 +23,49 @@ interface BlogPost {
   publishedAt?: Date;
 }
 
+interface FormData {
+  title: string;
+  content: string;
+  excerpt: string;
+  featured_image: string;
+  category_id: string;
+  tags: string[];
+  status: 'draft' | 'published';
+  seo_title: string;
+  seo_description: string;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+  description?: string;
+  parent_id?: number;
+}
+
 const BlogAdmin = () => {
   const router = useRouter();
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
-  const [formData, setFormData] = useState<BlogPost>({
+  const [formData, setFormData] = useState<FormData>({
     title: '',
-    description: '',
     content: '',
-    thumbnail: '',
+    excerpt: '',
+    featured_image: '',
+    category_id: '',
     tags: [],
-    status: 'draft'
+    status: 'draft',
+    seo_title: '',
+    seo_description: ''
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -46,10 +74,10 @@ const BlogAdmin = () => {
   };
 
   const handleTagsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const tags = e.target.value.split(',').map(tag => tag.trim());
+    const tagsArray = e.target.value.split(',').map(tag => tag.trim());
     setFormData(prev => ({
       ...prev,
-      tags
+      tags: tagsArray
     }));
   };
 
@@ -72,11 +100,14 @@ const BlogAdmin = () => {
       // 폼 초기화
       setFormData({
         title: '',
-        description: '',
         content: '',
-        thumbnail: '',
+        excerpt: '',
+        featured_image: '',
+        category_id: '',
         tags: [],
-        status: 'draft'
+        status: 'draft',
+        seo_title: '',
+        seo_description: ''
       });
       
       setIsEditing(false);
@@ -98,17 +129,34 @@ const BlogAdmin = () => {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/admin/categories');
+      if (!response.ok) throw new Error('카테고리 조회 실패');
+      const data = await response.json();
+      setCategories(data.categories);
+    } catch (error) {
+      console.error('카테고리 조회 중 에러:', error);
+    }
+  };
+
   useEffect(() => {
     fetchPosts();
+    fetchCategories();
   }, []);
 
   return (
     <AdminContainer>
       <Header>
         <h1>블로그 관리</h1>
-        <NewPostButton onClick={() => setIsEditing(false)}>
-          새 글 작성
-        </NewPostButton>
+        <ButtonGroup>
+          <NewPostButton onClick={() => setIsEditing(false)}>
+            새 글 작성
+          </NewPostButton>
+          <CategoryButton onClick={() => setShowCategoryModal(true)}>
+            카테고리 관리
+          </CategoryButton>
+        </ButtonGroup>
       </Header>
 
       <ContentWrapper>
@@ -118,7 +166,17 @@ const BlogAdmin = () => {
               key={post.id}
               onClick={() => {
                 setSelectedPost(post);
-                setFormData(post);
+                setFormData({
+                  title: post.title || '',
+                  content: post.content || '',
+                  excerpt: post.description || '',
+                  featured_image: post.thumbnail || '',
+                  category_id: '',
+                  tags: post.tags || [],
+                  status: post.status || 'draft',
+                  seo_title: '',
+                  seo_description: ''
+                });
                 setIsEditing(true);
               }}
             >
@@ -152,26 +210,42 @@ const BlogAdmin = () => {
             </InputGroup>
 
             <InputGroup>
-              <label>설명</label>
+              <label>발췌문</label>
               <input
                 type="text"
-                name="description"
-                value={formData.description}
+                name="excerpt"
+                value={formData.excerpt}
                 onChange={handleInputChange}
-                placeholder="글 설명을 입력하세요"
-                required
+                placeholder="글 요약을 입력하세요"
               />
             </InputGroup>
 
             <InputGroup>
-              <label>썸네일 URL</label>
+              <label>대표 이미지 URL</label>
               <input
                 type="text"
-                name="thumbnail"
-                value={formData.thumbnail}
+                name="featured_image"
+                value={formData.featured_image}
                 onChange={handleInputChange}
-                placeholder="썸네일 이미지 URL을 입력하세요"
+                placeholder="이미지 URL을 입력하세요"
               />
+            </InputGroup>
+
+            <InputGroup>
+              <label>카테고리</label>
+              <select
+                name="category_id"
+                value={formData.category_id}
+                onChange={handleInputChange}
+                required
+              >
+                <option value="">카테고리 선택</option>
+                {categories.map(category => (
+                  <option key={category.id} value={category.id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
             </InputGroup>
 
             <InputGroup>
@@ -182,6 +256,28 @@ const BlogAdmin = () => {
                 value={formData.tags.join(', ')}
                 onChange={handleTagsChange}
                 placeholder="태그1, 태그2, 태그3"
+              />
+            </InputGroup>
+
+            <InputGroup>
+              <label>SEO 제목</label>
+              <input
+                type="text"
+                name="seo_title"
+                value={formData.seo_title}
+                onChange={handleInputChange}
+                placeholder="SEO 제목을 입력하세요"
+              />
+            </InputGroup>
+
+            <InputGroup>
+              <label>SEO 설명</label>
+              <input
+                type="text"
+                name="seo_description"
+                value={formData.seo_description}
+                onChange={handleInputChange}
+                placeholder="SEO 설명을 입력하세요"
               />
             </InputGroup>
 
@@ -218,6 +314,14 @@ const BlogAdmin = () => {
           </form>
         </EditorSection>
       </ContentWrapper>
+
+      {showCategoryModal && (
+        <CategoryModal
+          onClose={() => setShowCategoryModal(false)}
+          onCategoryChange={fetchCategories}
+          categories={categories}
+        />
+      )}
     </AdminContainer>
   );
 };
@@ -362,6 +466,15 @@ const PublishButton = styled(Button)`
 
   &:hover {
     background: #388E3C;
+  }
+`;
+
+const CategoryButton = styled(Button)`
+  background: #6c757d;
+  color: white;
+
+  &:hover {
+    background: #5a6268;
   }
 `;
 
