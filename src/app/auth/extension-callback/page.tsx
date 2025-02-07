@@ -32,7 +32,7 @@ function ExtensionCallbackContent() {
     if (token) {
       if (window.chrome?.runtime?.sendMessage) {
         window.chrome.runtime.sendMessage(
-          process.env.EXTENSION_ID!,
+          process.env.NEXT_PUBLIC_EXTENSION_ID!,
           { 
             type: 'LOGIN_SUCCESS', 
             token 
