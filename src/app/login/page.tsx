@@ -4,7 +4,7 @@ import React, { useCallback, useState, useEffect, Suspense } from 'react';
 import styled from 'styled-components';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { getCookie } from '@/app/utils/cookie';
+import { getCookie } from '@/utils/cookie';
 
 function LoginContent() {
   const router = useRouter();

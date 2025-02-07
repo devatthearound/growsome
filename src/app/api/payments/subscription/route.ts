@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
-import pool from '@/app/lib/db';
-import { verifyToken } from '@/app/utils/jwt';
-import { validateAuth } from '@/app/utils/auth';
+import pool from '@/lib/db';
+import { verifyToken } from '@/utils/jwt';
+import { validateAuth } from '@/utils/auth';
 
 export async function POST(request: Request) {
   const client = await pool.connect();

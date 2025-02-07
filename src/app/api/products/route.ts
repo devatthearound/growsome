@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import pool from '@/app/lib/db';
+import pool from '@/lib/db';
 
 // 상품 목록 조회 API
 export async function GET(request: Request) {

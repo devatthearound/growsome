@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import styled from 'styled-components';
-import { getContentBySlug } from '@/app/utils/content';
 import ReactMarkdown from 'react-markdown';
 
 export default async function BlogPost({
@@ -23,14 +22,14 @@ export default async function BlogPost({
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchPost = async () => {
-      const data = await getContentBySlug('blog', id);
-      setPost(data);
-      setLoading(false);
-    };
-    fetchPost();
-  }, [id]);
+  // useEffect(() => {
+  //   const fetchPost = async () => {
+  //     const data = await getContentBySlug('blog', id);
+  //     setPost(data);
+  //     setLoading(false);
+  //   };
+  //   fetchPost();
+  // }, [id]);
 
   if (loading) return <div>Loading...</div>;
   if (!post) return <div>Post not found</div>;

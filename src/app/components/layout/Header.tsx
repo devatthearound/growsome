@@ -7,7 +7,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faBars, faTimes, faSignOutAlt, faRocket } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { checkMenuAuth } from '@/app/utils/menuAuth';
+import { checkMenuAuth } from '@/utils/menuAuth';
 
 interface HeaderProps {
   onSubscribeClick: () => void;

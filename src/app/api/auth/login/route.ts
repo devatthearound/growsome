@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
-import pool from '@/app/lib/db';
-import { generateToken } from '@/app/utils/jwt';
+import pool from '@/lib/db';
+import { generateToken } from '@/utils/jwt';
 
 export async function POST(request: Request) {
   let client;

@@ -72,10 +72,15 @@ export const processPayment = async (
 
   const { order } = await prepareResponse.json();
 
+  console.log(process.env.NEXT_PUBLIC_PORTONE_STORE_ID);
+  console.log(process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY);
+  console.log("POSTGRES_PORT", process.env.NEXT_PUBLIC_EXTENSION_ID);
+
   // 2. 포트원 결제 요청
   const response = await PortOne.requestPayment({
-    storeId: process.env.NEXT_PUBLIC_PORTONE_STORE_ID!,
-    channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY!,
+    
+    storeId: process.env.NEXT_PUBLIC_PORTONE_STORE_ID || '',
+    channelKey: process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY || '',
     paymentId: order.paymentId,
     orderName: productTitle,
     totalAmount: order.amount,

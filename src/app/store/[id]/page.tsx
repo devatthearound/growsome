@@ -2,10 +2,22 @@
 
 import React from 'react';
 import styled from 'styled-components';
-import { getProductData } from '@/lib/getProductData';
+// import { getProductData } from '@/lib/getProductData';
 
-const ProductDetail = async ({ params }: { params: { id: string } }) => {
-  const data = await getProductData(params.id);
+export default async function ProductDetail({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params;
+  // const data = await getProductData(params.id);
+  const data = {
+    title: 'Product 1',
+    description: 'This is a product description',
+    price: 100000,
+    image: '/default-image.jpg',
+    tags: ['tag1', 'tag2', 'tag3']
+  }
 
   if (!data) {
     return <p>Product not found</p>;
@@ -74,5 +86,3 @@ const Tag = styled.span`
   font-size: 0.8rem;
   color: #666;
 `;
-
-export default ProductDetail;
