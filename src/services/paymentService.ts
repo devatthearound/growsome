@@ -72,10 +72,13 @@ export const processPayment = async (
 
   const { order } = await prepareResponse.json();
 
+  console.log(process.env.PORTONE_STORE_ID);
+  console.log(process.env.PORTONE_CHANNEL_KEY);
+  
   // 2. 포트원 결제 요청
   const response = await PortOne.requestPayment({
-    storeId: process.env.PORTONE_STORE_ID!,
-    channelKey: process.env.PORTONE_CHANNEL_KEY!,
+    storeId: process.env.PORTONE_STORE_ID || '',
+    channelKey: process.env.PORTONE_CHANNEL_KEY || '',
     paymentId: order.paymentId,
     orderName: productTitle,
     totalAmount: order.amount,
