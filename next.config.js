@@ -9,7 +9,7 @@ const nextConfig = {
     styledComponents: true,
   },
   output: 'standalone',
-  hostname: '0.0.0.0',
+  /*hostname: '0.0.0.0',*/
   reactStrictMode: true,
   webpack: (config) => {
     config.module.rules.push({
