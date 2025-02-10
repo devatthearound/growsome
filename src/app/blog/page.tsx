@@ -1,153 +1,250 @@
 "use client"
 import React from 'react';
 import styled from 'styled-components';
-import { motion } from 'framer-motion';
 
-interface BlogPost {
+interface InsightPost {
   id: string;
   title: string;
-  description: string;
-  date: string;
   category: string;
-  readTime: string;
+  link: string;
 }
 
-export default function BlogPage() {
-  const samplePosts: BlogPost[] = [
-    {
-      id: "1",
-      title: "Next.js와 TypeScript로 블로그 만들기",
-      description: "현대적인 웹 개발 스택을 활용하여 개인 블로그를 만드는 방법을 소개합니다.",
-      date: "2024.03.15",
-      category: "개발",
-      readTime: "5분"
+const InsightPage = () => {
+  const categories = {
+    growth: {
+      title: "성장과 학습",
+      posts: [
+        {
+          id: "1",
+          title: "AI 시대의 자기주도적 학습법",
+          category: "성장",
+          link: "/insights/self-learning"
+        },
+        {
+          id: "2",
+          title: "디지털 노마드의 성장 전략",
+          category: "성장",
+          link: "/insights/digital-nomad"
+        },
+      ]
     },
-    {
-      id: "2",
-      title: "AI 프롬프트 엔지니어링 기초",
-      description: "ChatGPT와 같은 AI 모델을 효과적으로 활용하기 위한 프롬프트 작성법을 알아봅니다.",
-      date: "2024.03.14",
-      category: "AI",
-      readTime: "7분"
+    business: {
+      title: "비즈니스 전략",
+      posts: [
+        {
+          id: "3",
+          title: "프리랜서를 위한 수익화 전략",
+          category: "비즈니스",
+          link: "/insights/freelancer-monetization"
+        },
+        {
+          id: "4",
+          title: "AI 기반 비즈니스 로드맵 설계",
+          category: "비즈니스",
+          link: "/insights/ai-business"
+        },
+      ]
     },
-    {
-      id: "3",
-      title: "프리랜서 개발자 생존기",
-      description: "1년간의 프리랜서 개발자 경험과 노하우를 공유합니다.",
-      date: "2024.03.13",
-      category: "커리어",
-      readTime: "10분"
+    productivity: {
+      title: "생산성과 시간관리",
+      posts: [
+        {
+          id: "5",
+          title: "AI 도구를 활용한 업무 자동화",
+          category: "생산성",
+          link: "/insights/ai-automation"
+        },
+        {
+          id: "6",
+          title: "효율적인 원격근무 시스템 구축",
+          category: "생산성",
+          link: "/insights/remote-work"
+        },
+      ]
     }
-  ];
+  };
 
   return (
     <Container>
       <Header>
-        <h1>블로그</h1>
-        <p>개발, AI, 그리고 디지털 노마드 라이프스타일</p>
+        <SearchSection>
+          <SearchTitle>
+            똑똑하고 창의적인<br />
+            그로우썸의 <span style={{ color: '#06ff01' }}>인사이트</span>
+          </SearchTitle>
+          {/*<SearchBox>
+            <SearchInput 
+              placeholder="원하는 인사이트를 검색해보세요" 
+              type="text"
+            />
+            <SearchButton>검색</SearchButton>
+          </SearchBox>*/}
+        </SearchSection>
       </Header>
-      <BlogGrid>
-        {samplePosts.map((post) => (
-          <BlogCard 
-            key={post.id}
-            whileHover={{ y: -5 }}
-            transition={{ duration: 0.2 }}
-          >
-            <CategoryTag>{post.category}</CategoryTag>
-            <Title>{post.title}</Title>
-            <Description>{post.description}</Description>
-            <MetaInfo>
-              <span>{post.date}</span>
-              <span>•</span>
-              <span>{post.readTime} 읽기</span>
-            </MetaInfo>
-          </BlogCard>
+
+      <MainContent>
+        <SectionTitle>주제별 인사이트</SectionTitle>
+        
+        {Object.entries(categories).map(([key, category]) => (
+          <CategorySection key={key}>
+            <CategoryTitle>{category.title}</CategoryTitle>
+            <PostList>
+              {category.posts.map((post) => (
+                <PostItem key={post.id} href={post.link}>
+                  <PostTitle>{post.title}</PostTitle>
+                  <Arrow>→</Arrow>
+                </PostItem>
+              ))}
+            </PostList>
+          </CategorySection>
         ))}
-      </BlogGrid>
+      </MainContent>
     </Container>
   );
-}
+};
 
 const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 150px 20px 100px 20px;
-  
-  @media (min-width: 700px) {
-    padding: 150px 20px;
-  }
+  padding: 40px 20px;
 `;
 
 const Header = styled.div`
+  background: #080d34;
+  width: 100vw;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  padding: 90px 20px;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+`;
+
+const SearchSection = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
   text-align: center;
-  margin-bottom: 60px;
+`;
 
-  h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-    color: #333;
-  }
+const SearchTitle = styled.h1`
+  font-size: 4rem;
+  font-weight: 700;
+  color: white;
+  line-height: 1.3;
+`;
 
-  p {
-    font-size: 1.1rem;
-    color: #666;
+const SearchBox = styled.div`
+  display: flex;
+  align-items: center;
+  max-width: 600px;
+  margin: 0 auto;
+  background: #5c59e7
+  border: 1px solid #5c59e7
+  border-radius: 12px;
+  padding: 8px;
+  transition: all 0.3s ease;
+
+  &:focus-within {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
   }
 `;
 
-const BlogGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 30px;
-  padding: 20px 0;
+const SearchInput = styled.input`
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 12px 16px;
+  font-size: 1.1rem;
+  color: white;
+  outline: none;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+  }
 `;
 
-const BlogCard = styled(motion.div)`
-  background: white;
-  border-radius: 15px;
-  padding: 25px;
+const SearchButton = styled.button`
+  background: #06FF01;
+  color: #5c59e7;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
-  border: 1px solid #eaeaea;
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: #ddd;
+    transform: translateY(-2px);
+    opacity: 0.9;
   }
 `;
 
-const CategoryTag = styled.span`
-  background: #f3f4f6;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  color: #666;
-  display: inline-block;
-  margin-bottom: 15px;
+const MainContent = styled.main`
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 60px 20px;
 `;
 
-const Title = styled.h2`
-  font-size: 1.4rem;
-  margin-bottom: 12px;
-  color: #333;
-  line-height: 1.4;
+const SectionTitle = styled.h2`
+  font-size: 2rem;
+  margin-bottom: 40px;
+  color: #5c59e7;
 `;
 
-const Description = styled.p`
-  font-size: 1rem;
-  color: #666;
-  line-height: 1.6;
+const CategorySection = styled.section`
+  margin-bottom: 40px;
+`;
+
+const CategoryTitle = styled.h3`
+  font-size: 1.5rem;
+  color: #5c59e7;
   margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f0f0f0;
 `;
 
-const MetaInfo = styled.div`
+const PostList = styled.div`
   display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
-  color: #888;
+  flex-direction: column;
+  gap: 15px;
+`;
 
-  span {
-    &:nth-child(2) {
-      color: #ddd;
-    }
+const PostItem = styled.a`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: white;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #f8f9fa;
+    transform: translateX(5px);
   }
-`; 
+`;
+
+const PostTitle = styled.h4`
+  font-size: 1.1rem;
+  color: #333;
+  margin: 0;
+`;
+
+const Arrow = styled.span`
+  color: #5c59e7;
+`;
+
+export default InsightPage; 

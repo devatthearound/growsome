@@ -12,7 +12,7 @@ import { useCoupangApi } from '@/app/contexts/CoupangApiContext';
 const MyPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState('menu');
+  const [activeTab, setActiveTab] = useState('profile');
   const { apiKeys, updateApiKeys } = useCoupangApi();
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);

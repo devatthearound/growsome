@@ -66,9 +66,14 @@ const ToyProjects = () => {
         animate="visible"
         variants={fadeIn}
       >
-        <Title>토이 프로젝트</Title>
+        <Title>AI 자동화 연구소</Title>
+        <SubTitle>쿠팡파트너스를 시작으로 제휴 마케팅 & 마케팅 성과 자동화!</SubTitle>
         <Description>
-          실험적이고 혁신적인 아이디어를 실현하는 <br />우리의 토이 프로젝트들을 소개합니다.
+          "제휴 마케팅을 자동화하면? 마케팅 성과를 극대화하면?"
+          <br />
+          우리가 먼저 만들어보았습니다.
+          <br />
+          당신의 비즈니스 성장을 극대화할 AI 프로젝트를 만나보세요.
         </Description>
       </PageHeader>
 
@@ -132,11 +137,19 @@ const Title = styled.h1`
   margin-bottom: 20px;
 `;
 
+const SubTitle = styled.h2`
+  font-size: 1.5rem;
+  color: #514FE4;
+  margin-bottom: 20px;
+`;
+
 const Description = styled.p`
   font-size: 1.2rem;
   color: #666;
-  max-width: 600px;
+  max-width: 800px;
   margin: 0 auto;
+  line-height: 1.8;
+  text-align: center;
 `;
 
 const ProjectGrid = styled.div`

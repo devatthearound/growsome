@@ -25,27 +25,29 @@ const Hero = () => {
         </FloatingAgent>
       </FloatingAgents>
       <HeroContent>
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          variants={fadeIn}
-          transition={{ duration: 0.6 }}
-        >
           <MainTitle>
-            <span className="accent">AI</span>로<br />
-            더 똑똑하게,<br />
-            <span className="highlight">더 창의적으로</span>
+            <span className="accent">똑똑하고 창의적으로</span><br />
+            <span className="highlight">답을 찾다</span>
           </MainTitle>
-          <SubTitle>우리는 문제를 해결합니다</SubTitle>
-          <ContactButton 
-            href="https://discord.gg/W8dZjdEa3w" 
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            비밀연구소 입장 🚀
-          </ContactButton>
-        </motion.div>
+
       </HeroContent>
+      <JoinSection>
+        <JoinColumn>
+          <JoinText>비밀연구소에 합류하세요!</JoinText>
+          <JoinDescription>
+          AI와 함께 온라인 SW사업을 시작하고, 성장시키고, 수익을 창출하기 위한 팁, 전략 및 리소스를 알아보세요.
+          </JoinDescription>
+        </JoinColumn>
+        <JoinColumn>
+          <JoinForm>
+            <a href="https://open.kakao.com/o/gqWxH1Zg" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+              <SubscribeButton>
+                비밀연구소 참여하기
+              </SubscribeButton>
+            </a>
+          </JoinForm>
+        </JoinColumn>
+      </JoinSection>
       <GridBackground />
     </HeroSection>
   );
@@ -53,16 +55,22 @@ const Hero = () => {
 
 const HeroSection = styled.section`
   position: relative;
-  height: 100vh;
-  min-height: 800px;
+  height: 1000px; /* Set height for desktop */
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   overflow: hidden;
   background: #514FE4;
   padding: 20px;
-  text-align: center;
+  text-align: left;
+
+  @media (max-width: 768px) {
+    height: auto; /* Adjust height for mobile */
+    align-items: center; /* Center align for mobile */
+    text-align: center; /* Center text for mobile */
+    padding-top: 150px; /* Add padding to avoid overlap with navigation */
+  }
 `;
 
 const HeroContent = styled.div`
@@ -72,17 +80,26 @@ const HeroContent = styled.div`
   padding: 0 2rem;
   z-index: 3;
   width: 100%;
+  flex-grow: 1; /* Allow content to grow and fill space */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center content vertically */
+  margin-bottom: 50px;
+
+  @media (max-width: 768px) {
+    align-items: center; /* Center content horizontally for mobile */
+  }
 `;
 
 const MainTitle = styled.h1`
-  font-size: min(10rem, 12vh);
+  font-size: 8rem; /* Set a fixed size for desktop */
   font-weight: 800;
   color: white;
   line-height: 1.1;
   position: relative;
   letter-spacing: -3px;
-  margin-bottom: 2rem;
-  text-align: center;
+  margin-bottom: 1rem;
+  text-align: left;
   word-wrap: break-word;
 
   .accent {
@@ -94,17 +111,8 @@ const MainTitle = styled.h1`
   }
 
   @media (max-width: 768px) {
-    font-size: min(7rem, 10vh);
-  }
-
-  @media (max-height: 800px) {
-    font-size: min(8rem, 10vh);
-    margin-bottom: 1rem;
-  }
-
-  @media (max-height: 600px) {
-    font-size: min(6rem, 8vh);
-    margin-bottom: 0.5rem;
+    font-size: 4rem; /* Adjust size for mobile */
+    text-align: center; /* Center text for mobile */
   }
 `;
 
@@ -113,7 +121,7 @@ const SubTitle = styled.p`
   color: rgba(255, 255, 255, 0.9);
   margin-bottom: 3rem;
   font-weight: 500;
-  text-align: center;
+  text-align: left;
   word-wrap: break-word;
 
   @media (max-width: 768px) {
@@ -199,8 +207,83 @@ const ContactButton = styled.a`
   }
 `;
 
+const JoinSection = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 1400px;
+  color: white;
+  margin: 0 auto;
+
+  @media (max-width: 768px) {
+    flex-direction: column; /* Stack elements vertically for mobile */
+  }
+`;
+
+const JoinColumn = styled.div`
+  flex: 1;
+  padding: 10px;
+`;
+
+const JoinText = styled.h2`
+  font-size: 2rem;
+  margin-bottom: 10px;
+  font-weight: 500;
+`;
+
+const JoinDescription = styled.p`
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+  font-weight: 400;
+`;
+
+const JoinForm = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap; /* Prevent wrapping */
+
+  @media (max-width: 768px) {
+    flex-direction: row; /* Keep elements in a row for mobile */
+  }
+`;
+
+const EmailInput = styled.input`
+  padding: 15px 30px;
+  font-size: min(1.2rem, 2.5vh);
+  border: none;
+  border-radius: 30px;
+  width: 250px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s;
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+  }
+`;
+
+const SubscribeButton = styled.div`
+  display: inline-block;
+  padding: 15px 30px;
+  background: #06FF01;
+  color: #080D34;
+  font-size: 1.2rem;
+  border-radius: 30px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+  }
+`;
+
 const GridBackground = styled.div`
-  // 여기에 GridBackground 스타일을 추가하세요
+  // ... existing GridBackground styles ...
 `;
 
 export default Hero;

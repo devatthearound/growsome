@@ -4,7 +4,6 @@ import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import BottomNav from './components/layout/BottomNav';
 import SubscribePopup from './components/common/SubscribePopup';
-import { Geist, Geist_Mono } from "next/font/google";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import "./globals.css";
@@ -13,16 +12,6 @@ import StyledComponentsRegistry from '../lib/registry';
 import { AuthProvider } from './contexts/AuthContext';
 import { CoupangApiProvider } from './contexts/CoupangApiContext';
 import { EmailProvider } from './contexts/EmailContext';
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 // export const metadata: Metadata = {
 //   title: "Create Next App",
