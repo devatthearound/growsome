@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useParams } from 'next/navigation';
@@ -8,73 +8,80 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRocket } from '@fortawesome/free-solid-svg-icons';
 import Slider from 'react-slick';
 import dynamic from 'next/dynamic';
-import CouponBanner from '@/app/components/common/CouponBanner'; // 쿠폰 배너 임포트
+import CouponBanner from '@/app/components/common/CouponBanner';
+import Image from 'next/image';
+import 'slick-carousel/slick/slick.css';
+import 'slick-carousel/slick/slick-theme.css';
 
-// CSS 파일들을 클라이언트 사이드에서만 로드하도록 수정
-if (typeof window !== 'undefined') {
-  require('slick-carousel/slick/slick.css');
-  require('slick-carousel/slick/slick-theme.css');
-}
+const ToyProjectsDetail = () => {
+  const params = useParams();
+  const [project, setProject] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-export default async function ToyProjectsDetail({
-    params,
-}: {
-    params: Promise<{ id: string }>
-}) {
-    const { id } = await params;
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 }
   };
 
-  // 프로젝트 데이터 (실제로는 API나 데이터베이스에서 가져올 것)
-  const projectData = {
-    'coupang-auto': {
-      title: '쿠팡파트너스 자동화',
-      description: '쿠팡 파트너스 상품을 자동으로 검색하고 포스팅할 수 있는 서비스입니다.',
-      mainImage: '/images/projects/coupang-auto.jpg',
-      overview: '이 서비스는 불편함을 해소하기 위해 개발되었습니다. 자동화된 시스템으로 더 많은 시간을 절약하세요.',
-      benefits: [
-        '시간 절약: 자동화된 프로세스로 수작업을 줄입니다.',
-        '정확성: 데이터 수집 및 포스팅의 정확성을 높입니다.',
-        '편리함: 사용자가 쉽게 접근할 수 있는 인터페이스를 제공합니다.'
-      ],
-      currentStage: 'Beta', // 현재 개발 런칭 단계
-      pricing: {
-        stage: 'Beta',
-        price: '$20/month',
-        description: '정식 출시 후 가격입니다.'
-      },
-      couponInfo: {
-        message: '쿠폰이 있는 경우,무료로 사용해보실 수 있습니다.쿠폰 코드를 입력하세요!',
-        expiration: '2023년 12월 31일까지 유효합니다.'
-      },
-      callToAction: '지금 바로 사용해보세요! 가격은 오를 예정입니다.',
-      testimonials: [
-        { name: '홍길동', feedback: '이 서비스 덕분에 시간을 많이 절약했습니다!' },
-        { name: '김철수', feedback: '정확한 데이터 수집이 가능해져서 정말 만족합니다.' },
-        { name: '이영희', feedback: '사용하기 매우 편리하고 유용합니다!' },
-        { name: '박지민', feedback: '이 서비스 덕분에 업무 효율이 높아졌습니다.' },
-        { name: '최민수', feedback: '정말 추천합니다! 사용해보세요.' }
-      ]
-    },
-    // 다른 프로젝트 데이터도 추가
-  };
+  useEffect(() => {
+    const fetchProject = async () => {
+      try {
+        // 실제 API 호출로 대체 가능
+        const projectData = {
+          'coupang-auto': {
+            title: '쿠팡파트너스 자동화',
+            description: '쿠팡 파트너스 상품을 자동으로 검색하고 포스팅할 수 있는 서비스입니다.',
+            mainImage: '/images/projects/coupang-auto.jpg',
+            overview: '이 서비스는 불편함을 해소하기 위해 개발되었습니다. 자동화된 시스템으로 더 많은 시간을 절약하세요.',
+            benefits: [
+              '시간 절약: 자동화된 프로세스로 수작업을 줄입니다.',
+              '정확성: 데이터 수집 및 포스팅의 정확성을 높입니다.',
+              '편리함: 사용자가 쉽게 접근할 수 있는 인터페이스를 제공합니다.'
+            ],
+            currentStage: 'Beta', // 현재 개발 런칭 단계
+            pricing: {
+              stage: 'Beta',
+              price: '$20/month',
+              description: '정식 출시 후 가격입니다.'
+            },
+            couponInfo: {
+              message: '쿠폰이 있는 경우,무료로 사용해보실 수 있습니다.쿠폰 코드를 입력하세요!',
+              expiration: '2023년 12월 31일까지 유효합니다.'
+            },
+            callToAction: '지금 바로 사용해보세요! 가격은 오를 예정입니다.',
+            testimonials: [
+              { name: '홍길동', feedback: '이 서비스 덕분에 시간을 많이 절약했습니다!' },
+              { name: '김철수', feedback: '정확한 데이터 수집이 가능해져서 정말 만족합니다.' },
+              { name: '이영희', feedback: '사용하기 매우 편리하고 유용합니다!' },
+              { name: '박지민', feedback: '이 서비스 덕분에 업무 효율이 높아졌습니다.' },
+              { name: '최민수', feedback: '정말 추천합니다! 사용해보세요.' }
+            ]
+          },
+          // 다른 프로젝트 데이터도 추가
+        };
+        
+        setProject(projectData[params.id as keyof typeof projectData]);
+      } catch (error) {
+        console.error('Error fetching project:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const project = projectData[id as keyof typeof projectData];
+    fetchProject();
+  }, [params.id]);
 
-  if (!project) {
-    return <div>Project not found</div>;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (!project) return <div>Project not found</div>;
 
   const settings = {
     dots: true,
     infinite: true,
     speed: 500,
-    slidesToShow: 3, // 슬라이더에서 3개씩 보여줌
+    slidesToShow: 3,
     slidesToScroll: 1,
-    autoplay: true, // 자동 재생
-    autoplaySpeed: 2000, // 2초마다 슬라이드 변경
+    autoplay: true,
+    autoplaySpeed: 2000,
   };
 
   return (
@@ -93,7 +100,13 @@ export default async function ToyProjectsDetail({
       </Hero>
 
       <MainImage>
-        <img src={project.mainImage} alt={project.title} />
+        <Image
+          src={project.mainImage}
+          alt={project.title}
+          fill
+          style={{ objectFit: 'cover' }}
+          priority
+        />
       </MainImage>
 
       <CouponBanner 
@@ -107,7 +120,7 @@ export default async function ToyProjectsDetail({
 
         <SectionTitle>주요 혜택</SectionTitle>
         <BenefitsList>
-          {project.benefits.map((benefit, index) => (
+          {project.benefits.map((benefit: any, index: any) => (
             <BenefitItem key={index}>
               <FontAwesomeIcon icon={faRocket} />
               <BenefitText>{benefit}</BenefitText>
@@ -125,7 +138,7 @@ export default async function ToyProjectsDetail({
         <SectionTitle>고객 후기</SectionTitle>
         <TestimonialsList>
           <Slider {...settings}>
-            {project.testimonials.map((testimonial, index) => (
+            {project.testimonials.map((testimonial: any, index: any) => (
               <TestimonialCard key={index}>
                 <TestimonialFeedback>
                   <Stars>⭐⭐⭐⭐⭐</Stars>
@@ -299,3 +312,5 @@ const UseButton = styled.button<{ inverted: boolean }>`
     color: white;
   }
 `;
+
+export default ToyProjectsDetail;

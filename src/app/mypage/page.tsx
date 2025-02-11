@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import styled from 'styled-components';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -9,7 +9,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { useCoupangApi } from '@/app/contexts/CoupangApiContext';
 
-const MyPage = () => {
+const MyPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState('profile');
@@ -645,6 +645,14 @@ const MyPage = () => {
         )}
       </MobileLayout>
     </PageContainer>
+  );
+};
+
+const MyPage = () => {
+  return (
+    <Suspense fallback={<div>로딩중...</div>}>
+      <MyPageContent />
+    </Suspense>
   );
 };
 

@@ -2,9 +2,8 @@
 // import type { Metadata } from "next";
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
-import BottomNav from './components/layout/BottomNav';
 import SubscribePopup from './components/common/SubscribePopup';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import "./globals.css";
 import styled, { createGlobalStyle } from 'styled-components';
@@ -39,7 +38,11 @@ export default function RootLayout({
 }>) {
   const router = useRouter();
   const [isSubscribePopupOpen, setIsSubscribePopupOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleSubscribeClick = () => {
     setIsSubscribePopupOpen(true);
@@ -49,6 +52,9 @@ export default function RootLayout({
     setIsSubscribePopupOpen(false);
   };
 
+  if (!isMounted) {
+    return null; // 또는 로딩 상태를 표시하는 컴포넌트
+  }
 
   return (
     <html lang="ko">

@@ -1,23 +1,30 @@
 'use client'
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import Hero from './components/home/Hero'; 
 import Partner from './components/home/Partner';
 import Letters from './components/home/Letters';
 import Solutions from './components/home/Solutions';
-import Newsletters from './components/home/Newsletters';
-import Blog from './components/home/Blog';
 import JoinUs from './components/home/JoinUs';
 
 const Home = () => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null; // 또는 로딩 컴포넌트
+  }
+
   return (
     <HomeContainer>
       <Hero />
       <Partner />
       <Letters />
       <Solutions />
-      {/*<Newsletters />*/}
       <JoinUs />
     </HomeContainer>
   );

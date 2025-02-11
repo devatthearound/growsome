@@ -30,7 +30,7 @@ const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick, theme
   const navigationLinks: NavItem[] = [
     /*{ path: '/blog', label: '그로우썸 인사이트' },*/
     { path: '/product', label: '실전솔루션' },
-    /*{ path: '/toyprojects', label: '토이프로젝트' },*/
+    { path: '/toyprojects', label: '토이프로젝트' },
      ];
 
   const handleMenuClick = (path: string) => {
@@ -67,10 +67,6 @@ const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick, theme
   };
 
   const renderUserSection = (isMobile: boolean = false) => {
-    // 더미 데이터 설정
-    const dummyUser = {
-      displayName: "조현주"
-    };
 
     return (
       <>
@@ -78,7 +74,7 @@ const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick, theme
           <>
             <UserProfileGroup onClick={() => handleMenuClick('/mypage')}>
               <FontAwesomeIcon icon={faUser} />
-              <UserName>{dummyUser.displayName}</UserName>
+              <UserName>{user?.username}</UserName>
             </UserProfileGroup>
             <LogoutButton 
               onClick={logout}

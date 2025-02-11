@@ -1,22 +1,12 @@
 "use client"
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import styled, { keyframes, createGlobalStyle } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faRocket, faClock, faUsers, faLightbulb, faChartLine, faComments, faFileAlt } from '@fortawesome/free-solid-svg-icons';
 import { motion, useMotionValue, useSpring } from 'framer-motion';
-import { Canvas, useFrame, extend } from "@react-three/fiber";
-import { OrbitControls, Sphere } from "@react-three/drei";
-import * as THREE from 'three';
 import { Check, X, TrendingUp, CheckCircle, Clock, AlertTriangle, ArrowRight, Smile, Frown, HelpCircle, Wallet, Users, FileCheck, Rocket } from 'lucide-react';
 import Link from 'next/link';
-
-extend({ 
-  OrbitControls,
-  ambientLight: THREE.AmbientLight,
-  pointLight: THREE.PointLight,
-  directionalLight: THREE.DirectionalLight 
-});
 
 // Global style to remove underline from all links
 const GlobalStyle = createGlobalStyle`
@@ -478,7 +468,7 @@ const Timeline = () => {
   );
 };
 
-const HeroButton = styled(motion.a)`
+const HeroButton = styled(motion.button)`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -489,10 +479,12 @@ const HeroButton = styled(motion.a)`
   font-weight: 800;
   padding: 20px 40px;
   border-radius: 100px;
+  border: none;
   text-decoration: none;
   margin-top: 32px;
   box-shadow: 0 6px 25px rgba(6, 255, 1, 0.4);
   transition: all 0.3s ease;
+  cursor: pointer;
 
   &:hover {
     transform: translateY(-3px);
@@ -538,9 +530,11 @@ const Hero = () => (
       </Subtitle>
       <Link href="/purchase" passHref>
         <HeroButton
+          as="button"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
+          onClick={() => {}}
         >
           지금 바로 AI 실행 패키지 구매하기
           <ArrowRight size={20} />
@@ -1762,9 +1756,11 @@ const FinalCTA = () => (
     </FinalCTATitle>
     <Link href="/purchase" passHref>
       <FinalCTAButton
+        as="button"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
+        onClick={() => {}}
       >
         지금 바로 AI 실행 패키지 구매하기
         <ArrowRight size={20} />
@@ -1773,27 +1769,41 @@ const FinalCTA = () => (
   </FinalCTASection>
 );
 
-const ProductLanding = () => {
+// GlobalStyle을 별도의 컴포넌트로 분리
+const GlobalStyleWrapper = () => {
+  const [mounted, setMounted] = useState(false);
+
   useEffect(() => {
-    // Client-side logic here
+    setMounted(true);
   }, []);
+
+  if (!mounted) return null;
+
+  return <GlobalStyle />;
+};
+
+const ProductLanding = () => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) {
+    return null; // 또는 로딩 상태를 표시하는 컴포넌트
+  }
 
   return (
     <ProductPage>
-      <GlobalStyle />
+      <GlobalStyleWrapper />
       <Hero />
-      {/*<Stats />*/}
       <PainPoints />
       <Hook />
       <WhyGrowsome />
-
-      
       <Timeline />
       <PostPurchase />
       <Coupon />
-
       <PriceIncrease />
-
       <FinalCTA />
     </ProductPage>
   );
