@@ -28,7 +28,7 @@ const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick, theme
 
   // 중앙 집중식 네비게이션 링크 관리
   const navigationLinks: NavItem[] = [
-    { path: '/blog', label: '그로우썸 인사이트' },
+    /* { path: '/blog', label: '그로우썸 인사이트' },*/
     { path: '/product', label: '실전솔루션' },
     { path: '/toyprojects', label: '토이프로젝트' },
      ];
