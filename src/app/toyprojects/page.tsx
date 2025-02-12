@@ -252,84 +252,39 @@ interface Project {
   title: string;
   description: string;
   tags: string[];
-  status: string;
-  icon: string;
-  rating: number;
-  reviews: string[];
-  imageUrl?: string;
+  thumbnail_img?: string;
+  url?: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 const ToyProjects = () => {
-  const projects = [
-    {
-      id: "1",
-      title: "AI 자동화 챗봇 시스템",
-      description: "기업 고객 상담을 자동화하는 AI 챗봇 솔루션.",
-      tags: ["AI 챗봇", "NLP", "자동화"],
-      status: "운영 중",
-      icon: "🤖",
-      rating: 9,
-      reviews: ["응답 속도가 빠르고 정확해요!", "업무 효율이 크게 향상됐어요."],
-      imageUrl: "https://via.placeholder.com/300x150"
-    },
-    {
-      id: "2",
-      title: "AI 기반 문서 요약 시스템",
-      description: "긴 문서를 빠르게 요약해주는 AI 텍스트 분석 도구.",
-      tags: ["NLP", "문서 요약", "AI 자동화"],
-      status: "베타 테스트 중",
-      icon: "📄",
-      rating: 8,
-      reviews: ["요약이 정말 정확해요!", "시간 절약에 큰 도움이 됩니다."],
-      imageUrl: "https://via.placeholder.com/300x150"
-    },
-    {
-      id: "3",
-      title: "AI 자동화 데이터 태깅 시스템",
-      description: "데이터 라벨링을 자동화하여 학습 데이터를 효율적으로 구축.",
-      tags: ["데이터 라벨링", "AI 자동화", "ML 데이터"],
-      status: "운영 중",
-      icon: "🏷️",
-      rating: 8,
-      reviews: ["라벨링 속도가 3배 빨라졌어요!", "데이터 정밀도가 높아요."],
-      imageUrl: "https://via.placeholder.com/300x150"
-    }
-  ];
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const textOnlyProjects = [
-    {
-      id: "4",
-      title: "AI 기반 의료 문서 분석",
-      description: "의료 보고서를 자동 분석하여 주요 인사이트 제공.",
-      tags: ["AI", "의료 데이터", "자동 분석"],
-      status: "진행 중",
-      icon: "⚕️",
-      rating: 7,
-      reviews: []
-    },
-    {
-      id: "5",
-      title: "AI 기반 광고 최적화 시스템",
-      description: "사용자 데이터를 분석하여 광고 퍼포먼스를 극대화.",
-      tags: ["AI 마케팅", "광고 최적화", "머신러닝"],
-      status: "완료",
-      icon: "📈",
-      rating: 9,
-      reviews: []
-    },
-    {
-      id: "6",
-      title: "AI 음성 비서 자동화",
-      description: "스마트 디바이스에서 음성을 인식하고 자동 실행.",
-      tags: ["음성 인식", "자동화", "AI 비서"],
-      status: "테스트 중",
-      icon: "🎙️",
-      rating: 6,
-      reviews: []
-    }
-  ];
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch('/api/toyprojects');
+        const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.error || '프로젝트를 불러오는데 실패했습니다.');
+        }
+        
+        setProjects(data.projects);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
+      } finally {
+        setLoading(false);
+      }
+    };
 
- 
+    fetchProjects();
+  }, []);
+
   const profileImages = [
     'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&h=80&fit=crop',
     'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop',
@@ -361,12 +316,21 @@ const ToyProjects = () => {
 
       <SectionContainer>
         <SectionTitle>바로 사용할 수 있어요!</SectionTitle>
+        {loading && <p>프로젝트를 불러오는 중...</p>}
+        {error && <p style={{ color: 'red' }}>{error}</p>}
         <ProjectGrid>
           {projects.map((project) => (
             <ProjectCard key={project.id}>
-              {project.imageUrl && <ProjectImage src={project.imageUrl} alt={project.title} />}
+              {project.thumbnail_img && (
+                <ProjectImage 
+                  src={project.thumbnail_img} 
+                  alt={project.title} 
+                />
+              )}
               <ProjectHeader>
-                <ProjectStatus>{project.status}</ProjectStatus>
+                <ProjectStatus>
+                  {project.is_active ? '운영 중' : '준비 중'}
+                </ProjectStatus>
               </ProjectHeader>
               <ProjectTitle>{project.title}</ProjectTitle>
               <ProjectDescription>{project.description}</ProjectDescription>
@@ -375,46 +339,12 @@ const ToyProjects = () => {
                   <Tag key={index}>{tag}</Tag>
                 ))}
               </TagContainer>
-              <ProfileImages />
               <ProjectFooter>
-                <FundingInfo>
-                  {project.reviews.length}명 참여
-                </FundingInfo>
-                <LikeButton>
-                  좋아요
-                </LikeButton>
-              </ProjectFooter>
-            </ProjectCard>
-          ))}
-        </ProjectGrid>
-      </SectionContainer>
-
-      <SectionContainer>
-        <SectionTitle>이런 자동화 필요한가요?</SectionTitle>
-        <ProjectGrid>
-          {textOnlyProjects.map((project) => (
-            <ProjectCard key={project.id}>
-              <ProjectHeader>
-                <ProjectIcon>{project.icon}</ProjectIcon>
-                <ProjectStatus>{project.status}</ProjectStatus>
-              </ProjectHeader>
-              <ProjectTitle>{project.title}</ProjectTitle>
-              <ProjectDescription>{project.description}</ProjectDescription>
-              <TagContainer>
-                {project.tags.map((tag, index) => (
-                  <Tag key={index}>{tag}</Tag>
-                ))}
-              </TagContainer>
-              <FundingProgress>
-                <ProgressBar style={{ width: `${project.rating * 10}%` }} />
-              </FundingProgress>
-              <ProjectFooter>
-                <FundingInfo>
-                  {project.reviews.length}명 참여
-                </FundingInfo>
-                <ViewButton>
-                  보기
-                </ViewButton>
+                {project.url && (
+                  <ViewButton onClick={() => window.open(project.url, '_blank')}>
+                    보기
+                  </ViewButton>
+                )}
               </ProjectFooter>
             </ProjectCard>
           ))}

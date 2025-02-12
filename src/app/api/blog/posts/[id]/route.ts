@@ -4,11 +4,21 @@ import pool from '@/lib/db';
 // GET: 특정 슬러그의 포스트 조회
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
   const client = await pool.connect();
   
   try {
+    const id = (await params).id // 'a', 'b', or 'c'
+
+    if (!id) {
+      return Response.json(
+          { error: 'ID is required' },
+          { status: 400 }
+      );
+  }
+
+
     const result = await client.query(
       `SELECT 
         p.*,
@@ -16,7 +26,7 @@ export async function GET(
       FROM posts p
       LEFT JOIN post_categories pc ON p.category_id = pc.id
       WHERE p.id = $1 AND p.status = 'published'`,
-      [params.id]
+      [id]
     );
 
     if (result.rows.length === 0) {

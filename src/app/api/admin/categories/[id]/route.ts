@@ -1,16 +1,26 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { validateAuth } from '@/utils/auth';
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
+
   const client = await pool.connect();
   
   try {
     const { userId } = await validateAuth(client);
-    const categoryId = parseInt(params.id);
+    const id = (await params).id // 'a', 'b', or 'c'
+
+    if (!id) {
+      return Response.json(
+          { error: 'ID is required' },
+          { status: 400 }
+      );
+  }
+
+    const categoryId = parseInt(id);
 
     // 하위 카테고리 존재 여부 확인
     const subCategoriesCheck = await client.query(

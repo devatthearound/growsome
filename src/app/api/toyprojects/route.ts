@@ -11,6 +11,7 @@ export async function GET() {
         title,
         description,
         url,
+        thumbnail_img,
         tags::text[] as tags,
         is_active,
         created_at,

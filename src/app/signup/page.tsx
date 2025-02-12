@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { ValidationError } from '@/utils/validators';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
+import Image from 'next/image';
 
 // SearchParams를 사용하는 실제 컴포넌트
 function SignupContent() {
@@ -55,13 +56,12 @@ function SignupContent() {
       if (response.ok) {
         setUser(null);
         setIsAlreadyLoggedIn(false);
-        // 로그아웃 후 페이지 새로고침
         window.location.reload();
       }
     } catch (error) {
       console.error('로그아웃 오류:', error);
     }
-  }, [setUser]);
+  }, [setUser, setIsAlreadyLoggedIn]);
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -152,18 +152,14 @@ function SignupContent() {
 
         if (response.ok && data.isLoggedIn) {
           if (isExtension) {
-            // 토큰을 별도로 가져오기
             const tokenResponse = await fetch('/api/auth/token', {
               credentials: 'include'
             });
             const tokenData = await tokenResponse.json();
 
             if (tokenResponse.ok && tokenData.token) {
-              console.log('Token retrieved successfully');
               window.location.href = `/auth/extension-callback?token=${tokenData.token}`;
               return;
-            } else {
-              console.error('Failed to retrieve token:', tokenData.error);
             }
           } else {
             setUser(data.user);
@@ -386,6 +382,17 @@ function SignupContent() {
           )}
         </Form>
       </RightPanel>
+      {/* {user?.profileImage && (
+        <ImageWrapper>
+          <Image 
+            src={user.profileImage} 
+            alt="Profile" 
+            width={100} 
+            height={100}
+            style={{ objectFit: 'cover', borderRadius: '50%' }}
+          />
+        </ImageWrapper>
+      )} */}
     </SignUpContainer>
   );
 }
@@ -393,11 +400,7 @@ function SignupContent() {
 // 메인 컴포넌트
 const SignupPage = () => {
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen">
-        <p>로딩중...</p>
-      </div>
-    }>
+    <Suspense fallback={<LoadingFallback />}>
       <SignupContent />
     </Suspense>
   );
@@ -646,6 +649,19 @@ const UserInfo = styled.div`
     margin: 0.5rem 0;
     color: #333;
   }
+`;
+
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <p>로딩중...</p>
+  </div>
+);
+
+const ImageWrapper = styled.div`
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 0 auto;
 `;
 
 export default SignupPage; 

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGlobe, faCode, faRocket } from '@fortawesome/free-solid-svg-icons';
@@ -44,9 +45,15 @@ export default function ClientProjectDetail({ project }: ProjectDetailProps) {
                 </HeroContent>
             </Hero>
 
-            <MainImage>
-                <img src={project.mainImage} alt={project.title} />
-            </MainImage>
+            <MainImageWrapper>
+                <Image 
+                    src={project.mainImage}
+                    alt={project.title}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                    priority
+                />
+            </MainImageWrapper>
 
             <ContentSection>
                 <SectionTitle>Overview</SectionTitle>
@@ -80,7 +87,7 @@ export default function ClientProjectDetail({ project }: ProjectDetailProps) {
 
                 <ImageGallery>
                     {project.images.map((image: string, index: number) => (
-                        <GalleryImage
+                        <GalleryImageWrapper
                             key={index}
                             as={motion.div}
                             initial="hidden"
@@ -88,8 +95,13 @@ export default function ClientProjectDetail({ project }: ProjectDetailProps) {
                             viewport={{ once: true }}
                             variants={fadeIn}
                         >
-                            <img src={image} alt={`${project.title} screenshot ${index + 1}`} />
-                        </GalleryImage>
+                            <Image
+                                src={image}
+                                alt={`${project.title} screenshot ${index + 1}`}
+                                fill
+                                style={{ objectFit: 'cover' }}
+                            />
+                        </GalleryImageWrapper>
                     ))}
                 </ImageGallery>
             </ContentSection>
@@ -143,16 +155,10 @@ const MetaValue = styled.div`
     font-weight: 500;
 `;
 
-const MainImage = styled.div`
+const MainImageWrapper = styled.div`
     width: 100%;
     height: 600px;
-    overflow: hidden;
-
-    img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
+    position: relative;
 `;
 
 const ContentSection = styled.div`
@@ -207,19 +213,15 @@ const FeatureDescription = styled.p`
 
 const ImageGallery = styled.div`
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
-    margin-top: 4rem;
+    margin-top: 3rem;
 `;
 
-const GalleryImage = styled.div`
-    border-radius: 20px;
+const GalleryImageWrapper = styled.div`
+    position: relative;
+    width: 100%;
+    height: 300px;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-
-    img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
 `; 

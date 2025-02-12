@@ -7,12 +7,6 @@ import dynamic from 'next/dynamic';
 import CategoryModal from './CategoryModal';
 import MDEditor, { commands } from '@uiw/react-md-editor';
 
-// 마크다운 에디터를 클라이언트 사이드에서만 로드
-const MDEditorComponent = dynamic(
-  () => import('@uiw/react-md-editor'),
-  { ssr: false }
-);
-
 interface BlogPost {
   id?: number;
   title: string;
@@ -317,11 +311,12 @@ const BlogAdmin = () => {
     fetchCategories();
   }, []);
 
+  // 이미지 정리를 위한 cleanup useEffect
   useEffect(() => {
     return () => {
       tempImages.forEach(({ preview }) => URL.revokeObjectURL(preview));
     };
-  }, []);
+  }, [tempImages]); // tempImages를 의존성 배열에 추가
 
   // 카테고리별 필터링된 포스트 목록
   const filteredPosts = posts.filter(post => 

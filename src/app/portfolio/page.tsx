@@ -4,6 +4,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import Image from 'next/image';
 
 const Portfolio = () => {
   const fadeIn = {
@@ -65,7 +66,12 @@ const Portfolio = () => {
             transition={{ delay: index * 0.2 }}
           >
             <ProjectImage>
-              <img src={project.image} alt={project.title} />
+              <Image
+                src={project.image}
+                alt={project.title}
+                fill
+                style={{ objectFit: 'cover' }}
+              />
             </ProjectImage>
             <ProjectInfo>
               <ProjectTitle>{project.title}</ProjectTitle>
@@ -140,14 +146,8 @@ const ProjectCard = styled.div`
 const ProjectImage = styled.div`
   width: 100%;
   aspect-ratio: 16/10;
+  position: relative;
   overflow: hidden;
-
-  img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-  }
 
   &:hover img {
     transform: scale(1.05);
