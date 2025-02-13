@@ -343,8 +343,7 @@ const PurchasePage = () => {
                 </PackageContent>
                 <ButtonWrapper>
                   <PurchaseButton
-                    href="/"
-                    target="_blank"
+                    href="/payment?product_id=4"
                     rel="noopener noreferrer"
                   >
                     구매하기
@@ -385,8 +384,7 @@ const PurchasePage = () => {
                 </PackageContent>
                 <ButtonWrapper>
                   <PurchaseButton
-                    href="/"
-                    target="_blank"
+                    href="/payment?product_id=5"
                     rel="noopener noreferrer"
                     isHighlighted
                   >
@@ -427,8 +425,7 @@ const PurchasePage = () => {
                 </PackageContent>
                 <ButtonWrapper>
                   <PurchaseButton
-                    href="/"
-                    target="_blank"
+                    href="/payment?product_id=6"
                     rel="noopener noreferrer"
                   >
                     구매하기

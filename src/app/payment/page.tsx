@@ -83,7 +83,7 @@ const PaymentContent = () => {
     try {
       await processPayment(
         {
-          productPlanId: 4,
+          productPlanId: product.id,
           quantity: 1,
           couponCode: appliedCoupon?.code,
           customerInfo: {
