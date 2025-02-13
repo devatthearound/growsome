@@ -51,6 +51,9 @@ const Introduce = () => {
 };
 
 const IntroduceSection = styled.section`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   background-color: #F2F5FA;
   color: #001C46;
   padding: 150px 50px;
