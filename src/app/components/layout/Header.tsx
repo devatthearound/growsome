@@ -7,7 +7,6 @@ import { useRouter, usePathname } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faBars, faTimes, faSignOutAlt, faRocket } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { checkMenuAuth } from '@/utils/menuAuth';
 
 interface HeaderProps {
   onSubscribeClick: () => void;
@@ -34,9 +33,6 @@ const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick, theme
      ];
 
   const handleMenuClick = (path: string) => {
-    if (!checkMenuAuth(path)) {
-      return;
-    }
     router.push(path);
     setIsMenuOpen(false);
   };
