@@ -22,9 +22,12 @@ export async function GET(
     const result = await client.query(
       `SELECT 
         p.*,
-        pc.name as category_name
+        pc.name as category_name,
+        u.username as author_name,
+        u.avatar as author_avatar
       FROM posts p
       LEFT JOIN post_categories pc ON p.category_id = pc.id
+      LEFT JOIN users u ON p.author_id = u.id
       WHERE p.id = $1 AND p.status = 'published'`,
       [id]
     );
@@ -44,7 +47,13 @@ export async function GET(
 
     return NextResponse.json({
       success: true,
-      post: result.rows[0]
+      post: {
+        ...result.rows[0],
+        author: {
+          name: result.rows[0].author_name,
+          avatar: result.rows[0].author_avatar
+        }
+      }
     });
 
   } catch (error) {

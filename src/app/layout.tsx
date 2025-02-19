@@ -95,6 +95,7 @@ const AppContainer = styled.div`
 const Main = styled.main`
   flex: 1;
   margin: 0;
+  margin-top:70px;
   
   @media (min-width: 769px) {
     padding-bottom: 0;

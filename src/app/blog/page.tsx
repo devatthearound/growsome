@@ -1,250 +1,200 @@
-"use client"
-import React from 'react';
-import styled from 'styled-components';
+'use client';
 
-interface InsightPost {
-  id: string;
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
+import Link from 'next/link';
+
+interface BlogPost {
+  id: number;
   title: string;
-  category: string;
-  link: string;
+  excerpt: string;
+  featured_image: string;
+  category_id: number;
+  tags: string[];
+  published_at: string;
+  status: 'published' | 'draft';
 }
 
-const InsightPage = () => {
-  const categories = {
-    growth: {
-      title: "성장과 학습",
-      posts: [
-        {
-          id: "1",
-          title: "AI 시대의 자기주도적 학습법",
-          category: "성장",
-          link: "/insights/self-learning"
-        },
-        {
-          id: "2",
-          title: "디지털 노마드의 성장 전략",
-          category: "성장",
-          link: "/insights/digital-nomad"
-        },
-      ]
-    },
-    business: {
-      title: "비즈니스 전략",
-      posts: [
-        {
-          id: "3",
-          title: "프리랜서를 위한 수익화 전략",
-          category: "비즈니스",
-          link: "/insights/freelancer-monetization"
-        },
-        {
-          id: "4",
-          title: "AI 기반 비즈니스 로드맵 설계",
-          category: "비즈니스",
-          link: "/insights/ai-business"
-        },
-      ]
-    },
-    productivity: {
-      title: "생산성과 시간관리",
-      posts: [
-        {
-          id: "5",
-          title: "AI 도구를 활용한 업무 자동화",
-          category: "생산성",
-          link: "/insights/ai-automation"
-        },
-        {
-          id: "6",
-          title: "효율적인 원격근무 시스템 구축",
-          category: "생산성",
-          link: "/insights/remote-work"
-        },
-      ]
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+const BlogPage = () => {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  const fetchPosts = async () => {
+    try {
+      const response = await fetch('/api/blog/posts');
+      const data = await response.json();
+      setPosts(data.posts.filter((post: BlogPost) => post.status === 'published'));
+    } catch (error) {
+      console.error('포스트 로딩 중 에러:', error);
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/api/blog/categories');
+      const data = await response.json();
+      setCategories(data.categories);
+    } catch (error) {
+      console.error('카테고리 로딩 중 에러:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosts();
+    fetchCategories();
+  }, []);
+
+  const filteredPosts = posts.filter(post => 
+    selectedCategory === 'all' || 
+    post.category_id === parseInt(selectedCategory)
+  );
+
   return (
-    <Container>
+    <BlogContainer>
       <Header>
-        <SearchSection>
-          <SearchTitle>
-            똑똑하고 창의적인<br />
-            그로우썸의 <span style={{ color: '#06ff01' }}>인사이트</span>
-          </SearchTitle>
-          {/*<SearchBox>
-            <SearchInput 
-              placeholder="원하는 인사이트를 검색해보세요" 
-              type="text"
-            />
-            <SearchButton>검색</SearchButton>
-          </SearchBox>*/}
-        </SearchSection>
+        <h1>블로그</h1>
+        <CategoryFilter>
+          <select
+            value={selectedCategory}
+            onChange={(e) => setSelectedCategory(e.target.value)}
+          >
+            <option value="all">전체 보기</option>
+            {categories.map(category => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </CategoryFilter>
       </Header>
 
-      <MainContent>
-        <SectionTitle>주제별 인사이트</SectionTitle>
-        
-        {Object.entries(categories).map(([key, category]) => (
-          <CategorySection key={key}>
-            <CategoryTitle>{category.title}</CategoryTitle>
-            <PostList>
-              {category.posts.map((post) => (
-                <PostItem key={post.id} href={post.link}>
-                  <PostTitle>{post.title}</PostTitle>
-                  <Arrow>→</Arrow>
-                </PostItem>
-              ))}
-            </PostList>
-          </CategorySection>
+      <PostGrid>
+        {filteredPosts.map(post => (
+          <PostCard key={post.id}>
+            <Link href={`/blog/${post.id}`}>
+              {post.featured_image && (
+                <PostImage src={post.featured_image} alt={post.title} />
+              )}
+              <PostContent>
+                <PostTitle>{post.title}</PostTitle>
+                <PostExcerpt>{post.excerpt}</PostExcerpt>
+                <PostMeta>
+                  <PostDate>
+                    {new Date(post.published_at).toLocaleDateString('ko-KR')}
+                  </PostDate>
+                  <TagList>
+                    {post.tags.map((tag, index) => (
+                      <Tag key={index}>#{tag}</Tag>
+                    ))}
+                  </TagList>
+                </PostMeta>
+              </PostContent>
+            </Link>
+          </PostCard>
         ))}
-      </MainContent>
-    </Container>
+      </PostGrid>
+    </BlogContainer>
   );
 };
 
-const Container = styled.div`
+const BlogContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 40px 20px;
+  padding: 2rem;
 `;
 
 const Header = styled.div`
-  background: #080d34;
-  width: 100vw;
-  margin-left: calc(-50vw + 50%);
-  margin-right: calc(-50vw + 50%);
-  padding: 90px 20px;
-  position: relative;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 30% 50%, rgba(255,255,255,0.05) 0%, transparent 50%);
-    pointer-events: none;
-  }
-`;
-
-const SearchSection = styled.div`
-  max-width: 800px;
-  margin: 0 auto;
-  text-align: center;
-`;
-
-const SearchTitle = styled.h1`
-  font-size: 4rem;
-  font-weight: 700;
-  color: white;
-  line-height: 1.3;
-`;
-
-const SearchBox = styled.div`
-  display: flex;
-  align-items: center;
-  max-width: 600px;
-  margin: 0 auto;
-  background: #5c59e7
-  border: 1px solid #5c59e7
-  border-radius: 12px;
-  padding: 8px;
-  transition: all 0.3s ease;
-
-  &:focus-within {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-  }
-`;
-
-const SearchInput = styled.input`
-  flex: 1;
-  background: transparent;
-  border: none;
-  padding: 12px 16px;
-  font-size: 1.1rem;
-  color: white;
-  outline: none;
-
-  &::placeholder {
-    color: rgba(255, 255, 255, 0.6);
-  }
-`;
-
-const SearchButton = styled.button`
-  background: #06FF01;
-  color: #5c59e7;
-  padding: 12px 24px;
-  border-radius: 8px;
-  border: none;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    opacity: 0.9;
-  }
-`;
-
-const MainContent = styled.main`
-  max-width: 700px;
-  margin: 0 auto;
-  padding: 60px 20px;
-`;
-
-const SectionTitle = styled.h2`
-  font-size: 2rem;
-  margin-bottom: 40px;
-  color: #5c59e7;
-`;
-
-const CategorySection = styled.section`
-  margin-bottom: 40px;
-`;
-
-const CategoryTitle = styled.h3`
-  font-size: 1.5rem;
-  color: #5c59e7;
-  margin-bottom: 20px;
-  padding-bottom: 10px;
-  border-bottom: 2px solid #f0f0f0;
-`;
-
-const PostList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-`;
-
-const PostItem = styled.a`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px;
-  background: white;
-  border: 1px solid #f0f0f0;
-  border-radius: 8px;
-  text-decoration: none;
-  transition: all 0.3s ease;
+  margin-bottom: 2rem;
 
-  &:hover {
-    background: #f8f9fa;
-    transform: translateX(5px);
+  h1 {
+    font-size: 2.5rem;
+    color: #333;
   }
 `;
 
-const PostTitle = styled.h4`
-  font-size: 1.1rem;
+const CategoryFilter = styled.div`
+  select {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+  }
+`;
+
+const PostGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+`;
+
+const PostCard = styled.article`
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+`;
+
+const PostImage = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+`;
+
+const PostContent = styled.div`
+  padding: 1.5rem;
+`;
+
+const PostTitle = styled.h2`
+  margin: 0 0 1rem 0;
+  font-size: 1.5rem;
   color: #333;
-  margin: 0;
 `;
 
-const Arrow = styled.span`
-  color: #5c59e7;
+const PostExcerpt = styled.p`
+  color: #666;
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
 `;
 
-export default InsightPage; 
+const PostMeta = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const PostDate = styled.span`
+  color: #888;
+  font-size: 0.9rem;
+`;
+
+const TagList = styled.div`
+  display: flex;
+  gap: 0.5rem;
+`;
+
+const Tag = styled.span`
+  color: #514FE4;
+  font-size: 0.9rem;
+`;
+
+export default BlogPage;
