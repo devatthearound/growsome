@@ -60,17 +60,25 @@ export async function POST(request: Request) {
 
     const user = userResult.rows[0];
 
-    // JWT 토큰 생성
-    const token = await generateToken({
-      userId: user.id,
-      email: user.email
-    });
+  // JWT 토큰 생성
+  const accessToken = await generateToken({
+    userId: user.id,
+    email: user.email
+  }, '7d'); // access token은 7일 유효
+
+  const refreshToken = await generateToken({
+    userId: user.id,
+    email: user.email
+  }, '30d'); // refresh token은 30일 유효
+
+    // 새 세션 생성 (refresh token 포함)
+    const expiresAt = 'NOW() + INTERVAL \'24 hours\'';
 
     // 세션 테이블에 토큰 저장
     await client.query(
-      `INSERT INTO sessions (user_id, token, expires_at)
-      VALUES ($1, $2, NOW() + INTERVAL '7 days')`,
-      [user.id, token]
+      `INSERT INTO sessions (user_id, access_token, refresh_token, expires_at)
+      VALUES ($1, $2, $3, ${expiresAt})`,
+      [user.id, accessToken, refreshToken]
     );
 
     // 약관 동의 기록
@@ -106,14 +114,26 @@ export async function POST(request: Request) {
       }
     });
 
-    response.cookies.set({
-      name: 'coupas_access_token',
-      value: token,
-      httpOnly: true,
-      secure: true,
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60 // 7일
-    });
+   // 쿠키 설정 업데이트
+   response.cookies.set({
+    name: 'coupas_access_token',
+    value: accessToken,
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    path: '/',
+    maxAge: 60 * 60 // 1시간
+  });
+
+  response.cookies.set({
+    name: 'coupas_refresh_token',
+    value: refreshToken,
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    path: '/',
+    maxAge: 30 * 24 * 60 * 60
+  });
 
     return response;
 
