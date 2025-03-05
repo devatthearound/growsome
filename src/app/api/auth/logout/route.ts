@@ -8,7 +8,7 @@ export async function POST() {
   
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
+    const token = cookieStore.get('coupas_access_token')?.value;
 
     if (token) {
       try {
@@ -32,7 +32,7 @@ export async function POST() {
 
     // 쿠키 삭제 설정 업데이트
     response.cookies.delete({
-      name: 'auth_token',
+      name: 'coupas_access_token',
       secure: true,
       sameSite: 'strict',
       path: '/'

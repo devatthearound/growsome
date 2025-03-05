@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 
 export async function validateAuth(client: any) {
   const cookieStore = await cookies();
-  const token = cookieStore.get('auth_token')?.value;
+  const token = cookieStore.get('coupas_access_token')?.value;
 
   if (!token) {
     throw new Error('인증되지 않은 사용자입니다.');

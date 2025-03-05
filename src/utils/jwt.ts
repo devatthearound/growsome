@@ -3,17 +3,16 @@ import * as jose from 'jose'
 const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'your-secret-key'
 )
-const JWT_EXPIRES_IN = '7d'
 
 export interface JWTPayload extends jose.JWTPayload {
   userId: number
   email: string
 }
 
-export const generateToken = async (payload: JWTPayload): Promise<string> => {
+export const generateToken = async (payload: JWTPayload, expiresIn: string): Promise<string> => {
   return await new jose.SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
-    .setExpirationTime(JWT_EXPIRES_IN)
+    .setExpirationTime(expiresIn)
     .sign(JWT_SECRET)
 }
 

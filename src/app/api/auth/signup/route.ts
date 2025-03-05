@@ -107,7 +107,7 @@ export async function POST(request: Request) {
     });
 
     response.cookies.set({
-      name: 'auth_token',
+      name: 'coupas_access_token',
       value: token,
       httpOnly: true,
       secure: true,

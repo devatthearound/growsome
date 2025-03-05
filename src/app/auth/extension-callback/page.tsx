@@ -26,16 +26,17 @@ declare global {
 
 function ExtensionCallbackContent() {
   const searchParams = useSearchParams();
-  const token = searchParams.get('token');
+  const coupasAccessToken = searchParams.get('coupas_access_token');
+  const coupasRefreshToken = searchParams.get('coupas_refresh_token');
 
   useEffect(() => {
-    if (token) {
+    if (coupasAccessToken) {
       if (window.chrome?.runtime?.sendMessage) {
         window.chrome.runtime.sendMessage(
           process.env.NEXT_PUBLIC_EXTENSION_ID!,
           { 
             type: 'LOGIN_SUCCESS', 
-            token 
+            token: coupasAccessToken
           },
           async (response) => {
             if (response?.success) {
@@ -50,7 +51,7 @@ function ExtensionCallbackContent() {
         window.location.href = '/download-extension';
       }
     }
-  }, [token]);
+  }, [coupasAccessToken, coupasRefreshToken]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">

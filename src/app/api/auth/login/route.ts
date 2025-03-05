@@ -79,29 +79,34 @@ export async function POST(request: Request) {
     }
 
     // JWT 토큰 생성
-    const token = await generateToken({
+    const accessToken = await generateToken({
       userId: user.id,
       email: user.email
-    });
+    }, '7d'); // access token은 7일 유효
+
+    const refreshToken = await generateToken({
+      userId: user.id,
+      email: user.email
+    }, '30d'); // refresh token은 30일 유효
 
     await client.query('BEGIN');
 
     try {
-      // 기존 세션 삭제 (선택적)
+      // 기존 세션 삭제
       await client.query(
         'DELETE FROM sessions WHERE user_id = $1',
         [user.id]
       );
 
-      // 새 세션 생성
+      // 새 세션 생성 (refresh token 포함)
       const expiresAt = rememberMe 
-        ? 'NOW() + INTERVAL \'30 days\''  // 로그인 상태 유지 시 30일
-        : 'NOW() + INTERVAL \'24 hours\''; // 기본 24시간
+        ? 'NOW() + INTERVAL \'30 days\''
+        : 'NOW() + INTERVAL \'24 hours\'';
 
       await client.query(
-        `INSERT INTO sessions (user_id, token, expires_at)
-        VALUES ($1, $2, ${expiresAt})`,
-        [user.id, token]
+        `INSERT INTO sessions (user_id, access_token, refresh_token, expires_at)
+        VALUES ($1, $2, $3, ${expiresAt})`,
+        [user.id, accessToken, refreshToken]
       );
 
       // 마지막 로그인 시간 업데이트
@@ -122,6 +127,8 @@ export async function POST(request: Request) {
     const response = NextResponse.json({
       success: true,
       message: '로그인이 완료되었습니다.',
+      accessToken: accessToken,
+      refreshToken: refreshToken,
       user: {
         id: user.id,
         email: user.email,
@@ -134,12 +141,22 @@ export async function POST(request: Request) {
 
     // 쿠키 설정 업데이트
     response.cookies.set({
-      name: 'auth_token',
-      value: token,
+      name: 'coupas_access_token',
+      value: accessToken,
       httpOnly: true,
-      secure: true, // HTTPS 필수
-      sameSite: 'strict', // 가장 엄격한 설정
-      path: '/', // 전체 도메인에서 접근 가능
+      secure: true,
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 60 * 60 // 1시간
+    });
+
+    response.cookies.set({
+      name: 'coupas_refresh_token',
+      value: refreshToken,
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      path: '/',
       maxAge: rememberMe 
         ? 30 * 24 * 60 * 60  // 30일
         : 24 * 60 * 60       // 24시간

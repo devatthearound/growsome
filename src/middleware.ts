@@ -4,7 +4,7 @@ import { verifyToken } from './utils/jwt';
 
 export async function middleware(request: NextRequest) {
   try {
-    const token = request.cookies.get('auth_token')?.value;
+    const token = request.cookies.get('coupas_access_token')?.value;
     console.log('Middleware - Token:', token?.substring(0, 20) + '...'); // 토큰 일부만 로그
 
     if (!token) {

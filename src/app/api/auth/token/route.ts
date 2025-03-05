@@ -4,7 +4,7 @@ import { verifyToken } from '@/utils/jwt';
 
 export async function GET() {
   const cookieStore = await cookies();
-  const token = cookieStore.get('auth_token')?.value;
+  const token = cookieStore.get('coupas_access_token')?.value;
 
   if (!token) {
     return NextResponse.json(

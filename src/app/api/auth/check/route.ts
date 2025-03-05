@@ -9,7 +9,7 @@ export async function GET() {
   try {
     // 쿠키에서 토큰 가져오기
     const cookieStore = await cookies();
-    const token = cookieStore.get('auth_token')?.value;
+    const token = cookieStore.get('coupas_access_token')?.value;
 
     console.log('token', token);
     if (!token) {
