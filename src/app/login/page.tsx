@@ -79,7 +79,7 @@ function LoginContent() {
       
       if (!isExtension) {
         const redirectTo = searchParams.get('redirect_to') || '/';
-        router.push(redirectTo);
+        window.location.href = redirectTo;
       } else {
         window.location.href = `/auth/extension-callback?token=${data.token}`;
       }
