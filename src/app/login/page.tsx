@@ -79,7 +79,13 @@ function LoginContent() {
       
       if (!isExtension) {
         const redirectTo = searchParams.get('redirect_to') || '/';
-        window.location.href = redirectTo + '?coupas_access_token=' + data.accessToken + '&coupas_refresh_token=' + data.refreshToken;
+
+        if (redirectTo.includes('coupas-auth')) {
+          window.location.href = redirectTo + '?coupas_access_token=' + data.accessToken + '&coupas_refresh_token=' + data.refreshToken;
+        }
+
+        window.location.href = redirectTo;
+
       } else {
         window.location.href = `/auth/extension-callback?coupas_access_token=${data.accessToken}&coupas_refresh_token=${data.refreshToken}`;
       }
