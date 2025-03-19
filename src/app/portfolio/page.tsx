@@ -20,7 +20,7 @@ const Portfolio = () => {
       description: '급매 부동산 데이터를 제공하는 투자 지원 플랫폼',
       category: 'Web Platform',
       client: '스카이키',
-      year: '2023'
+      year: '2024~2025'
     },
     {
       id: 'withslow',
@@ -29,16 +29,16 @@ const Portfolio = () => {
       description: '발달장애인을 위한 비대면 교육과 중개 플랫폼',
       category: 'Web Platform',
       client: '느린걸음',
-      year: '2023'
+      year: '2024~2025'
     },
     {
-      id: 'affiliate',
-      image: '/images/projects/affiliate/main_thumb_800x500.png',
-      title: '제휴마케팅',
-      description: 'N잡러를 위한 가성비 제품을 큐레이션하는 쿠팡파트너스 유튜브 채널',
+      id: 'cupas',
+      image: '/images/projects/cupas/main_thumb_800x500.png',
+      title: '쿠파스 자동화',
+      description: 'N잡러를 위한 쿠팡파트너스 자동화 솔루션',
       category: 'Marketing',
       client: '그로썸',
-      year: '2023'
+      year: '2025'
     }
   ];
 
@@ -56,45 +56,43 @@ const Portfolio = () => {
 
       <ProjectGrid>
         {projects.map((project, index) => (
-          <ProjectCard
-            key={project.id}
-            as={motion.div}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-            transition={{ delay: index * 0.2 }}
-          >
-            <ProjectImage>
-              <Image
-                src={project.image}
-                alt={project.title}
-                fill
-                style={{ objectFit: 'cover' }}
-              />
-            </ProjectImage>
-            <ProjectInfo>
-              <ProjectTitle>{project.title}</ProjectTitle>
-              <ProjectDescription>{project.description}</ProjectDescription>
-              <ProjectMeta>
-                <MetaItem>
-                  <MetaLabel>Category:</MetaLabel>
-                  <MetaValue>{project.category}</MetaValue>
-                </MetaItem>
-                <MetaItem>
-                  <MetaLabel>Client:</MetaLabel>
-                  <MetaValue>{project.client}</MetaValue>
-                </MetaItem>
-                <MetaItem>
-                  <MetaLabel>Year:</MetaLabel>
-                  <MetaValue>{project.year}</MetaValue>
-                </MetaItem>
-              </ProjectMeta>
-              <ViewProject href={`/portfolio/${project.id}`}>
-                View Project
-              </ViewProject>
-            </ProjectInfo>
-          </ProjectCard>
+          <Link key={project.id} href={`/portfolio/${project.id}`} passHref>
+            <ProjectCard
+              as={motion.div}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeIn}
+              transition={{ delay: index * 0.2 }}
+            >
+              <ProjectImage>
+                <Image
+                  src={project.image}
+                  alt={project.title}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                />
+              </ProjectImage>
+              <ProjectInfo>
+                <ProjectTitle>{project.title}</ProjectTitle>
+                <ProjectDescription>{project.description}</ProjectDescription>
+                <ProjectMeta>
+                  <MetaItem>
+                    <MetaLabel>Category:</MetaLabel>
+                    <MetaValue>{project.category}</MetaValue>
+                  </MetaItem>
+                  <MetaItem>
+                    <MetaLabel>Client:</MetaLabel>
+                    <MetaValue>{project.client}</MetaValue>
+                  </MetaItem>
+                  <MetaItem>
+                    <MetaLabel>Year:</MetaLabel>
+                    <MetaValue>{project.year}</MetaValue>
+                  </MetaItem>
+                </ProjectMeta>
+              </ProjectInfo>
+            </ProjectCard>
+          </Link>
         ))}
       </ProjectGrid>
     </ProjectsPage>
@@ -132,10 +130,8 @@ const ProjectGrid = styled.div`
 `;
 
 const ProjectCard = styled.div`
-  background: white;
-  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  
   transition: transform 0.3s ease;
 
   &:hover {
@@ -148,6 +144,12 @@ const ProjectImage = styled.div`
   aspect-ratio: 16/10;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border-radius: 20px;
+
+  img {
+    transition: transform 0.3s ease;
+  }
 
   &:hover img {
     transform: scale(1.05);

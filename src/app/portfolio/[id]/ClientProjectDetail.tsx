@@ -20,10 +20,7 @@ export default function ClientProjectDetail({ project }: ProjectDetailProps) {
     return (
         <ProjectDetailPage>
             <Hero
-                as={motion.div}
-                initial="hidden"
-                animate="visible"
-                variants={fadeIn}
+                bgColor={project.bgColor || '#514FE4'}
             >
                 <HeroContent>
                     <ProjectTitle>{project.title}</ProjectTitle>
@@ -45,14 +42,23 @@ export default function ClientProjectDetail({ project }: ProjectDetailProps) {
                 </HeroContent>
             </Hero>
 
-            <MainImageWrapper>
-                <Image 
-                    src={project.mainImage}
-                    alt={project.title}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    priority
-                />
+            <MainImageWrapper bgColor={project.imageBgColor || '#FFFFFF'}>
+                {project.images && project.images.length > 0 ? (
+                    project.images.map((image: string, index: number) => (
+                        <Image 
+                            key={index}
+                            src={image}
+                            alt={`${project.title} image ${index + 1}`}
+                            layout="responsive"
+                            width={1600}
+                            height={1000}
+                            style={{ objectFit: 'cover' }}
+                            priority
+                        />
+                    ))
+                ) : (
+                    <p>No images available</p>
+                )}
             </MainImageWrapper>
 
             <ContentSection>
@@ -82,29 +88,17 @@ export default function ClientProjectDetail({ project }: ProjectDetailProps) {
                             <FeatureTitle>{feature.title}</FeatureTitle>
                             <FeatureDescription>{feature.description}</FeatureDescription>
                         </FeatureCard>
+                        
                     ))}
                 </FeaturesGrid>
-
-                <ImageGallery>
-                    {project.images.map((image: string, index: number) => (
-                        <GalleryImageWrapper
-                            key={index}
-                            as={motion.div}
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true }}
-                            variants={fadeIn}
-                        >
-                            <Image
-                                src={image}
-                                alt={`${project.title} screenshot ${index + 1}`}
-                                fill
-                                style={{ objectFit: 'cover' }}
-                            />
-                        </GalleryImageWrapper>
-                    ))}
-                </ImageGallery>
+                {project.link && (
+                <ProjectLink href={project.link} target="_blank" rel="noopener noreferrer">
+                    Visit Project
+                </ProjectLink>
+            )}
             </ContentSection>
+
+
         </ProjectDetailPage>
     );
 }
@@ -113,14 +107,14 @@ const ProjectDetailPage = styled.div`
     background: #f8f9fa;
 `;
 
-const Hero = styled.div`
-    background: #514FE4;
+const Hero = styled.div<{ bgColor: string }>`
+    background: ${({ bgColor }) => bgColor};
     color: white;
     padding: 120px 0 60px;
 `;
 
 const HeroContent = styled.div`
-    max-width: 1440px;
+    max-width: 700px;
     margin: 0 auto;
     padding: 0 2rem;
 `;
@@ -155,14 +149,20 @@ const MetaValue = styled.div`
     font-weight: 500;
 `;
 
-const MainImageWrapper = styled.div`
+const MainImageWrapper = styled.div<{ bgColor: string }>`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 1900px;
     width: 100%;
-    height: 600px;
+    height: auto;
     position: relative;
+    margin: 0 auto;
+    background-color: ${({ bgColor }) => bgColor};
 `;
 
 const ContentSection = styled.div`
-    max-width: 1440px;
+    max-width: 700px;
     margin: 0 auto;
     padding: 4rem 2rem;
 `;
@@ -224,4 +224,21 @@ const GalleryImageWrapper = styled.div`
     height: 300px;
     border-radius: 8px;
     overflow: hidden;
+`;
+
+const ProjectLink = styled.a`
+    display: inline-block;
+    margin-top: 2rem;
+    padding: 1rem 2rem;
+    background: #514FE4;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover {
+        background: #4340c0;
+        transform: translateY(-2px);
+    }
 `; 

@@ -34,8 +34,8 @@ const Services = () => {
       subTabs: [
         { id: 'serviceTarget', label: '서비스 대상' },
         { id: 'process', label: '프로세스' },
-        { id: 'payment', label: '정산 방식' },
-        { id: 'workerManagement', label: '작업자 관리' },
+        /*{ id: 'payment', label: '정산 방식' },
+       /* { id: 'workerManagement', label: '작업자 관리' },*/
         { id: 'qna', label: 'QnA' }
       ]
     }
@@ -119,7 +119,7 @@ const Services = () => {
   };
 
   const handleInquiryClick = () => {
-    router.push('/inquiry', { 
+    router.push('https://pf.kakao.com/_Lpaln/chat', { 
     //   state: { 
     //     source: 'services',
     //     type: 'development'
@@ -128,7 +128,7 @@ const Services = () => {
   };
 
   const handleSubscriptionClick = () => {
-    router.push('/subscription', {
+    router.push('https://pf.kakao.com/_Lpaln/chat', {
     //   state: {
     //     source: 'services',
     //     type: 'team'
@@ -295,7 +295,7 @@ const Services = () => {
 
               <VoucherCard>
                 <VoucherBadge>데이터바우처</VoucherBadge>
-                <VoucherName>최대 2,000만원 지원</VoucherName>
+                <VoucherName>최대 4,500만원 지원</VoucherName>
                 <VoucherDesc>데이터 활용 지원금</VoucherDesc>
                 <VoucherRate>자부담 20%</VoucherRate>
                 <VoucherNote>중소기업 대상 지원</VoucherNote>
@@ -535,7 +535,7 @@ const Services = () => {
             </ActionButtonGroup>
           </QuestionBox>
         );
-      case 'payment':
+       /*case 'payment':
         return (
           <PaymentSection>
             <ProcessTitle>정산 방식</ProcessTitle>
@@ -626,7 +626,7 @@ const Services = () => {
               </ManagementCard>
             </ManagementGrid>
           </WorkerManagementSection>
-        );
+        );*/
       default:
         return (
           <QuestionBox>
@@ -707,10 +707,10 @@ const MainTabContainer = styled.div`
   width: 1000px;
   margin: 0 auto;
   position: sticky;
-  top: 80px;
+  top: 76px;
   background: #f8f9fa;
   z-index: 98;
-  border-bottom: 1px solid #eee;
+  border-bottom: 0px solid #eee;
   padding: 0;
 
   @media (max-width: 1000px) {
