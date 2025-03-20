@@ -102,6 +102,7 @@ const Portfolio = () => {
 const ProjectsPage = styled.div`
   padding: 120px 0;
   background: #f8f9fa;
+  min-height: 90vh;
 `;
 
 const PageHeader = styled.div`
