@@ -707,7 +707,7 @@ const MainTabContainer = styled.div`
   width: 1000px;
   margin: 0 auto;
   position: sticky;
-  top: 76px;
+  top: 72px;
   background: #f8f9fa;
   z-index: 98;
   border-bottom: 0px solid #eee;
@@ -716,6 +716,7 @@ const MainTabContainer = styled.div`
   @media (max-width: 1000px) {
     width: 100%;
     padding: 0;
+    top: 62px;
   }
 `;
 
@@ -744,7 +745,7 @@ const MainTab = styled.button<{ $active: boolean }>`
     transition: background-color 0.3s ease;
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1000px) {
     font-size: 1.4rem;
     padding: 1rem 0;
   }
@@ -787,15 +788,15 @@ const SubTabContainer = styled.div`
   height: fit-content;
   z-index: 97;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1000px) {
     flex-direction: row;
     width: 100%;
     overflow-x: auto;
     gap: 0;
     margin: 0;
-    padding: 1rem;
+    padding: 2rem;
     position: sticky;
-    top: 124px;
+    top: 120px;
     background: #f8f9fa;
     box-shadow: 0 1px 0 rgba(0,0,0,0.1);
     &::-webkit-scrollbar {
@@ -816,9 +817,9 @@ const SubTab = styled.button<{ $active: boolean }>`
   white-space: nowrap;
   width: 100%;
 
-  @media (max-width: 768px) {
-    text-align: center;
-    padding: 0.5rem;
+  @media (max-width: 1000px) {
+    text-align: left;
+    padding: 0rem;
     width: 20%;
     font-size: 0.9rem;
     background: none;
@@ -837,7 +838,7 @@ const Content = styled.div`
   overflow-y: auto;
   scroll-behavior: smooth;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1000px) {
     margin-top: 0;
     padding: 0 2rem;
   }
