@@ -97,7 +97,10 @@ const Portfolio = () => {
       </ProjectGrid>
     </ProjectsPage>
   );
+  
 };
+
+
 
 const ProjectsPage = styled.div`
   padding: 120px 0;

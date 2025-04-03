@@ -6,7 +6,9 @@ const Footer = () => {
     <FooterWrapper>
       <FooterContent>
         <FooterText>
-          © 2024 Growthsome. All rights reserved.
+        디어라운드 주식회사<br /> 사업자등록번호 573-86-01025 대표 조현주<br /> 
+        서울시 영등포구 영등포로 19길 15, 301-14호
+        T.02-583-8228 E.master@growsome.co.kr<br />통신판매업신고번호 제2025-서울영등포-0150호
         </FooterText>
         <ComingSoon>NEW SERVICE COMING SOON</ComingSoon>
       </FooterContent>
