@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 const Store = () => {
   const router = useRouter();
@@ -107,7 +108,12 @@ const Store = () => {
               transition={{ delay: index * 0.2 }}
             >
               <ProductImage onClick={() => handleDetailNavigation(product.id)}>
-                <img src={product.image} alt={product.title} />
+                <Image 
+                  src={product.image || '/default-image.jpg'} 
+                  alt={product.title || 'Product'} 
+                  width={300}
+                  height={200}
+                />
               </ProductImage>
               <ProductInfo>
                 <TagList>

@@ -1,22 +1,34 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { useRouter } from 'next/navigation';
 import { getProductData } from '@/app/store/[id]/getProductData';
+import Image from 'next/image';
 
-export default async function ProductDetail({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = await params;
+const ProductDetail = () => {
   const router = useRouter();
-  const data = await getProductData(id);
+  const [product, setProduct] = useState<any>(null);
+  const [id, setId] = useState<string>('');
 
-  if (!data) {
-    return <p>Product not found</p>;
-  }
+  useEffect(() => {
+    // URL에서 id 파라미터 추출
+    const pathSegments = window.location.pathname.split('/');
+    const productId = pathSegments[pathSegments.length - 1];
+    setId(productId);
+  }, []);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (id) {
+        const data = await getProductData(id);
+        setProduct(data);
+      }
+    };
+    fetchProduct();
+  }, [id]);
+
+  if (!product) return <div>로딩 중...</div>;
 
   const handleDetailNavigation = (productId: number) => {
     router.push(`/store/${productId}`);
@@ -25,14 +37,19 @@ export default async function ProductDetail({
   return (
     <DetailContainer>
       <ImageWrapper>
-        <img src={data.image || '/default-image.jpg'} alt={data.title || 'Product'} />
+        <Image 
+          src={product.image} 
+          alt={product.title}
+          width={500}
+          height={300}
+        />
       </ImageWrapper>
       <InfoWrapper>
-        <h1>{data.title || 'No Title'}</h1>
-        <p>{data.description || 'No Description'}</p>
-        <Price>{data.price ? `${data.price.toLocaleString()}원` : 'Price not available'}</Price>
+        <h1>{product.title || 'No Title'}</h1>
+        <p>{product.description || 'No Description'}</p>
+        <Price>{product.price ? `${product.price.toLocaleString()}원` : 'Price not available'}</Price>
         <TagList>
-          {data.tags?.map((tag: string, index: number) => (
+          {product.tags?.map((tag: string, index: number) => (
             <Tag key={index}>{tag}</Tag>
           )) || <Tag>No Tags</Tag>}
         </TagList>
@@ -85,3 +102,5 @@ const Tag = styled.span`
   font-size: 0.8rem;
   color: #666;
 `;
+
+export default ProductDetail;
