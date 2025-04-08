@@ -5,9 +5,10 @@ import styled from 'styled-components';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faLock } from '@fortawesome/free-solid-svg-icons';
-import { processPayment } from '@/services/paymentService';
+import { processPayment } from '@/services/tossPaymentService';
 import { validateCoupon } from '@/services/couponService';
 import { useAuth } from '../contexts/AuthContext';
+import { getProductData } from '../../lib/getProductData';
 
 // ?productId=123"
 const PaymentContent = () => {
@@ -27,6 +28,9 @@ const PaymentContent = () => {
     discount: number;
     name: string;
   } | null>(null);
+  const [applyingCoupon, setApplyingCoupon] = useState(false);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [discountAmount, setDiscountAmount] = useState(0);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -34,29 +38,11 @@ const PaymentContent = () => {
         if (!productId) {
           throw new Error('상품 ID가 필요합니다.');
         }
-
-        const response = await fetch(`/api/products?productId=${productId}`);
-        if (!response.ok) {
-          throw new Error('상품 정보를 불러오는데 실패했습니다.');
-        }
-
-        const data = await response.json();
-        if (!data.products?.[0]) {
+        const data = await getProductData(productId);
+        if (!data) {
           throw new Error('상품을 찾을 수 없습니다.');
         }
-
-        const productData = data.products[0];
-        setProduct({
-          id: productData.id,
-          title: productData.name,
-          description: productData.description,
-          originPrice: productData.plans?.[0]?.origin_price?.toLocaleString() || '가격 정보 없음',
-          discountAmount: productData.plans?.[0]?.discount_amount || 0,
-          price: productData.plans?.[0]?.price?.toLocaleString() || '가격 정보 없음',
-          features: productData.plans?.[0]?.features?.features || [],
-          image: productData.image || '',
-          type: productData.plans?.[0]?.billing_type || 'one_time',
-        });
+        setProduct(data);
       } catch (err: any) {
         console.error('상품 정보 로딩 중 에러:', err);
         setError(err.message);
@@ -81,16 +67,18 @@ const PaymentContent = () => {
 
     console.log(user);
     try {
+      const customerInfo = {
+        customerId: user.id.toString(),
+        email: user.email,
+        phoneNumber: user.phone_number
+      };
+
       await processPayment(
         {
           productPlanId: product.id,
           quantity: 1,
-          couponCode: appliedCoupon?.code,
-          customerInfo: {
-            customerId: user.id.toString(),
-            email: user.email,
-            phoneNumber: user.phone_number
-          }
+          couponCode: appliedCoupon?.code || undefined,
+          customerInfo,
         },
         product.title
       );
@@ -109,6 +97,9 @@ const PaymentContent = () => {
       return;
     }
     
+    setApplyingCoupon(true);
+    setCouponError(null);
+
     try {
       const { coupon } = await validateCoupon({
         code: couponCode,
@@ -121,9 +112,13 @@ const PaymentContent = () => {
         name: coupon.name
       });
       setCouponCode('');
+      setDiscountAmount(coupon.discountAmount);
     } catch (error: any) {
       alert(error.message || '쿠폰 적용 중 오류가 발생했습니다.');
       setCouponCode('');
+      setCouponError(error.message);
+    } finally {
+      setApplyingCoupon(false);
     }
   };
 
@@ -159,6 +154,8 @@ const PaymentContent = () => {
       </PaymentPage>
     );
   }
+
+  const finalAmount = calculateFinalAmount();
 
   return (
     <PaymentPage>
@@ -255,7 +252,7 @@ const PaymentContent = () => {
                   </>
                 )}
                 <TotalLabel>최종 결제 금액</TotalLabel>
-                <TotalPrice>{calculateFinalAmount().toLocaleString()}원</TotalPrice>
+                <TotalPrice>{finalAmount.toLocaleString()}원</TotalPrice>
               </div>
             </TotalSection>
 
@@ -268,8 +265,14 @@ const PaymentContent = () => {
                   onChange={(e) => setCouponCode(e.target.value)}
                   placeholder="쿠폰 코드를 입력하세요"
                 />
-                <ApplyButton onClick={handleCouponApply}>적용</ApplyButton>
+                <ApplyButton
+                  onClick={handleCouponApply}
+                  disabled={applyingCoupon}
+                >
+                  {applyingCoupon ? '적용 중...' : '적용하기'}
+                </ApplyButton>
               </CouponInputWrapper>
+              {couponError && <ErrorMessage>{couponError}</ErrorMessage>}
               {appliedCoupon && (
                 <AppliedCoupon>
                   <CouponName>{appliedCoupon.name}</CouponName>
@@ -586,6 +589,12 @@ const DiscountBadge = styled.span`
   font-size: 0.9rem;
   font-weight: 600;
   margin: 4px 0;
+`;
+
+const ErrorMessage = styled.div`
+  color: red;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
 `;
 
 export default Payment;
