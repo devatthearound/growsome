@@ -45,14 +45,14 @@ const PaymentContent = () => {
         setProduct(data);
       } catch (err: any) {
         console.error('상품 정보 로딩 중 에러:', err);
-        setError(err.message);
+        router.push('/404');
       } finally {
         setLoading(false);
       }
     };
 
     fetchProduct();
-  }, [productId]);
+  }, [productId, router]);
 
   const handlePayment = useCallback(async () => {
     if (!user) {
@@ -160,21 +160,16 @@ const PaymentContent = () => {
   return (
     <PaymentPage>
       <Container>
-        <PageHeader>
-          <h1>결제하기</h1>
-          <p>안전한 결제를 위해 SSL 보안 인증을 사용합니다</p>
-        </PageHeader>
+        <Title>결제하기</Title>
+        <SubTitle>안전한 결제를 위해 SSL 보안 인증을 사용합니다</SubTitle>
 
-        <PaymentGrid>
-          <OrderSummary>
+        <Grid>
+          <OrderSection>
             <SectionTitle>주문 내역</SectionTitle>
-            <ProductCard>
-              {product.image && (
-                <ProductImage src={product.image} alt={product.title} />
-              )}
-              <h3>{product.title}</h3>
-              <PriceWrapper>
-                <OriginalPrice>{product.originPrice}원</OriginalPrice>
+            <ProductInfo>
+              <ProductName>{product.title}</ProductName>
+              <PriceInfo>
+                <OriginalPrice>{product.originPrice.toLocaleString()}원</OriginalPrice>
                 {product.discountAmount > 0 && (
                   <DiscountBadge>
                     {calculateDiscountPercentage(
@@ -183,23 +178,21 @@ const PaymentContent = () => {
                     )}% 할인
                   </DiscountBadge>
                 )}
-                <Price>{product.price}원</Price>
-              </PriceWrapper>
-              {product.description && (
-                <Description>{product.description}</Description>
-              )}
+                <FinalPrice>{product.price.toLocaleString()}원</FinalPrice>
+              </PriceInfo>
+              <Description>{product.description}</Description>
               {product.features && (
-                <FeatureList>
+                <Features>
                   {product.features.map((feature: string, index: number) => (
-                    <FeatureItem key={index}>
+                    <Feature key={index}>
                       <FontAwesomeIcon icon={faCheck} />
                       {feature}
-                    </FeatureItem>
+                    </Feature>
                   ))}
-                </FeatureList>
+                </Features>
               )}
-            </ProductCard>
-          </OrderSummary>
+            </ProductInfo>
+          </OrderSection>
 
           <PaymentSection>
             <SectionTitle>결제 수단 선택</SectionTitle>
@@ -238,11 +231,11 @@ const PaymentContent = () => {
             <TotalSection>
               <div>
                 <TotalLabel>정가</TotalLabel>
-                <div>{product.originPrice}원</div>
+                <div>{product.originPrice.toLocaleString()}원</div>
                 {product.discountAmount > 0 && (
                   <>
                     <TotalLabel>상품 할인</TotalLabel>
-                    <div>-{product.discountAmount.toLocaleString()}원</div>
+                    <div>-{(product.originPrice - product.price).toLocaleString()}원</div>
                   </>
                 )}
                 {appliedCoupon && (
@@ -285,7 +278,7 @@ const PaymentContent = () => {
               결제하기
             </PayButton>
           </PaymentSection>
-        </PaymentGrid>
+        </Grid>
       </Container>
     </PaymentPage>
   );
@@ -312,103 +305,87 @@ const PaymentPage = styled.div`
 `;
 
 const Container = styled.div`
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 40px 20px;
 `;
 
-const PageHeader = styled.div`
+const Title = styled.h1`
   text-align: center;
-  margin-bottom: 40px;
-
-  h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 8px;
-  }
-
-  p {
-    color: #666;
-  }
+  font-size: 28px;
+  margin-bottom: 10px;
 `;
 
-const PaymentGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1.5fr;
-  gap: 40px;
+const SubTitle = styled.p`
+  text-align: center;
+  color: #666;
+  margin-bottom: 40px;
+`;
 
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 1.2rem;
-  font-weight: 600;
+  font-size: 18px;
   margin-bottom: 20px;
 `;
 
-const OrderSummary = styled.div`
+const OrderSection = styled.div`
   background: white;
-  padding: 24px;
-  border-radius: 16px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 `;
 
-const ProductCard = styled.div`
-  h3 {
-    font-size: 1.1rem;
-    font-weight: 600;
-    margin-bottom: 16px;
-  }
+const ProductInfo = styled.div`
   padding: 20px;
-  background: white;
-  border-radius: 12px;
+  background: #f8f9fa;
+  border-radius: 8px;
 `;
 
-const PriceWrapper = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
+const ProductName = styled.h3`
+  font-size: 20px;
+  margin-bottom: 15px;
+`;
+
+const PriceInfo = styled.div`
+  margin-bottom: 20px;
 `;
 
 const OriginalPrice = styled.span`
-  font-size: 0.9rem;
-  color: #999;
   text-decoration: line-through;
+  color: #999;
+  margin-right: 10px;
 `;
 
-const Price = styled.div`
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #514FE4;
-  margin-bottom: 24px;
+const DiscountBadge = styled.span`
+  background: #ff4b4b;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  margin-right: 10px;
 `;
 
-const FeatureList = styled.ul`
-  list-style: none;
-  padding: 0;
+const FinalPrice = styled.span`
+  font-size: 24px;
+  font-weight: bold;
+  color: #4a4fff;
 `;
 
-const FeatureItem = styled.li`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
+const Description = styled.p`
   color: #666;
-  font-size: 0.95rem;
-
-  svg {
-    color: #514FE4;
-    font-size: 0.9rem;
-  }
+  font-size: 14px;
 `;
 
 const PaymentSection = styled.div`
   background: white;
-  padding: 24px;
-  border-radius: 16px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 `;
 
 const PaymentMethods = styled.div`
@@ -506,15 +483,6 @@ const PayButton = styled.button`
   }
 `;
 
-const ProductImage = styled.img`
-  width: 100%;
-  height: auto;
-  max-height: 150px;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 16px;
-`;
-
 const CouponSection = styled.div`
   margin: 2rem 0;
   padding: 1.5rem;
@@ -575,26 +543,29 @@ const CouponDiscount = styled.span`
   font-weight: 600;
 `;
 
-const Description = styled.p`
-  color: #666;
-  font-size: 0.9rem;
-  margin: 12px 0;
-`;
-
-const DiscountBadge = styled.span`
-  background: #FF4B4B;
-  color: white;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin: 4px 0;
-`;
-
 const ErrorMessage = styled.div`
   color: red;
   font-size: 0.9rem;
   margin-top: 0.5rem;
+`;
+
+const Features = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+`;
+
+const Feature = styled.li`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  color: #666;
+  font-size: 14px;
+
+  svg {
+    color: #4a4fff;
+  }
 `;
 
 export default Payment;

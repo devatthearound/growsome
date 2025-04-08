@@ -1,8 +1,8 @@
 import { Product } from '@/types/product';
 
 const products: { [key: string]: Product } = {
-  'basic-solution': {
-    id: 'basic-solution',
+  '4': {
+    id: '4',
     name: '베이직 솔루션',
     description: '사업계획서 초안과 MVP 예시 이미지가 필요한 스타트업에 적합',
     price: 300000,
@@ -21,8 +21,8 @@ const products: { [key: string]: Product } = {
       monthlyPayment: 25000
     }
   },
-  'standard-solution': {
-    id: 'standard-solution',
+  '5': {
+    id: '5',
     name: '스탠다드 솔루션',
     description: '10페이지 내외 사업계획서 초안과 커서AI 목업이 필요한 기업에 적합',
     price: 990000,
@@ -40,8 +40,8 @@ const products: { [key: string]: Product } = {
       monthlyPayment: 82500
     }
   },
-  'premium-solution': {
-    id: 'premium-solution',
+  '6': {
+    id: '6',
     name: '프리미엄 솔루션',
     description: '대규모 프로젝트나 특별한 요구사항이 있는 기업에 적합',
     price: 9900000,

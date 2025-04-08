@@ -299,9 +299,9 @@ const PurchasePage = () => {
       <TitleSection>
         <Title>우리의 <span style={{ color: '#5c59e7' }}>특별한 실전솔루션</span>을 <br />선택하세요</Title>
         <Subtitle>궁금한 점이 있으신가요? 전문가와 상담하세요.</Subtitle>
-        <a href="http://pf.kakao.com/_Lpaln/chat" target="_blank" rel="noopener noreferrer">
+        <Link href="/contact">
           <InquiryButton>문의하기</InquiryButton>
-        </a>
+        </Link>
       </TitleSection>
       <div className="container mx-auto px-4">
         <PackageSection>
@@ -341,14 +341,9 @@ const PurchasePage = () => {
                     </Feature>
                   </FeatureList>
                 </PackageContent>
-                <ButtonWrapper>
-                  <PurchaseButton
-                    href="/payment?product_id=4"
-                    rel="noopener noreferrer"
-                  >
-                    구매하기
-                  </PurchaseButton>
-                </ButtonWrapper>
+                <Link href="/payment?product_id=4" passHref>
+                  <PurchaseButton>구매하기</PurchaseButton>
+                </Link>
               </PackageCard>
 
               <PackageCard isHighlighted>
@@ -382,15 +377,9 @@ const PurchasePage = () => {
                     </Feature>
                   </FeatureList>
                 </PackageContent>
-                <ButtonWrapper>
-                  <PurchaseButton
-                    href="/payment?product_id=5"
-                    rel="noopener noreferrer"
-                    isHighlighted
-                  >
-                    구매하기
-                  </PurchaseButton>
-                </ButtonWrapper>
+                <Link href="/payment?product_id=5" passHref>
+                  <PurchaseButton isHighlighted>구매하기</PurchaseButton>
+                </Link>
               </PackageCard>
 
               <PackageCard>
@@ -423,14 +412,9 @@ const PurchasePage = () => {
                     </Feature>
                   </FeatureList>
                 </PackageContent>
-                <ButtonWrapper>
-                  <PurchaseButton
-                    href="/payment?product_id=6"
-                    rel="noopener noreferrer"
-                  >
-                    구매하기
-                  </PurchaseButton>
-                </ButtonWrapper>
+                <Link href="/payment?product_id=6" passHref>
+                  <PurchaseButton>구매하기</PurchaseButton>
+                </Link>
               </PackageCard>
             </PackageGrid>
           </PackageContainer>
