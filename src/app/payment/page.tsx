@@ -54,9 +54,18 @@ const PaymentContent = () => {
     fetchProduct();
   }, [productId, router]);
 
+  useEffect(() => {
+    // 로그인 상태 확인
+    if (!user && !loading) {
+      const currentPath = window.location.pathname + window.location.search;
+      router.push(`/login?redirect_to=${encodeURIComponent(currentPath)}`);
+    }
+  }, [user, loading, router]);
+
   const handlePayment = useCallback(async () => {
     if (!user) {
-      alert('로그인이 필요합니다.');
+      const currentPath = window.location.pathname + window.location.search;
+      router.push(`/login?redirect_to=${encodeURIComponent(currentPath)}`);
       return;
     }
 
@@ -75,7 +84,7 @@ const PaymentContent = () => {
 
       await processPayment(
         {
-          productPlanId: product.id,
+          productPlanId: parseInt(productId || '0'),
           quantity: 1,
           couponCode: appliedCoupon?.code || undefined,
           customerInfo,
