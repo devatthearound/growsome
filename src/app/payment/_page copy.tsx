@@ -5,8 +5,8 @@ import styled from 'styled-components';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faLock } from '@fortawesome/free-solid-svg-icons';
-import { processPayment } from '@/services/tossPaymentService';
-import { validateCoupon } from '@/services/couponService';
+// import { processPayment } from '@/services/tossPaymentService';
+// import { validateCoupon } from '@/services/couponService';
 import { useAuth } from '../contexts/AuthContext';
 import { getProductData } from '../../lib/getProductData';
 
@@ -75,60 +75,60 @@ const PaymentContent = () => {
     }
 
     console.log(user);
-    try {
-      const customerInfo = {
-        customerId: user.id.toString(),
-        email: user.email,
-        phoneNumber: user.phone_number
-      };
+  //   try {
+  //     const customerInfo = {
+  //       customerId: user.id.toString(),
+  //       email: user.email,
+  //       phoneNumber: user.phone_number
+  //     };
 
-      await processPayment(
-        {
-          productPlanId: parseInt(productId || '0'),
-          quantity: 1,
-          couponCode: appliedCoupon?.code || undefined,
-          customerInfo,
-        },
-        product.title
-      );
+  //     await processPayment(
+  //       {
+  //         productPlanId: parseInt(productId || '0'),
+  //         quantity: 1,
+  //         couponCode: appliedCoupon?.code || undefined,
+  //         customerInfo,
+  //       },
+  //       product.title
+  //     );
 
-      alert('결제가 완료되었습니다.');
-      router.push('/payment/complete');
-    } catch (error: any) {
-      console.error('결제 처리 중 오류가 발생했습니다:', error);
-      alert(error.message || '결제 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
-    }
+  //     alert('결제가 완료되었습니다.');
+  //     router.push('/payment/complete');
+  //   } catch (error: any) {
+  //     console.error('결제 처리 중 오류가 발생했습니다:', error);
+  //     alert(error.message || '결제 처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+  //   }
   }, [user, agreed, appliedCoupon, product, router]);
 
   const handleCouponApply = async () => {
-    if (!couponCode) {
-      alert('쿠폰 코드를 입력해주세요.');
-      return;
-    }
+    // if (!couponCode) {
+    //   alert('쿠폰 코드를 입력해주세요.');
+    //   return;
+    // }
     
-    setApplyingCoupon(true);
-    setCouponError(null);
+    // setApplyingCoupon(true);
+    // setCouponError(null);
 
-    try {
-      const { coupon } = await validateCoupon({
-        code: couponCode,
-        productId: product.id
-      });
+    // try {
+    //   const { coupon } = await validateCoupon({
+    //     code: couponCode,
+    //     productId: product.id
+    //   });
 
-      setAppliedCoupon({
-        code: coupon.code,
-        discount: coupon.discountAmount,
-        name: coupon.name
-      });
-      setCouponCode('');
-      setDiscountAmount(coupon.discountAmount);
-    } catch (error: any) {
-      alert(error.message || '쿠폰 적용 중 오류가 발생했습니다.');
-      setCouponCode('');
-      setCouponError(error.message);
-    } finally {
-      setApplyingCoupon(false);
-    }
+    //   setAppliedCoupon({
+    //     code: coupon.code,
+    //     discount: coupon.discountAmount,
+    //     name: coupon.name
+    //   });
+    //   setCouponCode('');
+    //   setDiscountAmount(coupon.discountAmount);
+    // } catch (error: any) {
+    //   alert(error.message || '쿠폰 적용 중 오류가 발생했습니다.');
+    //   setCouponCode('');
+    //   setCouponError(error.message);
+    // } finally {
+    //   setApplyingCoupon(false);
+    // }
   };
 
   const calculateDiscountPercentage = (originalPrice: number, discountAmount: number) => {
@@ -302,7 +302,7 @@ const Payment = () => {
         </Container>
       </PaymentPage>
     }>
-      <PaymentContent />
+      {/* <PaymentContent /> */}
     </Suspense>
   );
 };

@@ -4,7 +4,7 @@ export async function POST(request: Request) {
   try {
     const { paymentKey, orderId, amount } = await request.json();
 
-    const widgetSecretKey = "live_gsk_Z61JOxRQVEYL2zP0GgX0VW0X9bAq";
+    const widgetSecretKey = process.env.TOSS_SECRET_KEY || '';
     const encryptedSecretKey = "Basic " + Buffer.from(widgetSecretKey + ":").toString("base64");
 
     const response = await fetch("https://api.tosspayments.com/v1/payments/confirm", {
