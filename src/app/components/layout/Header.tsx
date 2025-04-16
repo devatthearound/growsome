@@ -1,16 +1,15 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faBars, faTimes, faSignOutAlt, faRocket } from '@fortawesome/free-solid-svg-icons';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faUser, faBars, faTimes, faSignOutAlt, faRocket } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/app/contexts/AuthContext';
+import dynamic from 'next/dynamic';
 
 interface HeaderProps {
-  onSubscribeClick: () => void;
-  onInquiryClick: () => void;
   theme?: 'light' | 'dark';
 }
 
@@ -19,15 +18,24 @@ interface NavItem {
   label: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick, theme = 'light' }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+const FontAwesomeIcon = dynamic(
+  () => import('@fortawesome/react-fontawesome').then(mod => mod.FontAwesomeIcon),
+  { ssr: false }
+);
+const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const router = useRouter();
   const { user, isLoggedIn, logout } = useAuth();
   const currentPath = usePathname();
 
+
   // 중앙 집중식 네비게이션 링크 관리
   const navigationLinks: NavItem[] = [
-   
     { path: '/product', label: '실전솔루션' },
     { path: '/portfolio', label: '포트폴리오' },
     { path: '/services', label: '개발 서비스' },
@@ -38,74 +46,6 @@ const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick, theme
     setIsMenuOpen(false);
   };
 
-  const renderNavLinks = (isMobile: boolean = false) => {
-    return navigationLinks.map((link) => {
-      const isActive = currentPath === link.path;
-      return isMobile ? (
-        <MobileNavItem 
-          key={link.path} 
-          onClick={() => handleMenuClick(link.path)}
-          $isActive={isActive}
-        >
-          {link.label}
-        </MobileNavItem>
-      ) : (
-        <NavItem key={link.path}>
-          <NavLink 
-            onClick={() => handleMenuClick(link.path)}
-            $isActive={isActive}
-          >
-            {link.label}
-            <NavLinkUnderline $isActive={isActive} />
-          </NavLink>
-        </NavItem>
-      )
-    });
-  };
-
-  const renderUserSection = (isMobile: boolean = false) => {
-    return (
-      <>
-        {isLoggedIn ? (
-          <>
-            <UserProfileGroup onClick={() => handleMenuClick('/mypage')}>
-              <FontAwesomeIcon icon={faUser} />
-              <UserName>{user?.username}</UserName>
-            </UserProfileGroup>
-            <LogoutButton 
-              onClick={logout}
-              $isMobile={isMobile}
-              $theme={theme}
-            >
-              로그아웃
-            </LogoutButton>
-          </>
-        ) : (
-          <LoginButton 
-            onClick={() => router.push('/login')}
-            $isMobile={isMobile}
-            $theme={theme}
-          >
-            로그인
-          </LoginButton>
-        )}
-        {isMobile ? (
-          <a href="https://open.kakao.com/o/gqWxH1Zg" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-            <MobileSecretLabButton>
-              비밀연구소 참여하기 🚀
-            </MobileSecretLabButton>
-          </a>
-        ) : (
-          <a href="https://open.kakao.com/o/gqWxH1Zg" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-          
-          <SecretLabButton>
-            <span>비밀연구소 참여하기 🚀</span>
-          </SecretLabButton>
-          </a>
-        )}
-      </>
-    );
-  };
 
   return (
     <HeaderWrapper $theme={theme}>
@@ -117,24 +57,122 @@ const Header: React.FC<HeaderProps> = ({ onSubscribeClick, onInquiryClick, theme
           
           <MainNav>
             <NavList>
-              {renderNavLinks()}
+              {
+                navigationLinks.map((link) => {
+                  const isActive = currentPath === link.path;
+                  return (
+                    <NavItem key={link.path}>
+                    <NavLink 
+                      onClick={() => handleMenuClick(link.path)}
+                      $isActive={isActive}
+                    >
+                      {link.label}
+                      <NavLinkUnderline $isActive={isActive} />
+                    </NavLink>
+                  </NavItem>
+                  ) 
+                })
+              }
             </NavList>
           </MainNav>
         </NavSection>
 
         <UserSection>
-          {renderUserSection()}
+          {
+          <>
+          {isLoggedIn ? (
+            <>
+              <UserProfileGroup onClick={() => handleMenuClick('/mypage')}>
+                {/* {
+                  isMounted && <FontAwesomeIcon icon={faUser} />
+                } */}
+                <UserName>{user?.username}</UserName>
+              </UserProfileGroup>
+              <LogoutButton 
+                onClick={logout}
+                $isMobile={false}
+                $theme={theme}
+              >
+                로그아웃
+              </LogoutButton>
+            </>
+          ) : (
+            <LoginButton 
+              onClick={() => router.push('/login')}
+              $isMobile={false}
+              $theme={theme}
+            >
+              로그인
+            </LoginButton>
+          )}
+          <a href="https://open.kakao.com/o/gqWxH1Zg" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+            
+            <SecretLabButton>
+              <span>비밀연구소 참여하기 🚀</span>
+            </SecretLabButton>
+            </a>
+          </>
+          }
         </UserSection>
 
         <MobileMenuButton onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          <FontAwesomeIcon icon={isMenuOpen ? faTimes : faBars} />
+          {/* {
+            isMounted && <FontAwesomeIcon icon={faTimes} />
+          } */}
         </MobileMenuButton>
       </HeaderContainer>
 
       <MobileMenu $isOpen={isMenuOpen}>
         <MobileNavList>
-          {renderNavLinks(true)}
-          {renderUserSection(true)}
+        {
+                navigationLinks.map((link) => {
+                  const isActive = currentPath === link.path;
+                  return (
+                    <MobileNavItem 
+                      key={link.path} 
+                      onClick={() => handleMenuClick(link.path)}
+                      $isActive={isActive}
+                    >
+                      {link.label}
+                    </MobileNavItem>
+                  )
+                })
+            }
+          {
+            <>
+            {isLoggedIn ? (
+              <>
+                <UserProfileGroup onClick={() => handleMenuClick('/mypage')}>
+                  {/* {
+                    isMounted && <FontAwesomeIcon icon={faUser} />
+                  } */}
+                  <UserName>{user?.username}</UserName>
+                </UserProfileGroup>
+                <LogoutButton 
+                  onClick={logout}
+                  $isMobile={true}
+                  $theme={theme}
+                >
+                  로그아웃
+                </LogoutButton>
+              </>
+            ) : (
+              <LoginButton 
+                onClick={() => router.push('/login')}
+                $isMobile={true}
+                $theme={theme}
+              >
+                로그인
+              </LoginButton>
+            )}
+            <a href="https://open.kakao.com/o/gqWxH1Zg" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+                <MobileSecretLabButton>
+                  비밀연구소 참여하기 🚀
+                </MobileSecretLabButton>
+              </a>
+              
+            </>
+          }
         </MobileNavList>
       </MobileMenu>
     </HeaderWrapper>

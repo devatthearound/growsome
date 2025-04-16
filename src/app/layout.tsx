@@ -1,4 +1,4 @@
-"use client"
+'use client'
 // import type { Metadata } from "next";
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -37,17 +37,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const router = useRouter();
-  const [isSubscribePopupOpen, setIsSubscribePopupOpen] = useState(false);
-
-
-  const handleSubscribeClick = () => {
-    setIsSubscribePopupOpen(true);
-  };
-
-  const handleCloseSubscribe = () => {
-    setIsSubscribePopupOpen(false);
-  };
 
 
   return (
@@ -63,17 +52,14 @@ export default function RootLayout({
             <EmailProvider>
 
             <AppContainer>
-              <Header 
-                onSubscribeClick={handleSubscribeClick}
-                onInquiryClick={() => router.push('/inquiry')}  
-              />
+              <Header />
               <Main>
                 {children}
               </Main>
             <Footer />
-            {isSubscribePopupOpen && (
+            {/* {isSubscribePopupOpen && (
               <SubscribePopup onClose={handleCloseSubscribe} />
-            )}
+            )} */}
           </AppContainer>
           </EmailProvider>
           </CoupangApiProvider>
