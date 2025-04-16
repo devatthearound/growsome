@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import MDEditor from '@uiw/react-md-editor';
 import { useParams } from 'next/navigation';
+import Image from 'next/image';
 
 interface BlogPost {
   id: number;
@@ -143,7 +144,7 @@ export default function BlogPostContent(){
           <PostMeta>
             <Author>
               <AuthorAvatar>
-                <img src={post.author?.avatar} alt={post.author?.name} />
+                <Image width={50} height={50} src={post.author?.avatar || ''} alt={post.author?.name || ''} />
               </AuthorAvatar>
               <AuthorInfo>
                 <AuthorName>{post.author?.name}</AuthorName>

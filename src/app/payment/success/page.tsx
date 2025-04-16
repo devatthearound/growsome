@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import styled from 'styled-components';
+import { Suspense } from 'react';
 
-const SuccessPage = () => {
+const SuccessContent = () => {
   const searchParams = useSearchParams();
   const [paymentInfo, setPaymentInfo] = useState<any>(null);
 
@@ -41,6 +42,14 @@ const SuccessPage = () => {
         홈으로 돌아가기
       </Button>
     </Container>
+  );
+};
+
+const SuccessPage = () => {
+  return (
+    <Suspense fallback={<div>로딩중...</div>}>
+      <SuccessContent />
+    </Suspense>
   );
 };
 
@@ -91,4 +100,4 @@ const Button = styled.button`
   }
 `;
 
-export default SuccessPage; 
+export default SuccessPage;

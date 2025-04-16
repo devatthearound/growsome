@@ -2,8 +2,9 @@
 
 import { useSearchParams } from 'next/navigation';
 import styled from 'styled-components';
+import { Suspense } from 'react';
 
-const FailPage = () => {
+const FailContent = () => {
   const searchParams = useSearchParams();
   const errorCode = searchParams.get('code');
   const errorMessage = searchParams.get('message');
@@ -19,6 +20,14 @@ const FailPage = () => {
         홈으로 돌아가기
       </Button>
     </Container>
+  );
+};
+
+const FailPage = () => {
+  return (
+    <Suspense fallback={<div>로딩중...</div>}>
+      <FailContent />
+    </Suspense>
   );
 };
 
@@ -65,4 +74,4 @@ const Button = styled.button`
   }
 `;
 
-export default FailPage; 
+export default FailPage;

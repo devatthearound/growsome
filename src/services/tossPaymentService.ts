@@ -1,4 +1,4 @@
-import { load } from "@tosspayments/payment-sdk";
+// import { load, TossPaymentsInstance } from '@tosspayments/payment-sdk';
 
 /**
  * Toss Payments 관련 서비스 함수들
@@ -24,15 +24,37 @@ interface PaymentPrepareParams {
   customerInfo: CustomerInfo;
 }
 
+interface TossPaymentConfig {
+  clientKey: string;
+  customerKey: string;
+  amount: number;
+  orderId: string;
+  orderName: string;
+  customerName: string;
+  customerEmail: string;
+  successUrl: string;
+  failUrl: string;
+}
+
+interface PaymentResponse {
+  status: string;
+  paymentKey: string;
+}
+
 /**
  * Toss Payments를 초기화합니다.
  * @returns Toss Payments 인스턴스
  */
-export const initializeTossPayments = async () => {
-  const tossPayments = await load(
-    process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY || ''
-  );
-  return tossPayments;
+export const initializeTossPayment = async (config: TossPaymentConfig):
+Promise<any> => {
+// Promise<TossPaymentsInstance> => {
+  try {
+    // const tossPayments = await load(config.clientKey);
+    // return tossPayments;
+  } catch (error) {
+    console.error('Toss Payment 초기화 실패:', error);
+    throw error;
+  }
 };
 
 /**
@@ -67,18 +89,27 @@ export const processPayment = async (
   const { order } = await prepareResponse.json();
 
   // 2. Toss Payments 결제 요청
-  const tossPayments = await initializeTossPayments();
-  
-  const response = await tossPayments.requestPayment('카드', {
+  const tossPayments = await initializeTossPayment({
+    clientKey: process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY || '',
+    customerKey: prepareParams.customerInfo.customerId,
     amount: order.amount,
     orderId: order.id,
     orderName: productTitle,
     customerName: prepareParams.customerInfo.customerId,
     customerEmail: prepareParams.customerInfo.email,
-    customerMobilePhone: prepareParams.customerInfo.phoneNumber,
     successUrl: `${window.location.origin}/payment/complete`,
     failUrl: `${window.location.origin}/payment/fail`,
   });
+  
+  const response = await requestPayment(tossPayments, {
+    amount: order.amount,
+    orderId: order.id,
+    orderName: productTitle,
+    customerName: prepareParams.customerInfo.customerId,
+    customerEmail: prepareParams.customerInfo.email,
+    successUrl: `${window.location.origin}/payment/complete`,
+    failUrl: `${window.location.origin}/payment/fail`,
+  }, '카드');
 
   if (response.status === 'DONE') {
     // 3. 결제 완료 처리
@@ -102,5 +133,28 @@ export const processPayment = async (
     return completeResponse.json();
   } else {
     throw new Error('결제가 완료되지 않았습니다.');
+  }
+};
+
+export const requestPayment = async (
+  // tossPayments: TossPaymentsInstance,
+  tossPayments: any,
+  config: Omit<TossPaymentConfig, 'clientKey' | 'customerKey'>,
+  method: string
+): Promise<PaymentResponse> => {
+  try {
+    const response = await tossPayments.requestPayment(method, {
+      amount: config.amount,
+      orderId: config.orderId,
+      orderName: config.orderName,
+      customerName: config.customerName,
+      customerEmail: config.customerEmail,
+      successUrl: config.successUrl,
+      failUrl: config.failUrl,
+    });
+    return response as PaymentResponse;
+  } catch (error) {
+    console.error('결제 요청 실패:', error);
+    throw error;
   }
 }; 
