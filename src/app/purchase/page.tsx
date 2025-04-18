@@ -373,7 +373,7 @@ const PurchasePage = () => {
                     </Feature>
                     <Feature>
                       <FontAwesomeIcon icon={faCheck} />
-                      우선순위 지원 및 빠른 피드백
+                      우선순위 지원 및 빠른 피드백 (멘토링·교육 방식)
                     </Feature>
                   </FeatureList>
                 </PackageContent>

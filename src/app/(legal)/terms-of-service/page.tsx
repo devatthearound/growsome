@@ -101,6 +101,7 @@ const TermsOfService = () => {
             <p>유료 서비스 결제 및 환불 조건은 '환불 정책' 페이지에 따릅니다.</p>
             <p>회사는 서비스 제공 전 또는 계약서상 기재된 범위 내에서 환불이 가능하며, 일정 조건에서는 환불이 제한될 수 있습니다.</p>
             <p>반복적인 환불 요청, 악의적 사용 기록이 있는 경우 회사는 서비스 이용을 제한할 수 있습니다.</p>
+            <p><strong>각 패키지(베이직/스탠다드/프리미엄)의 상세 가격 및 제공 내용은 <a href="https://growsome.kr/solutions" target="_blank" rel="noopener noreferrer">패키지 안내 페이지</a>를 참고하세요.</strong></p>
           </SectionContent>
         </Section>
 
