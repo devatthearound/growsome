@@ -9,6 +9,15 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { useCoupangApi } from '@/app/contexts/CoupangApiContext';
 
+interface UserInfo {
+  id: number;
+  email: string;
+  username: string;
+  company_name: string;
+  position: string;
+  phone_number: string;
+}
+
 const MyPageContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -18,6 +27,9 @@ const MyPageContent = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState('');
   const [editableKeys, setEditableKeys] = useState(apiKeys);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     // URL의 tab 파라미터를 확인하여 해당 탭 활성화
@@ -26,6 +38,25 @@ const MyPageContent = () => {
       setActiveTab(tab);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const response = await fetch('/api/user/me');
+        if (!response.ok) {
+          throw new Error('사용자 정보를 가져오는데 실패했습니다.');
+        }
+        const data = await response.json();
+        setUserInfo(data.user);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : '알 수 없는 오류가 발생했습니다.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
 
   const handleSave = () => {
     setIsSaving(true);
@@ -41,14 +72,6 @@ const MyPageContent = () => {
   };
 
   // 임시 데이터 - 실제로는 API에서 가져올 것
-  const userInfo = {
-    name: '홍길동',
-    email: 'hong@example.com',
-    phone: '010-1234-5678',
-    company: '그로썸',
-    position: 'CEO'
-  };
-
   const projectHistory = [
     {
       id: 1,
@@ -181,6 +204,18 @@ const MyPageContent = () => {
 
   // 각 탭의 내용을 렌더링하는 함수
   const renderTabContent = () => {
+    if (isLoading) {
+      return <LoadingMessage>로딩 중...</LoadingMessage>;
+    }
+
+    if (error) {
+      return <ErrorMessage>{error}</ErrorMessage>;
+    }
+
+    if (!userInfo) {
+      return <ErrorMessage>사용자 정보를 찾을 수 없습니다.</ErrorMessage>;
+    }
+
     switch (activeTab) {
       case 'profile':
         return (
@@ -195,7 +230,7 @@ const MyPageContent = () => {
             <ProfileGrid>
               <ProfileItem>
                 <Label>이름</Label>
-                <Value>{userInfo.name}</Value>
+                <Value>{userInfo.username}</Value>
               </ProfileItem>
               <ProfileItem>
                 <Label>이메일</Label>
@@ -203,11 +238,11 @@ const MyPageContent = () => {
               </ProfileItem>
               <ProfileItem>
                 <Label>연락처</Label>
-                <Value>{userInfo.phone}</Value>
+                <Value>{userInfo.phone_number}</Value>
               </ProfileItem>
               <ProfileItem>
                 <Label>회사</Label>
-                <Value>{userInfo.company}</Value>
+                <Value>{userInfo.company_name}</Value>
               </ProfileItem>
               <ProfileItem>
                 <Label>직책</Label>
@@ -1252,6 +1287,20 @@ const Link = styled.a`
   &:hover {
     text-decoration: underline;
   }
+`;
+
+const LoadingMessage = styled.div`
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+  color: #666;
+`;
+
+const ErrorMessage = styled.div`
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+  color: #ff4444;
 `;
 
 export default MyPage; 

@@ -277,13 +277,13 @@ function SignupContent() {
                   value={formData.phone}
                   onChange={handleChange}
                 />
-                <VerificationButton
+                {/* <VerificationButton
                   type="button"
                   onClick={handleVerification}
                   disabled={!formData.phone}
                 >
                   {verificationSent ? '재요청' : '인증요청'}
-                </VerificationButton>
+                </VerificationButton> */}
               </InputGroup>
               {messages.phone && <Message>{messages.phone}</Message>}
               {verificationSent && (

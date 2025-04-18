@@ -1,94 +1,64 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
-import styled from 'styled-components';
+import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense } from 'react';
 
-const SuccessPage = () => {
+const SuccessContent = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const [paymentInfo, setPaymentInfo] = useState<any>(null);
 
   useEffect(() => {
-    const paymentKey = searchParams.get('paymentKey');
-    const orderId = searchParams.get('orderId');
-    const amount = searchParams.get('amount');
+    // 쿼리 파라미터 값이 결제 요청할 때 보낸 데이터와 동일한지 반드시 확인하세요.
+    // 클라이언트에서 결제 금액을 조작하는 행위를 방지할 수 있습니다.
+    const requestData = {
+      orderId: searchParams.get("orderId"),
+      amount: searchParams.get("amount"),
+      paymentKey: searchParams.get("paymentKey"),
+    };
 
-    if (paymentKey && orderId && amount) {
-      setPaymentInfo({
-        paymentKey,
-        orderId,
-        amount: parseInt(amount),
+    async function confirm() {
+      const response = await fetch("/api/payments/confirm", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestData),
       });
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        // 결제 실패 비즈니스 로직을 구현하세요.
+        router.push(`/payment/fail?message=${json.message}&code=${json.code}`);
+        return;
+      }
+
+      // 결제 성공 비즈니스 로직을 구현하세요.
     }
-  }, [searchParams]);
+    confirm();
+  }, [searchParams, router]);
 
   return (
-    <Container>
-      <Title>결제가 완료되었습니다</Title>
-      {paymentInfo && (
-        <PaymentInfo>
-          <InfoItem>
-            <Label>주문번호</Label>
-            <Value>{paymentInfo.orderId}</Value>
-          </InfoItem>
-          <InfoItem>
-            <Label>결제금액</Label>
-            <Value>{paymentInfo.amount.toLocaleString()}원</Value>
-          </InfoItem>
-        </PaymentInfo>
-      )}
-      <Button onClick={() => window.location.href = '/'}>
-        홈으로 돌아가기
-      </Button>
-    </Container>
+    <div className="result wrapper">
+      <div className="box_section">
+        <h2>
+          결제 성공
+        </h2>
+        <p>{`주문번호: ${searchParams.get("orderId")}`}</p>
+        <p>{`결제 금액: ${Number(
+          searchParams.get("amount")
+        ).toLocaleString()}원`}</p>
+        <p>{`paymentKey: ${searchParams.get("paymentKey")}`}</p>
+      </div>
+    </div>
   );
 };
 
-const Container = styled.div`
-  max-width: 600px;
-  margin: 100px auto;
-  padding: 20px;
-  text-align: center;
-`;
-
-const Title = styled.h1`
-  font-size: 24px;
-  margin-bottom: 30px;
-`;
-
-const PaymentInfo = styled.div`
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 30px;
-`;
-
-const InfoItem = styled.div`
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-`;
-
-const Label = styled.span`
-  color: #666;
-`;
-
-const Value = styled.span`
-  font-weight: bold;
-`;
-
-const Button = styled.button`
-  background: #0066ff;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-
-  &:hover {
-    background: #0052cc;
-  }
-`;
-
-export default SuccessPage; 
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<div>로딩중...</div>}>
+      <SuccessContent />
+    </Suspense>
+  );
+}

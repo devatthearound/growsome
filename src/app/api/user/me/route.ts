@@ -11,7 +11,6 @@ export async function GET() {
     const cookieStore = await cookies();
     const token = cookieStore.get('coupas_access_token')?.value;
 
-    console.log('token', token);
     if (!token) {
       return NextResponse.json(
         { error: '인증되지 않은 사용자입니다.' },

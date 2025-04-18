@@ -19,7 +19,10 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   compiler: {
     styledComponents: true
-  }
+  },
+  images: {
+    domains: ['api.tosspayments.com'],
+  },
 }
 
 export default nextConfig;
