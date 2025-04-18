@@ -335,10 +335,7 @@ const PurchasePage = () => {
                       <FontAwesomeIcon icon={faCheck} />
                       빌드업 마케팅 전자책 제공
                     </Feature>
-                    <Feature>
-                      <FontAwesomeIcon icon={faCheck} />
-                      주 1회 1시간 줌 미팅
-                    </Feature>
+
                   </FeatureList>
                 </PackageContent>
                 <Link href="/payment?product_id=4" passHref>
@@ -373,7 +370,7 @@ const PurchasePage = () => {
                     </Feature>
                     <Feature>
                       <FontAwesomeIcon icon={faCheck} />
-                      우선순위 지원 및 빠른 피드백 (멘토링·교육 방식)
+                      우선순위 지원
                     </Feature>
                   </FeatureList>
                 </PackageContent>

@@ -11,7 +11,7 @@ const Footer = () => {
             <FooterLogo>GrowSome</FooterLogo>
             <LogoDescription>
               그로우썸은 디지털 전환 시대에 필요한 모든 솔루션을 제공합니다.
-              강의, SaaS, 컨설팅, 콘텐츠를 통해 비즈니스 성장을 지원합니다.
+              강의, SaaS, 콘텐츠를 통해 비즈니스 성장을 지원합니다.
             </LogoDescription>
             <SocialLinks>
               <SocialLink href="https://instagram.com" target="_blank" rel="noopener noreferrer">
