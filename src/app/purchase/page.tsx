@@ -395,15 +395,7 @@ const PurchasePage = () => {
                       <FontAwesomeIcon icon={faCheck} />
                       프리미엄 패키지의 모든 혜택 포함
                     </Feature>
-                    <Feature>
-                      <FontAwesomeIcon icon={faCheck} />
-                      맞춤형 컨설팅 제공
-                    </Feature>
-                    <Feature>
-                      <FontAwesomeIcon icon={faCheck} />
-                      전담 매니저 배정
-                    </Feature>
-                    <Feature>
+                     <Feature>
                       <FontAwesomeIcon icon={faCheck} />
                       무제한 페이지 작성
                     </Feature>
