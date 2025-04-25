@@ -12,10 +12,8 @@ function SignupContent() {
   const [step, setStep] = useState(1);
   const isPopup = false;
   const searchParams = useSearchParams();
-  const { user, setUser } = useAuth();
+  const { user, setUser, isLoggedIn, isLoading } = useAuth();
   const isExtension = searchParams.get('isExtension') === 'true';
-  const [isChecking, setIsChecking] = useState(true);
-  const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState(false);
 
   // const [isPopup, _setIsPopup] = useState(false);
   const [formData, setFormData] = useState({
@@ -57,13 +55,12 @@ function SignupContent() {
 
       if (response.ok) {
         setUser(null);
-        setIsAlreadyLoggedIn(false);
         window.location.reload();
       }
     } catch (error) {
       console.error('로그아웃 오류:', error);
     }
-  }, [setUser, setIsAlreadyLoggedIn]);
+  }, [setUser]);
 
   const handleEmailCheck = async () => {
     if (!formData.email) {
@@ -353,39 +350,8 @@ function SignupContent() {
     setVerificationSent(true);
   };
 
-  useEffect(() => {
-    const checkAuthAndRedirect = async () => {
-      try {
-        const redirectTo = searchParams.get('redirect_to') || '';
-
-        const response = await fetch('/api/auth/check?callback-url=' + redirectTo, {
-          credentials: 'include'
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.isLoggedIn) {
-            if (data.redirectUrl) {
-              window.location.href = data.redirectUrl;
-              return;
-            }
-          } else {
-            setUser(data.user);
-            setIsAlreadyLoggedIn(true);
-          }
-      } catch (error) {
-        console.error('인증 확인 오류:', error);
-      } finally {
-        setIsChecking(false);
-      }
-    };
-
-    checkAuthAndRedirect();
-  }, [isExtension, setUser]);
-
-
   // 로딩 중이거나 인증 체크 중일 때 표시할 내용
-  if (isChecking) {
+  if (isLoading) {
     return (
       <SignUpContainer>
         <div className="flex items-center justify-center">
@@ -395,7 +361,7 @@ function SignupContent() {
     );
   }
 
-  if (isAlreadyLoggedIn) {
+  if (isLoggedIn) {
     return (
       <SignUpContainer>
         <AlreadyLoggedInPanel>

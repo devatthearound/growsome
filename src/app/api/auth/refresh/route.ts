@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     const sessionResult = await client.query(
       `SELECT s.* 
       FROM sessions s
-      WHERE s.refresh_token = $1 
+      WHERE s.access_token = $1 
       AND s.expires_at > CURRENT_TIMESTAMP`,
       [refreshToken]
     );
@@ -55,7 +55,7 @@ export async function POST(request: Request) {
             THEN NOW() + INTERVAL '30 days'
             ELSE expires_at
           END
-      WHERE refresh_token = $3`,
+      WHERE access_token = $3`,
       [newAccessToken, newRefreshToken, refreshToken]
     );
 

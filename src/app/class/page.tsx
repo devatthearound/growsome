@@ -20,18 +20,6 @@ const Class = () => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState('입문');
 
-  // 실제 구현시에는 백엔드 API를 통해 구매 여부를 확인
-  React.useEffect(() => {
-    const checkPurchaseStatus = async () => {
-      // API 호출 예시
-      // const response = await fetch('/api/check-purchase-status');
-      // const data = await response.json();
-      // setHasPurchased(data.hasPurchased);
-      setHasPurchased(false); // 테스트용 기본값
-    };
-
-    checkPurchaseStatus();
-  }, []);
 
   const courses = [
     {

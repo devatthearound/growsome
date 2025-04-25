@@ -1,13 +1,15 @@
+// app/api/auth/login/route.ts
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import pool from '@/lib/db';
-import { generateToken } from '@/utils/jwt';
+import { generateToken, setAuthCookies } from '@/lib/auth';
 
 export async function POST(request: Request) {
   const client = await pool.connect();
 
   try {
     const { email, password, rememberMe, callbackUrl } = await request.json();
+    
     // 이메일 유효성 검사
     if (!email || !password) {
       return NextResponse.json(
@@ -24,7 +26,8 @@ export async function POST(request: Request) {
         u.password,
         u.username,
         u.company_name,
-        u.position
+        u.position,
+        u.phone_number
       FROM users u
       WHERE u.email = $1`,
       [email]
@@ -48,112 +51,61 @@ export async function POST(request: Request) {
       );
     }
 
+    // 로그인 시간 업데이트 (선택적)
+    try {
+      await client.query(
+        'UPDATE users SET last_login_at = NOW() WHERE id = $1',
+        [user.id]
+      );
+    } catch (updateError) {
+      // 로그인 시간 업데이트 실패는 무시 (중요하지 않음)
+      console.log('로그인 시간 업데이트 실패:', updateError);
+    }
+
     // JWT 토큰 생성
     const accessToken = await generateToken({
       userId: user.id,
       email: user.email
-    }, '7d'); // access token은 7일 유효
+    }, rememberMe ? '24h' : '2h'); // 로그인 유지 옵션에 따라 유효 시간 조정
 
     const refreshToken = await generateToken({
       userId: user.id,
       email: user.email
-    }, '30d'); // refresh token은 30일 유효
+    }, rememberMe ? '30d' : '7d'); // 로그인 유지 옵션에 따라 유효 시간 조정
 
-    await client.query('BEGIN');
-
-    try {
-      // 기존 세션 삭제
-      await client.query(
-        'DELETE FROM sessions WHERE user_id = $1',
-        [user.id]
-      );
-
-      // 새 세션 생성 (refresh token 포함)
-      const expiresAt = rememberMe 
-        ? 'NOW() + INTERVAL \'30 days\''
-        : 'NOW() + INTERVAL \'24 hours\'';
-
-      await client.query(
-        `INSERT INTO sessions (user_id, access_token, refresh_token, expires_at)
-        VALUES ($1, $2, $3, ${expiresAt})`,
-        [user.id, accessToken, refreshToken]
-      );
-
-      // 마지막 로그인 시간 업데이트
-      await client.query(
-        'UPDATE users SET last_login = CURRENT_TIMESTAMP WHERE id = $1',
-        [user.id]
-      );
-
-      await client.query('COMMIT');
-    } catch (error) {
-      await client.query('ROLLBACK');
-      throw error;
-    }
+    // 선택적: 리프레시 토큰을 데이터베이스에 저장
+    // try {
+    //   await client.query(
+    //     `INSERT INTO refresh_tokens(user_id, token_hash, expires_at)
+    //      VALUES($1, $2, NOW() + INTERVAL '7 days')
+    //      ON CONFLICT (user_id) DO UPDATE 
+    //      SET token_hash = $2, expires_at = NOW() + INTERVAL '7 days'`,
+    //     [user.id, refreshToken.substring(0, 64)] // 간소화된 예시: 실제로는 해시 함수 사용 권장
+    //   );
+    // } catch (tokenError) {
+    //   // 토큰 저장 실패는 무시 (테이블이 없을 수 있음)
+    //   console.log('리프레시 토큰 저장 실패:', tokenError);
+    // }
 
     // 사용자 정보에서 민감한 정보 제거
     delete user.password;
-    // 일반 로그인 응답
+    
+    // 로그인 응답
     const response = NextResponse.json({
       success: true,
       message: '로그인이 완료되었습니다.',
-      accessToken: accessToken,
-      refreshToken: refreshToken,
       user: {
         id: user.id,
         email: user.email,
         username: user.username,
-        company_name: user.company_name,
-        position: user.position
+        company_name: user.company_name,  
+        position: user.position,
+        phone_number: user.phone_number
       }
     });
 
-    // 쿠키 설정 업데이트
-    response.cookies.set({
-      name: 'coupas_access_token',
-      value: accessToken,
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      path: '/',
-      maxAge: 60 * 60 // 1시간
-    });
-
-    response.cookies.set({
-      name: 'coupas_refresh_token',
-      value: refreshToken,
-      httpOnly: true,
-      secure: true,
-      sameSite: 'strict',
-      path: '/',
-      maxAge: rememberMe 
-        ? 30 * 24 * 60 * 60  // 30일
-        : 24 * 60 * 60       // 24시간
-    });
-
-    if (callbackUrl) {
-      // Electron 앱으로 리다이렉트하기 위한 URL 생성
-      const redirectUrl = `${callbackUrl}?coupas_access_token=${accessToken}&coupas_refresh_token=${refreshToken}`;
-      
-      // JSON 응답으로 변경
-      return NextResponse.json({
-        success: true,
-        message: '로그인이 완료되었습니다.',
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-        redirectUrl: redirectUrl,
-        user: {
-          id: user.id,
-          email: user.email,
-          username: user.username,
-          company_name: user.company_name,
-          position: user.position
-        }
-      }
-      );
-    } else {
-      return response;
-    }
+    // HTTP Only 쿠키 설정
+    return setAuthCookies(accessToken, refreshToken, response);
   } catch (error: any) {  
     console.error('로그인 처리 중 에러:', error);
     return NextResponse.json(
@@ -164,13 +116,6 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   } finally {
-    if (client) {
-      try {
-        await client.release();
-        console.log('DB 연결 해제 성공');
-      } catch (releaseError) {
-        console.error('DB 연결 해제 실패:', releaseError);
-      }
-    }
+    client.release();
   }
 }

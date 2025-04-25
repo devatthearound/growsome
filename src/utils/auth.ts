@@ -17,7 +17,7 @@ export async function validateAuth(client: any) {
   const sessionResult = await client.query(
     `SELECT s.* 
     FROM sessions s
-    WHERE s.token = $1 
+    WHERE s.access_token = $1 
     AND s.expires_at > CURRENT_TIMESTAMP`,
     [token]
   );

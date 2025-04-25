@@ -3,7 +3,7 @@ import bcrypt from 'bcrypt';
 import { validateSignupData } from '@/utils/validators';
 import pool from '@/lib/db';
 import { generateToken } from '@/utils/jwt';
-
+import { setAuthCookies } from '@/lib/auth';
 export async function POST(request: Request) {
   const client = await pool.connect();
   
@@ -46,7 +46,7 @@ export async function POST(request: Request) {
         company_name, position, referral_source_id
       )
       VALUES ($1, $2, $3, $4, $5, $6, $7)
-      RETURNING id, email`,
+      RETURNING id, email, username, company_name, position`,
       [
         data.email,
         hashedPassword,
@@ -60,26 +60,17 @@ export async function POST(request: Request) {
 
     const user = userResult.rows[0];
 
-  // JWT 토큰 생성
-  const accessToken = await generateToken({
-    userId: user.id,
-    email: user.email
-  }, '7d'); // access token은 7일 유효
+    // JWT 토큰 생성
+    const accessToken = await generateToken({
+      userId: user.id,
+      email: user.email
+    }, '24h'); // 로그인 유지 옵션에 따라 유효 시간 조정
 
-  const refreshToken = await generateToken({
-    userId: user.id,
-    email: user.email
-  }, '30d'); // refresh token은 30일 유효
+    const refreshToken = await generateToken({
+      userId: user.id,
+      email: user.email
+      }, '30d'); // 로그인 유지 옵션에 따라 유효 시간 조정
 
-    // 새 세션 생성 (refresh token 포함)
-    const expiresAt = 'NOW() + INTERVAL \'24 hours\'';
-
-    // 세션 테이블에 토큰 저장
-    await client.query(
-      `INSERT INTO sessions (user_id, access_token, refresh_token, expires_at)
-      VALUES ($1, $2, $3, ${expiresAt})`,
-      [user.id, accessToken, refreshToken]
-    );
 
     // 약관 동의 기록
     if (data.termsAccepted || data.privacyPolicyAccepted) {
@@ -103,54 +94,21 @@ export async function POST(request: Request) {
     }
 
     await client.query('COMMIT');
-
-
-    if (data.callbackUrl) {
-      // Electron 앱으로 리다이렉트할 URL 정보를 JSON으로 반환
-      return NextResponse.json({
-        success: true,
-        message: '회원가입이 완료되었습니다.',
-        redirectUrl: `${data.callbackUrl}?coupas_access_token=${accessToken}&coupas_refresh_token=${refreshToken}`,
-        user: {
-          ...user,
-          isExtension: data?.isExtension || false
-        }
-      });
-    }
-
     // 쿠키에 토큰 설정
     const response = NextResponse.json({
       success: true,
       message: '회원가입이 완료되었습니다.',
       user: {
-        ...user,
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        company_name: user.company_name,  
+        position: user.position,
         isExtension: data?.isExtension || false
       }
     });
 
-   // 쿠키 설정 업데이트
-   response.cookies.set({
-    name: 'coupas_access_token',
-    value: accessToken,
-    httpOnly: true,
-    secure: true,
-    sameSite: 'strict',
-    path: '/',
-    maxAge: 60 * 60 // 1시간
-  });
-
-  response.cookies.set({
-    name: 'coupas_refresh_token',
-    value: refreshToken,
-    httpOnly: true,
-    secure: true,
-    sameSite: 'strict',
-    path: '/',
-    maxAge: 30 * 24 * 60 * 60
-  });
-
-    return response;
-
+    return setAuthCookies(accessToken, refreshToken, response);
   } catch (error: any) {
     await client.query('ROLLBACK');
     console.error('회원가입 에러:', error);

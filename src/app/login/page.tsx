@@ -4,15 +4,12 @@ import React, { useCallback, useState, useEffect, Suspense } from 'react';
 import styled from 'styled-components';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { getCookie } from '@/utils/cookie';
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { user, setUser } = useAuth();
+  const { user, setUser, isLoggedIn, isLoading } = useAuth();
   const isExtension = searchParams.get('isExtension') === 'true';
-  const [isChecking, setIsChecking] = useState(true);
-  const [isAlreadyLoggedIn, setIsAlreadyLoggedIn] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -25,7 +22,7 @@ function LoginContent() {
     general: ''
   });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
 
   const handleLogout = useCallback(async () => {
     try {
@@ -36,7 +33,6 @@ function LoginContent() {
 
       if (response.ok) {
         setUser(null);
-        setIsAlreadyLoggedIn(false);
         // 로그아웃 후 페이지 새로고침
         window.location.reload();
       }
@@ -56,7 +52,7 @@ function LoginContent() {
 
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsLoginLoading(true);
     try {
       const redirectTo = searchParams.get('redirect_to') || '';
 
@@ -92,64 +88,12 @@ function LoginContent() {
       console.error('로그인 에러:', error);
       setMessages(prev => ({ ...prev, general: '로그인 중 오류가 발생했습니다.' }));
     } finally {
-      setIsLoading(false);
+      setIsLoginLoading(false);
     }
   }, [formData, isExtension, router, setUser, searchParams]);
 
-  useEffect(() => {
-    const checkAuthAndRedirect = async () => {
-      try {
-        const redirectTo = searchParams.get('redirect_to') || '';
-
-        const response = await fetch('/api/auth/check?callback-url=' + redirectTo, {
-          credentials: 'include',
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.isLoggedIn) {
-          setUser(data.user);
-          
-          if (isExtension) {
-            // 토큰을 별도로 가져오기
-            const tokenResponse = await fetch('/api/auth/token', {
-              credentials: 'include'
-            });
-            const tokenData = await tokenResponse.json();
-
-            if (tokenResponse.ok && tokenData.token) {
-              console.log('Token retrieved successfully');
-              window.location.href = `/auth/extension-callback?token=${tokenData.token}`;
-              return;
-            }
-          } else {
-            // 이미 로그인된 경우 원래 가려던 페이지로 리다이렉트
-            const redirectTo = searchParams.get('redirect_to') || '';
-
-            if(redirectTo === '') {
-            // redirect_to가 없는 경우에만 isAlreadyLoggedIn 설정
-            setIsAlreadyLoggedIn(true);
-            return;
-            }else if(redirectTo.includes('coupas-auth')) {
-              window.location.href = redirectTo + '?coupas_access_token=' + data.accessToken + '&coupas_refresh_token=' + data.refreshToken;
-            }else{
-              window.location.href = redirectTo;
-            }
-
-          }
-        }
-      } catch (error) {
-        console.error('인증 확인 오류:', error);
-      } finally {
-        setIsChecking(false);
-      }
-    };
-
-    checkAuthAndRedirect();
-  }, [isExtension, setUser, router, searchParams]);
-
   // 로딩 중이거나 인증 체크 중일 때 표시할 내용
-  if (isChecking) {
+  if (isLoading) {
     return (
       <LoginContainer>
         <div className="flex items-center justify-center">
@@ -159,7 +103,7 @@ function LoginContent() {
     );
   }
 
-  if (isAlreadyLoggedIn) {
+  if (isLoggedIn) {
     return (
       <LoginContainer>
         <AlreadyLoggedInPanel>
@@ -221,8 +165,8 @@ function LoginContent() {
 
           {messages.general && <Message>{messages.general}</Message>}
           
-          <SolidButton type="submit" disabled={isLoading}>
-            {isLoading ? '로그인 중...' : '로그인'}
+          <SolidButton type="submit" disabled={isLoginLoading}>
+            {isLoginLoading ? '로그인 중...' : '로그인'}
           </SolidButton>
           
           <LinkGroup>
