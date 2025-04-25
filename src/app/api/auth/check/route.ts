@@ -1,7 +1,14 @@
 // app/api/auth/check/route.ts
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { getAuthTokens, verifyToken, generateToken, setAuthCookies } from '@/lib/auth';
+import { 
+  getAuthTokens, 
+  verifyToken, 
+  refreshTokens, 
+  setAuthCookies,
+  ACCESS_TOKEN_NAME,
+  REFRESH_TOKEN_NAME
+} from '@/lib/auth';
 
 export async function GET(request: Request) {
   const client = await pool.connect();
@@ -47,58 +54,24 @@ export async function GET(request: Request) {
 
     // 2. 액세스 토큰이 유효하지 않고 리프레시 토큰이 있는 경우
     if (!userId && refreshToken) {
-      try {
-        // 리프레시 토큰 검증
-        const payload = await verifyToken(refreshToken);
-        userId = payload.userId;
-        
-        // 리프레시 토큰으로 사용자 정보 확인
-        const userResult = await client.query(
-          `SELECT 
-            id, 
-            email, 
-            username, 
-            company_name, 
-            position,
-            phone_number
-          FROM users
-          WHERE id = $1`,
-          [userId]
-        );
-        
-        if (userResult.rows.length === 0) {
-          return NextResponse.json(
-            { isLoggedIn: false, error: '사용자를 찾을 수 없습니다.' },
-            { status: 404 }
-          );
-        }
-        
-        const user = userResult.rows[0];
-        
-        // 새로운 액세스 토큰과 리프레시 토큰 생성
-        newAccessToken = await generateToken({
-          userId: user.id,
-          email: user.email
-        }, '2h');
-        
-        newRefreshToken = await generateToken({
-          userId: user.id,
-          email: user.email
-        }, '7d');
-        
-        isTokenRefreshed = true;
-        userInfo = user;
-      } catch (error) {
-        // 리프레시 토큰도 유효하지 않은 경우
+      // 중앙화된 토큰 갱신 함수 사용
+      const refreshResult = await refreshTokens(refreshToken);
+      
+      if (!refreshResult) {
         return NextResponse.json(
           { isLoggedIn: false, error: '인증이 만료되었습니다. 다시 로그인해주세요.' },
           { status: 401 }
         );
       }
+      
+      userId = refreshResult.userId;
+      newAccessToken = refreshResult.accessToken;
+      newRefreshToken = refreshResult.refreshToken;
+      isTokenRefreshed = true;
     }
 
-    // 3. 액세스 토큰이 유효한 경우 사용자 정보 가져오기
-    if (userId && !userInfo) {
+    // 3. 사용자 정보 가져오기
+    if (userId) {
       const userResult = await client.query(
         `SELECT 
           id, 
@@ -140,7 +113,7 @@ export async function GET(request: Request) {
       return setAuthCookies(newAccessToken, newRefreshToken, response);
     }
 
-    // 5. Electron 앱이나 특정 경로로 리다이렉트 처리
+    // 5. Electron 앱을 위한 처리 (잠시 주석 해제하고 개선)
     if (callbackUrl) {
       // 이미 auth_code 매개변수가 있는지 확인
       const callbackURL = new URL(callbackUrl, new URL(request.url).origin);
@@ -157,8 +130,23 @@ export async function GET(request: Request) {
       // 절대 URL 생성
       const redirectUrl = callbackURL.toString();
       
-      // 실제 애플리케이션에서는 이 임시 코드를 DB에 저장하고
-      // 별도의 엔드포인트를 통해 임시 코드로 토큰을 교환하도록 구현해야 함
+      // 실제 애플리케이션에서는 임시 코드를 DB에 저장
+      try {
+        // 기존 임시 코드 삭제
+        await client.query(
+          `DELETE FROM auth_codes WHERE user_id = $1`,
+          [userInfo.id]
+        );
+        
+        // 새 임시 코드 저장
+        await client.query(
+          `INSERT INTO auth_codes(code, user_id, expires_at)
+           VALUES($1, $2, NOW() + INTERVAL '5 minutes')`,
+          [temporaryCode, userInfo.id]
+        );
+      } catch (error) {
+        console.log('임시 인증 코드 저장 실패 (테이블이 없을 수 있음):', error);
+      }
       
       return NextResponse.redirect(redirectUrl);
     }

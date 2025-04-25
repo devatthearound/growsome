@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { validateAuth } from '@/utils/auth';
+import { withAuth, TokenPayload } from '@/lib/auth';
 
 export async function POST(request: Request) {
+  return withAuth(request, preparePayment);
+}
+
+async function preparePayment(request: Request, user: TokenPayload): Promise<NextResponse> {
   const client = await pool.connect();
   
   try {
-    const { userId } = await validateAuth(client);
 
     const {
       productPlanId,
@@ -83,7 +86,7 @@ export async function POST(request: Request) {
           `SELECT COUNT(*) 
           FROM coupon_usages 
           WHERE coupon_id = $1 AND user_id = $2`,
-          [coupon.id, userId]
+          [coupon.id, user.userId]
         );
 
         if (userUsageResult.rows[0].count >= coupon.user_usage_limit) {
@@ -118,7 +121,7 @@ export async function POST(request: Request) {
         )
         VALUES ($1, $2, $3, $4, $5)
         RETURNING id`,
-        [userId, 'pending', subtotal, discountAmount, finalAmount]
+        [user.userId, 'pending', subtotal, discountAmount, finalAmount]
       );
 
       const orderId = orderResult.rows[0].id;

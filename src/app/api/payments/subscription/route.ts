@@ -2,13 +2,16 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import pool from '@/lib/db';
 import { verifyToken } from '@/utils/jwt';
-import { validateAuth } from '@/utils/auth';
+import { withAuth, TokenPayload } from '@/lib/auth';
 
 export async function POST(request: Request) {
+  return withAuth(request, processSubscriptionPayment);
+}
+
+async function processSubscriptionPayment(request: Request, user: TokenPayload): Promise<NextResponse> {
   const client = await pool.connect();
   
   try {
-    const { userId } = await validateAuth(client);
     const { billingKey, productPlanId, couponCode } = await request.json();
 
     await client.query('BEGIN');
@@ -55,7 +58,7 @@ export async function POST(request: Request) {
           created_at
         ) VALUES ($1, $2, $3, $3, CURRENT_TIMESTAMP)
         RETURNING id`,
-        [userId, 'pending', plan.price]
+        [user.userId, 'pending', plan.price]
       );
 
       const orderId = orderResult.rows[0].id;
@@ -111,7 +114,7 @@ export async function POST(request: Request) {
           is_subscription
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, $8, true)`,
         [
-          userId,
+          user.userId,
           orderId,
           productPlanId,
           plan.price,
@@ -139,7 +142,7 @@ export async function POST(request: Request) {
           CURRENT_TIMESTAMP,
           CURRENT_TIMESTAMP)`,
         [
-          userId,
+          user.userId,
           productPlanId,
           'active'
         ]
@@ -176,13 +179,16 @@ export async function POST(request: Request) {
   }
 }
 
-// 구독 취소 API
+
 export async function DELETE(request: Request) {
+  return withAuth(request, cancelSubscription);
+}
+
+// 구독 취소 API
+async function cancelSubscription(request: Request, user: TokenPayload): Promise<NextResponse> {
   const client = await pool.connect();
   
   try {
-    const { userId } = await validateAuth(client);
-
     const { searchParams } = new URL(request.url);
     const subscriptionId = searchParams.get('subscriptionId');
 
@@ -203,7 +209,7 @@ export async function DELETE(request: Request) {
         updated_at = CURRENT_TIMESTAMP
       WHERE id = $1 AND user_id = $2
       RETURNING *`,
-      [subscriptionId, userId]
+      [subscriptionId, user.userId]
     );
 
     if (result.rows.length === 0) {

@@ -2,21 +2,24 @@
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import pool from '@/lib/db';
+import crypto from 'crypto';
 
-const ACCESS_TOKEN_NAME = 'coupas_access_token';
-const REFRESH_TOKEN_NAME = 'coupas_refresh_token';
+// 일관된 토큰 이름 사용
+export const ACCESS_TOKEN_NAME = 'coupas_access_token';
+export const REFRESH_TOKEN_NAME = 'coupas_refresh_token';
 
 // 토큰 검증을 위한 비밀 키
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 // 페이로드 타입 정의
 export interface TokenPayload {
-  userId: string;
+  userId: string; 
   email: string;
 }
 
 // 쿠키 설정 함수
-export function setAuthCookies(accessToken: string, refreshToken: string, response: NextResponse) {
+export function setAuthCookies(accessToken: string, refreshToken: string, response: NextResponse, redirectUrl?: string) {
   // Access Token 쿠키 설정 (짧은 유효기간)
   response.cookies.set(ACCESS_TOKEN_NAME, accessToken, {
     httpOnly: true,
@@ -34,6 +37,16 @@ export function setAuthCookies(accessToken: string, refreshToken: string, respon
     path: '/',
     maxAge: 60 * 60 * 24 * 7, // 7일
   });
+
+  // 리다이렉트 URL이 있는 경우
+  if(redirectUrl) {
+    response.cookies.set('redirect_url', redirectUrl, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+    });
+  }
 
   return response;
 }
@@ -88,6 +101,72 @@ export async function generateToken(payload: TokenPayload, expiresIn: string | n
   });
 }
 
+// 중앙화된 토큰 갱신 함수
+export async function refreshTokens(refreshToken: string): Promise<{
+  accessToken: string;
+  refreshToken: string;
+  userId: string;
+  email: string;
+} | null> {
+  try {
+    // 리프레시 토큰 검증
+    const payload = await verifyToken(refreshToken);
+    const userId = payload.userId;
+    const email = payload.email;
+
+    // DB에서 리프레시 토큰 유효성 검증 (선택적)
+    const client = await pool.connect();
+    try {
+      // 토큰 블랙리스트 확인
+      const blacklistResult = await client.query(
+        `SELECT EXISTS(
+          SELECT 1 FROM token_blacklist 
+          WHERE token_hash = $1 AND expires_at > CURRENT_TIMESTAMP
+        ) as is_blacklisted`,
+        [hashToken(refreshToken)]
+      );
+
+      if (blacklistResult.rows[0].is_blacklisted) {
+        return null;
+      }
+
+      // 새 토큰 생성
+      const newAccessToken = await generateToken({ userId, email }, '2h');
+      const newRefreshToken = await generateToken({ userId, email }, '7d');
+
+      // 선택적: 새 리프레시 토큰 DB에 저장
+      try {
+        await client.query(
+          `INSERT INTO refresh_tokens(user_id, token_hash, expires_at)
+           VALUES($1, $2, NOW() + INTERVAL '7 days')
+           ON CONFLICT (user_id) 
+           DO UPDATE SET token_hash = $2, expires_at = NOW() + INTERVAL '7 days'`,
+          [userId, hashToken(newRefreshToken)]
+        );
+      } catch (error) {
+        console.log('리프레시 토큰 저장 실패 (테이블이 없을 수 있음):', error);
+      }
+
+      return {
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+        userId,
+        email
+      };
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('토큰 갱신 오류:', error);
+    return null;
+  }
+}
+
+// 토큰 해싱 함수 (DB 저장용)
+function hashToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
 // 사용자 인증 가드 (API 엔드포인트 보호용)
 export async function withAuth<T>(
   request: Request,
@@ -100,7 +179,7 @@ export async function withAuth<T>(
     // 2. 토큰이 없는 경우
     if (!accessToken && !refreshToken) {
       return NextResponse.json(
-        { error: '인증되지 않은 사용자입니다.' },
+        { isLoggedIn: false, error: '인증되지 않은 사용자입니다.' },
         { status: 401 }
       );
     }
@@ -121,7 +200,7 @@ export async function withAuth<T>(
         // 액세스 토큰이 유효하지 않은 경우
         if (!refreshToken) {
           return NextResponse.json(
-            { error: '인증이 만료되었습니다. 다시 로그인해주세요.' },
+            { isLoggedIn: false, error: '인증이 만료되었습니다. 다시 로그인해주세요.' },
             { status: 401 }
           );
         }
@@ -130,30 +209,21 @@ export async function withAuth<T>(
 
     // 4. 액세스 토큰이 유효하지 않고 리프레시 토큰이 있는 경우
     if (!userId && refreshToken) {
-      try {
-        // 리프레시 토큰 검증
-        const payload = await verifyToken(refreshToken);
-        userId = payload.userId;
-        userEmail = payload.email;
-        
-        // 새 액세스 토큰 및 리프레시 토큰 생성
-        newAccessToken = await generateToken({
-          userId,
-          email: userEmail
-        }, '2h');
-        
-        newRefreshToken = await generateToken({
-          userId,
-          email: userEmail
-        }, '7d');
-        
-        isTokenRefreshed = true;
-      } catch (error) {
+      // 중앙화된 토큰 갱신 함수 사용
+      const refreshResult = await refreshTokens(refreshToken);
+      
+      if (!refreshResult) {
         return NextResponse.json(
-          { error: '인증이 만료되었습니다. 다시 로그인해주세요.' },
+          { isLoggedIn: false, error: '인증이 만료되었습니다. 다시 로그인해주세요.' },
           { status: 401 }
         );
       }
+      
+      userId = refreshResult.userId;
+      userEmail = refreshResult.email;
+      newAccessToken = refreshResult.accessToken;
+      newRefreshToken = refreshResult.refreshToken;
+      isTokenRefreshed = true;
     }
 
     // 5. 인증된 사용자 정보 구성
@@ -175,6 +245,7 @@ export async function withAuth<T>(
     console.error('API 인증 오류:', error);
     return NextResponse.json(
       { 
+        isLoggedIn: false,
         error: '인증 처리 중 오류가 발생했습니다.',
         details: process.env.NODE_ENV === 'development' ? error.message : undefined
       },

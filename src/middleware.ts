@@ -1,22 +1,26 @@
 // src/middleware.ts
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { jwtVerify } from 'jose'; // jose는 Edge Runtime과 호환됨
+
+// 토큰 이름 상수
+const ACCESS_TOKEN_NAME = 'coupas_access_token';
+const REFRESH_TOKEN_NAME = 'coupas_refresh_token';
 
 // JWT 시크릿 키
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
-// 토큰 검증 함수
+// Edge Runtime 호환 토큰 검증 함수
 async function verifyJWT(token: string) {
-  return new Promise((resolve, reject) => {
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(decoded);
-      }
-    });
-  });
+  try {
+    // TextEncoder로 시크릿 키를 Uint8Array로 변환
+    const secretKey = new TextEncoder().encode(JWT_SECRET);
+    // jose의 jwtVerify 사용
+    const { payload } = await jwtVerify(token, secretKey);
+    return payload;
+  } catch (error) {
+    throw error;
+  }
 }
 
 export async function middleware(request: NextRequest) {
@@ -28,8 +32,8 @@ export async function middleware(request: NextRequest) {
     }
     
     // 1. 쿠키에서 토큰 가져오기
-    const accessToken = request.cookies.get('coupas_access_token')?.value;
-    const refreshToken = request.cookies.get('coupas_refresh_token')?.value;
+    const accessToken = request.cookies.get(ACCESS_TOKEN_NAME)?.value;
+    const refreshToken = request.cookies.get(REFRESH_TOKEN_NAME)?.value;
     
     // 2. 토큰이 아예 없는 경우 즉시 로그인 페이지로 리다이렉트
     if (!accessToken && !refreshToken) {
@@ -44,16 +48,15 @@ export async function middleware(request: NextRequest) {
       try {
         const payload = await verifyJWT(accessToken);
         
-        if (payload && (payload as any).userId) {
+        if (payload && payload.userId) {
           // 유효한 토큰이면 요청 진행
           return NextResponse.next();
         }
       } catch (verifyError) {
         // 액세스 토큰이 유효하지 않지만, 리프레시 토큰이 있는 경우
         if (refreshToken) {
-          // 이 경우는 /check API를 통해 처리되므로, 그쪽으로 리다이렉트
+          // /check API를 통해 토큰 갱신 처리
           const currentPath = request.nextUrl.pathname + request.nextUrl.search;
-          // 절대 URL 사용
           const checkUrl = new URL('/api/auth/check', request.url);
           checkUrl.searchParams.set('callback-url', currentPath);
           

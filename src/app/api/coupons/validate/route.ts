@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { validateAuth } from '@/utils/auth';
+import { withAuth, TokenPayload } from '@/lib/auth';
 
 export async function POST(request: Request) {
+  return withAuth(request, validateCoupon);
+}
+
+async function validateCoupon(request: Request, user: TokenPayload): Promise<NextResponse> {
   const client = await pool.connect();
   
   try {
-    const { userId } = await validateAuth(client);
     const { code, productId } = await request.json();
 
     // 쿠폰 유효성 검증
@@ -38,7 +41,7 @@ export async function POST(request: Request) {
         WHERE cu.coupon_id = c.id 
         AND cu.user_id = $2
       ) < c.user_usage_limit`,
-      [code, userId, productId]
+      [code, user.userId, productId]
     );
 
     if (result.rows.length === 0) {

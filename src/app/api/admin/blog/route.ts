@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { validateAuth } from '@/utils/auth';
+import { withAuth, TokenPayload } from '@/lib/auth';
 import { createSlug } from '@/utils/slugify';
 
 // GET: 블로그 포스트 목록 조회
@@ -44,12 +44,19 @@ export async function GET() {
   }
 }
 
-// POST: 새 블로그 포스트 생성
+
+/**
+ * 현재 로그인한 사용자의 정보를 반환하는 API
+ */
 export async function POST(request: Request) {
+  return withAuth(request, createBlogPost);
+}
+
+// POST: 새 블로그 포스트 생성
+async function createBlogPost(request: Request, user: TokenPayload): Promise<NextResponse> {
   const client = await pool.connect();
   
   try {
-    const { userId } = await validateAuth(client);
     const {
       title,
       content,
@@ -94,7 +101,7 @@ export async function POST(request: Request) {
         status,
         seo_title,
         seo_description,
-        userId,
+        user.userId,
         status === 'published' ? new Date() : null
       ]
     );
@@ -117,12 +124,16 @@ export async function POST(request: Request) {
   }
 }
 
-// PUT: 블로그 포스트 수정
+
 export async function PUT(request: Request) {
+  return withAuth(request, updateBlogPost);
+}
+
+// PUT: 블로그 포스트 수정
+async function updateBlogPost(request: Request, user: TokenPayload): Promise<NextResponse> {
   const client = await pool.connect();
   
   try {
-    const { userId } = await validateAuth(client);
     const {
       id,
       title,
@@ -166,7 +177,7 @@ export async function PUT(request: Request) {
         seo_description,
         status === 'published' ? new Date() : null,
         id,
-        userId
+        user.userId
       ]
     );
 

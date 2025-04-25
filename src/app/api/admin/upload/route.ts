@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { validateAuth } from '@/utils/auth';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 import pool from '@/lib/db';
@@ -17,7 +16,6 @@ const client = await pool.connect();
 
   try {
     // 인증 체크
-    const { userId } = await validateAuth(client);
     const formData = await request.formData();
     const file = formData.get('image') as File;
     

@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { validateAuth } from '@/utils/auth';
+import { withAuth, TokenPayload } from '@/lib/auth';
 
 export async function POST(request: Request) {
+  return withAuth(request, processPayment);
+}
+
+async function processPayment(request: Request, user: TokenPayload): Promise<NextResponse> {
   const client = await pool.connect();
   
   try {
-    const { userId } = await validateAuth(client);
 
     const {
       paymentId,
@@ -30,7 +33,7 @@ export async function POST(request: Request) {
         JOIN product_plans pp ON pp.id = oi.product_plan_id
         JOIN products p ON p.id = pp.product_id
         WHERE o.id = $1 AND o.user_id = $2`,
-        [orderId, userId]
+        [orderId, user.userId]
       );
 
       if (orderResult.rows.length === 0) {
@@ -90,7 +93,7 @@ export async function POST(request: Request) {
           SET is_used = true,
               used_at = CURRENT_TIMESTAMP
           WHERE coupon_id = $1 AND user_id = $2`,
-          [order.coupon_id, userId]
+          [order.coupon_id, user.userId]
         );
       }
 
@@ -109,7 +112,7 @@ export async function POST(request: Request) {
         )
         VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, $8)`,
         [
-          userId,
+          user.userId,
           orderId,
           order.product_plan_id,
           order.final_amount,
@@ -143,7 +146,7 @@ export async function POST(request: Request) {
           ($5::jsonb->>'usage_limit')::INTEGER,
           CURRENT_TIMESTAMP,
           CURRENT_TIMESTAMP)`,
-        [userId, order.product_plan_id, orderId, 'active', features]
+        [user.userId, order.product_plan_id, orderId, 'active', features]
       );
 
       await client.query('COMMIT');

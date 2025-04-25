@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { validateAuth } from '@/utils/auth';
 
 export async function DELETE(
   request: Request,
@@ -10,7 +9,6 @@ export async function DELETE(
   const client = await pool.connect();
   
   try {
-    const { userId } = await validateAuth(client);
     const id = (await params).id // 'a', 'b', or 'c'
 
     if (!id) {

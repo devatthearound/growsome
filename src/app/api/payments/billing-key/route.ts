@@ -1,12 +1,15 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { validateAuth } from '@/utils/auth';
+import { withAuth, TokenPayload } from '@/lib/auth';
 
 export async function POST(request: Request) {
+  return withAuth(request, createBillingKey);
+}
+
+async function createBillingKey(request: Request, user: TokenPayload): Promise<NextResponse> {
   const client = await pool.connect();
   
   try {
-    const { userId } = await validateAuth(client);
     const { billingKey } = await request.json();
 
     await client.query('BEGIN');
@@ -16,7 +19,7 @@ export async function POST(request: Request) {
       const existingKeyResult = await client.query(
         `SELECT id FROM billing_keys 
         WHERE user_id = $1 AND status = 'active'`,
-        [userId]
+        [user.userId]
       );
 
       // 2. 기존 빌링키가 있다면 비활성화
@@ -26,7 +29,7 @@ export async function POST(request: Request) {
           SET status = 'inactive', 
               deactivated_at = CURRENT_TIMESTAMP 
           WHERE user_id = $1 AND status = 'active'`,
-          [userId]
+          [user.userId]
         );
       }
 
@@ -39,7 +42,7 @@ export async function POST(request: Request) {
           created_at
         ) VALUES ($1, $2, $3, CURRENT_TIMESTAMP)
         RETURNING id`,
-        [userId, billingKey, 'active']
+        [user.userId, billingKey, 'active']
       );
 
       await client.query('COMMIT');

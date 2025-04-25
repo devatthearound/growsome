@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { validateAuth } from '@/utils/auth';
 import { createSlug } from '@/utils/slugify';
 
 // 카테고리 목록 조회
@@ -8,7 +7,6 @@ export async function GET(request: Request) {
   const client = await pool.connect();
   
   try {
-    const { userId } = await validateAuth(client);
 
     const result = await client.query(
       `SELECT 
@@ -45,7 +43,6 @@ export async function POST(request: Request) {
   const client = await pool.connect();
   
   try {
-    const { userId } = await validateAuth(client);
     const { name, description, parent_id } = await request.json();
 
     // 필수 필드 검증

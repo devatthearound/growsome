@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import bcrypt from 'bcrypt';
 import pool from '@/lib/db';
 import { generateToken, setAuthCookies } from '@/lib/auth';
+import crypto from 'crypto';
 
 export async function POST(request: Request) {
   const client = await pool.connect();
@@ -51,7 +52,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 로그인 시간 업데이트 (선택적)
+    // 로그인 시간 업데이트
     try {
       await client.query(
         'UPDATE users SET last_login_at = NOW() WHERE id = $1',
@@ -73,19 +74,22 @@ export async function POST(request: Request) {
       email: user.email
     }, rememberMe ? '30d' : '7d'); // 로그인 유지 옵션에 따라 유효 시간 조정
 
-    // 선택적: 리프레시 토큰을 데이터베이스에 저장
-    // try {
-    //   await client.query(
-    //     `INSERT INTO refresh_tokens(user_id, token_hash, expires_at)
-    //      VALUES($1, $2, NOW() + INTERVAL '7 days')
-    //      ON CONFLICT (user_id) DO UPDATE 
-    //      SET token_hash = $2, expires_at = NOW() + INTERVAL '7 days'`,
-    //     [user.id, refreshToken.substring(0, 64)] // 간소화된 예시: 실제로는 해시 함수 사용 권장
-    //   );
-    // } catch (tokenError) {
-    //   // 토큰 저장 실패는 무시 (테이블이 없을 수 있음)
-    //   console.log('리프레시 토큰 저장 실패:', tokenError);
-    // }
+    // 리프레시 토큰을 데이터베이스에 저장
+    try {
+      // 토큰 해시 생성 (토큰 자체를 저장하지 않음)
+      const tokenHash = hashToken(refreshToken);
+      
+      await client.query(
+        `INSERT INTO refresh_tokens(user_id, token_hash, expires_at)
+         VALUES($1, $2, NOW() + INTERVAL $3)
+         ON CONFLICT (user_id) DO UPDATE 
+         SET token_hash = $2, expires_at = NOW() + INTERVAL $3`,
+        [user.id, tokenHash, rememberMe ? '30 days' : '7 days']
+      );
+    } catch (tokenError) {
+      // 토큰 저장 실패는 로그만 기록 (테이블이 없을 수 있음)
+      console.log('리프레시 토큰 저장 실패:', tokenError);
+    }
 
     // 사용자 정보에서 민감한 정보 제거
     delete user.password;
@@ -105,7 +109,7 @@ export async function POST(request: Request) {
     });
 
     // HTTP Only 쿠키 설정
-    return setAuthCookies(accessToken, refreshToken, response);
+    return setAuthCookies(accessToken, refreshToken, response, callbackUrl);
   } catch (error: any) {  
     console.error('로그인 처리 중 에러:', error);
     return NextResponse.json(
@@ -118,4 +122,9 @@ export async function POST(request: Request) {
   } finally {
     client.release();
   }
+}
+
+// 토큰 해싱 함수 (DB 저장용)
+function hashToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
 }

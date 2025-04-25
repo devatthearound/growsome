@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { getAuthTokens, verifyToken, removeAuthCookies } from '@/lib/auth';
+import crypto from 'crypto';
 
 export async function POST(request: Request) {
   const client = await pool.connect();
@@ -41,17 +42,27 @@ export async function POST(request: Request) {
     // 데이터베이스에서 세션 정보 삭제 (사용자 ID가 있는 경우)
     if (userId) {
       try {
+        // 리프레시 토큰 DB에서 삭제
+        await client.query(
+          `DELETE FROM refresh_tokens WHERE user_id = $1`,
+          [userId]
+        );
+        
         // 리프레시 토큰 블랙리스트에 추가 (선택적)
-        // 실제 애플리케이션에서는 리프레시 토큰을 블랙리스트에 추가하여
-        // 다시 사용할 수 없도록 만드는 것이 좋습니다.
-        // if (refreshToken) {
-        //   await client.query(
-        //     `INSERT INTO token_blacklist(token, expires_at)
-        //      VALUES($1, NOW() + INTERVAL '7 days')
-        //      ON CONFLICT (token) DO NOTHING`,
-        //     [refreshToken]
-        //   );
-        // }
+        if (refreshToken) {
+          const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+          
+          try {
+            await client.query(
+              `INSERT INTO token_blacklist(token_hash, expires_at)
+               VALUES($1, NOW() + INTERVAL '7 days')
+               ON CONFLICT (token_hash) DO NOTHING`,
+              [tokenHash]
+            );
+          } catch (blacklistError) {
+            console.log('토큰 블랙리스트 저장 실패 (테이블이 없을 수 있음):', blacklistError);
+          }
+        }
         
         // 추가적인 세션 정보가 있다면 삭제
         try {
