@@ -30,7 +30,7 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
   }, []);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const router = useRouter();
-  const { user, isLoggedIn, logout } = useAuth();
+  const { user, isLoading, isLoggedIn, logout } = useAuth();
   const currentPath = usePathname();
 
 
@@ -80,7 +80,9 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
         <UserSection>
           {
           <>
-          {isLoggedIn ? (
+          {
+          !isLoading && (
+            isLoggedIn ? (
             <>
               <UserProfileGroup onClick={() => handleMenuClick('/mypage')}>
                 {/* {
@@ -104,7 +106,8 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
             >
               로그인
             </LoginButton>
-          )}
+          )
+        )}
           <a href="https://open.kakao.com/o/gqWxH1Zg" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
             
             <SecretLabButton>
@@ -140,7 +143,9 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
             }
           {
             <>
-            {isLoggedIn ? (
+            {
+              !isLoading && (
+                isLoggedIn ? (
               <>
                 <UserProfileGroup onClick={() => handleMenuClick('/mypage')}>
                   {/* {
@@ -164,7 +169,8 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
               >
                 로그인
               </LoginButton>
-            )}
+            )
+          )}
             <a href="https://open.kakao.com/o/gqWxH1Zg" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
                 <MobileSecretLabButton>
                   비밀연구소 참여하기 🚀

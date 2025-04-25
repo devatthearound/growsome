@@ -44,6 +44,8 @@ function SignupContent() {
 
   const [verificationSent, setVerificationSent] = useState(false);
 
+  const [isEmailVerified, setIsEmailVerified] = useState(false);
+
   const router = useRouter();
 
   const handleLogout = useCallback(async () => {
@@ -63,18 +65,84 @@ function SignupContent() {
     }
   }, [setUser, setIsAlreadyLoggedIn]);
 
+  const handleEmailCheck = async () => {
+    if (!formData.email) {
+      setMessages({ ...messages, email: '이메일을 입력해주세요.' });
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setMessages({ ...messages, email: '올바른 이메일 형식이 아닙니다.' });
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/check-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email: formData.email })
+      });
+      
+      const data = await response.json();
+      
+      if (data.exists) {
+        setMessages({ ...messages, email: '이미 사용 중인 이메일입니다.' });
+        setIsEmailVerified(false);
+      } else {
+        setMessages({ ...messages, email: '사용 가능한 이메일입니다.' });
+        setIsEmailVerified(true);
+      }
+    } catch (error) {
+      console.error('이메일 중복 검사 오류:', error);
+      setMessages({ ...messages, email: '이메일 확인 중 오류가 발생했습니다.' });
+      setIsEmailVerified(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
-    });
-
-    // Example validation logic
-    if (name === 'email' && !value.includes('@')) {
-      setMessages({ ...messages, email: '유효한 이메일을 입력하세요.' });
+    
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      let newFormData;
+      
+      // "모두 동의" 체크박스를 클릭한 경우
+      if (name === 'termsAccepted') {
+        newFormData = {
+          ...formData,
+          termsAccepted: checked,
+          privacyPolicyAccepted: checked,
+          marketingAccepted: checked
+        };
+      } else {
+        // 다른 체크박스를 클릭한 경우
+        newFormData = {
+          ...formData,
+          [name]: checked
+        };
+        
+        // 다른 체크박스가 모두 선택되었는지 확인하여 모두 동의 체크박스 상태 업데이트
+        if (name === 'privacyPolicyAccepted' || name === 'marketingAccepted') {
+          const otherCheckboxName = name === 'privacyPolicyAccepted' ? 'marketingAccepted' : 'privacyPolicyAccepted';
+          const allChecked = checked && formData[otherCheckboxName];
+          newFormData.termsAccepted = allChecked;
+        }
+      }
+      
+      setFormData(newFormData);
     } else {
+      setFormData({
+        ...formData,
+        [name]: value
+      });
+
+      // 이메일이 변경되면 검증 상태 초기화
+      if (name === 'email') {
+        setIsEmailVerified(false);
+      }
+
       setMessages({ ...messages, [name]: '' });
     }
   };
@@ -86,8 +154,138 @@ function SignupContent() {
     });
   };
 
-  const handleNext = () => {
-    if (step < 4) setStep(step + 1);
+  // 유효성 검사 함수들 추가
+  const validateStep1 = async () => {
+    const errors = { ...messages };
+    let isValid = true;
+
+    // 이메일 검증 상태 확인
+    if (!isEmailVerified) {
+      errors.email = '이메일 중복 확인이 필요합니다.';
+      isValid = false;
+    }
+
+    // 이메일 검사
+    if (!formData.email) {
+      errors.email = '이메일을 입력해주세요.';
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = '올바른 이메일 형식이 아닙니다.';
+      isValid = false;
+    }
+
+    // 비밀번호 검사
+    if (!formData.password) {
+      errors.password = '비밀번호를 입력해주세요.';
+      isValid = false;
+    } else {
+      // 비밀번호 복잡성 검사
+      const hasUpperCase = /[A-Z]/.test(formData.password);
+      const hasLowerCase = /[a-z]/.test(formData.password);
+      const hasNumbers = /\d/.test(formData.password);
+      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(formData.password);
+      
+      if (formData.password.length < 8) {
+        errors.password = '비밀번호는 8자 이상이어야 합니다.';
+        isValid = false;
+      } else if (!(hasUpperCase && hasLowerCase && hasNumbers && hasSpecialChar)) {
+        errors.password = '비밀번호는 대문자, 소문자, 숫자, 특수문자를 모두 포함해야 합니다.';
+        isValid = false;
+      }
+    }
+
+    // 비밀번호 확인 검사
+    if (!formData.confirmPassword) {
+      errors.confirmPassword = '비밀번호 확인을 입력해주세요.';
+      isValid = false;
+    } else if (formData.password !== formData.confirmPassword) {
+      errors.confirmPassword = '비밀번호가 일치하지 않습니다.';
+      isValid = false;
+    }
+
+    setMessages(errors);
+    return isValid;
+  };
+
+  const validateStep2 = () => {
+    const errors = { ...messages };
+    let isValid = true;
+
+    // 이름 검사
+    if (!formData.name) {
+      errors.name = '이름을 입력해주세요.';
+      isValid = false;
+    }
+
+    // 전화번호 검사
+    if (!formData.phone) {
+      errors.phone = '전화번호를 입력해주세요.';
+      isValid = false;
+    } else if (!/^[0-9]{10,11}$/.test(formData.phone.replace(/-/g, ''))) {
+      errors.phone = '올바른 전화번호 형식이 아닙니다.';
+      isValid = false;
+    }
+
+    // 약관 동의 검사
+    if (!formData.termsAccepted || !formData.privacyPolicyAccepted) {
+      errors.phone = '필수 약관에 동의해주세요.';
+      isValid = false;
+    }
+
+    setMessages(errors);
+    return isValid;
+  };
+
+  const validateStep3 = () => {
+    const errors = { ...messages };
+    let isValid = true;
+
+    // 회사명 검사
+    if (!formData.company) {
+      errors.name = '회사명을 입력해주세요.';
+      isValid = false;
+    }
+
+    setMessages(errors);
+    return isValid;
+  };
+
+  const validateStep4 = () => {
+    let isValid = true;
+
+    // 방문 경로 검사
+    if (!formData.visitPath) {
+      isValid = false;
+      alert('방문 경로를 선택해주세요.');
+    }
+
+    return isValid;
+  };
+
+  // handleNext 함수 수정
+  const handleNext = async () => {
+    let isValid = false;
+
+    switch (step) {
+      case 1:
+        isValid = await validateStep1();
+        break;
+      case 2:
+        isValid = validateStep2();
+        break;
+      case 3:
+        isValid = validateStep3();
+        break;
+      case 4:
+        isValid = validateStep4();
+        break;
+      default:
+        isValid = true;
+    }
+
+    if (isValid && step < 4) {
+      setStep(step + 1);
+    }
   };
 
   const handlePrev = () => {
@@ -96,6 +294,17 @@ function SignupContent() {
 
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    // 최종 제출 전 모든 단계 유효성 검사
+    const isStep1Valid = await validateStep1();
+    const isStep2Valid = validateStep2();
+    const isStep3Valid = validateStep3();
+    const isStep4Valid = validateStep4();
+
+    if (!isStep1Valid || !isStep2Valid || !isStep3Valid || !isStep4Valid) {
+      return;
+    }
+
     try {
       const response = await fetch('/api/auth/signup', {
         method: 'POST',
@@ -230,14 +439,27 @@ function SignupContent() {
           {step === 1 && (
             <>
               <Title>이메일과 비밀번호를 입력해주세요</Title>
-              <Input
-                type="email"
-                name="email"
-                placeholder="이메일"
-                value={formData.email}
-                onChange={handleChange}
-              />
-              {messages.email && <Message>{messages.email}</Message>}
+              <InputGroup>
+                <Input
+                  type="email"
+                  name="email"
+                  placeholder="이메일"
+                  value={formData.email}
+                  onChange={handleChange}
+                />
+                <VerificationButton
+                  type="button"
+                  onClick={handleEmailCheck}
+                  disabled={!formData.email}
+                >
+                  중복확인
+                </VerificationButton>
+              </InputGroup>
+              {messages.email && (
+                <Message style={{ color: isEmailVerified ? 'green' : 'red' }}>
+                  {messages.email}
+                </Message>
+              )}
               <Input
                 type="password"
                 name="password"
