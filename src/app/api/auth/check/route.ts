@@ -3,15 +3,19 @@ import { cookies } from 'next/headers';
 import pool from '@/lib/db';
 import { verifyToken } from '@/utils/jwt';
 
-export async function GET() {
+export async function GET(request: Request) {
   const client = await pool.connect();
   
   try {
+    // URL에서 searchParams 가져오기
+    const { searchParams } = new URL(request.url);
+    const callbackUrl = searchParams.get('callback-url');
+    
     // 쿠키에서 토큰 가져오기
     const cookieStore = await cookies();
     const token = cookieStore.get('coupas_access_token')?.value;
+    const refreshToken = cookieStore.get('coupas_refresh_token')?.value;
 
-    console.log('token', token);
     if (!token) {
       return NextResponse.json(
         { error: '인증되지 않은 사용자입니다.' },
@@ -61,18 +65,36 @@ export async function GET() {
 
     const user = userResult.rows[0];
 
-    return NextResponse.json({
-      isLoggedIn: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        company_name: user.company_name,
-        position: user.position,
-        phone_number : user.phone_number
-      }
-    });
-
+    if (callbackUrl) {
+      // Electron 앱으로 리다이렉트
+      const redirectUrl = `${callbackUrl}?coupas_access_token=${token}&coupas_refresh_token=${refreshToken}`;
+      
+      // JSON 응답으로 변경
+      return NextResponse.json({
+        isLoggedIn: true,
+        redirectUrl: redirectUrl,
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          company_name: user.company_name,
+          position: user.position,
+          phone_number: user.phone_number
+        }
+      });
+    } else {
+      return NextResponse.json({
+        isLoggedIn: true,
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          company_name: user.company_name,
+          position: user.position,
+          phone_number : user.phone_number
+        }
+      });
+    }
   } catch (error) {
     console.error('Auth check error:', error);
     return NextResponse.json(

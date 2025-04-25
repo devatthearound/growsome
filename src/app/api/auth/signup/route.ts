@@ -104,6 +104,20 @@ export async function POST(request: Request) {
 
     await client.query('COMMIT');
 
+
+    if (data.callbackUrl) {
+      // Electron 앱으로 리다이렉트할 URL 정보를 JSON으로 반환
+      return NextResponse.json({
+        success: true,
+        message: '회원가입이 완료되었습니다.',
+        redirectUrl: `${data.callbackUrl}?coupas_access_token=${accessToken}&coupas_refresh_token=${refreshToken}`,
+        user: {
+          ...user,
+          isExtension: data?.isExtension || false
+        }
+      });
+    }
+
     // 쿠키에 토큰 설정
     const response = NextResponse.json({
       success: true,

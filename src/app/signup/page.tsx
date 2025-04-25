@@ -300,6 +300,7 @@ function SignupContent() {
     const isStep2Valid = validateStep2();
     const isStep3Valid = validateStep3();
     const isStep4Valid = validateStep4();
+    const redirectTo = searchParams.get('redirect_to') || '';
 
     if (!isStep1Valid || !isStep2Valid || !isStep3Valid || !isStep4Valid) {
       return;
@@ -313,7 +314,8 @@ function SignupContent() {
         },
         body: JSON.stringify({
           ...formData,
-          isExtension
+          isExtension,
+          callbackUrl: redirectTo
         })
       });
       
@@ -321,7 +323,6 @@ function SignupContent() {
       
       if (!response.ok) {
         if (data.validationErrors) {
-          // 각 필드별 에러 메시지 설정
           const newMessages = { ...messages };
           data.validationErrors.forEach((error: ValidationError) => {
             newMessages[error.field as keyof typeof messages] = error.message;
@@ -334,16 +335,17 @@ function SignupContent() {
       
       setUser(data.user);
 
-      if (!data.user.isExtension) {
-        router.push('/');
+      // 리다이렉트 URL이 있는 경우 해당 URL로 이동
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
       } else {
-        window.location.href = `/auth/extension-callback?token=${data.token}`;
+        router.push('/');
       }
     } catch (error) {
       console.error('회원가입 에러:', error);
       // 에러 처리
     }
-  }, [formData, isExtension, router, setUser]);
+  }, [formData, isExtension, router, setUser, searchParams]);
 
   const handleVerification = () => {
     // TODO: 전화번호 인증 로직
@@ -354,27 +356,23 @@ function SignupContent() {
   useEffect(() => {
     const checkAuthAndRedirect = async () => {
       try {
-        const response = await fetch('/api/auth/check', {
+        const redirectTo = searchParams.get('redirect_to') || '';
+
+        const response = await fetch('/api/auth/check?callback-url=' + redirectTo, {
           credentials: 'include'
         });
+
         const data = await response.json();
 
         if (response.ok && data.isLoggedIn) {
-          if (isExtension) {
-            const tokenResponse = await fetch('/api/auth/token', {
-              credentials: 'include'
-            });
-            const tokenData = await tokenResponse.json();
-
-            if (tokenResponse.ok && tokenData.token) {
-              window.location.href = `/auth/extension-callback?token=${tokenData.token}`;
+            if (data.redirectUrl) {
+              window.location.href = data.redirectUrl;
               return;
             }
           } else {
             setUser(data.user);
             setIsAlreadyLoggedIn(true);
           }
-        }
       } catch (error) {
         console.error('인증 확인 오류:', error);
       } finally {

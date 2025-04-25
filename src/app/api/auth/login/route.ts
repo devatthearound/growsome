@@ -4,40 +4,10 @@ import pool from '@/lib/db';
 import { generateToken } from '@/utils/jwt';
 
 export async function POST(request: Request) {
-  let client;
+  const client = await pool.connect();
 
   try {
-    // DB 연결 시도
-    try {
-      client = await pool.connect();
-      console.log('DB 연결 성공');
-    } catch (dbError: any) {
-      console.error('DB 연결 실패:', {
-        message: dbError.message,
-        code: dbError.code,
-        stack: dbError.stack
-      });
-      return NextResponse.json(
-        { 
-          error: 'DB 연결에 실패했습니다. 잠시 후 다시 시도해주세요.',
-          details: process.env.NODE_ENV === 'development' ? dbError.message : undefined
-        },
-        { status: 500 }
-      );
-    }
-
-    let email, password, rememberMe, isExtension = false; // isExtension의 기본값을 false로 설정
-    
-    try {
-      const body = await request.json();
-      ({ email, password, rememberMe, isExtension = false } = body); // 구조 분해 할당에서 기본값 설정
-    } catch (error) {
-      return NextResponse.json(
-        { error: '잘못된 요청 형식입니다. 유효한 JSON 데이터를 전송해주세요.' },
-        { status: 400 }
-      );
-    }
-
+    const { email, password, rememberMe, callbackUrl } = await request.json();
     // 이메일 유효성 검사
     if (!email || !password) {
       return NextResponse.json(
@@ -134,8 +104,7 @@ export async function POST(request: Request) {
         email: user.email,
         username: user.username,
         company_name: user.company_name,
-        position: user.position,
-        isExtension: isExtension
+        position: user.position
       }
     });
 
@@ -162,8 +131,30 @@ export async function POST(request: Request) {
         : 24 * 60 * 60       // 24시간
     });
 
-    return response;
-  } catch (error: any) {
+    if (callbackUrl) {
+      // Electron 앱으로 리다이렉트하기 위한 URL 생성
+      const redirectUrl = `${callbackUrl}?coupas_access_token=${accessToken}&coupas_refresh_token=${refreshToken}`;
+      
+      // JSON 응답으로 변경
+      return NextResponse.json({
+        success: true,
+        message: '로그인이 완료되었습니다.',
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        redirectUrl: redirectUrl,
+        user: {
+          id: user.id,
+          email: user.email,
+          username: user.username,
+          company_name: user.company_name,
+          position: user.position
+        }
+      }
+      );
+    } else {
+      return response;
+    }
+  } catch (error: any) {  
     console.error('로그인 처리 중 에러:', error);
     return NextResponse.json(
       { 

@@ -58,6 +58,9 @@ function LoginContent() {
     e.preventDefault();
     setIsLoading(true);
     try {
+      const redirectTo = searchParams.get('redirect_to') || '';
+
+
       const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: {
@@ -65,7 +68,8 @@ function LoginContent() {
         },
         body: JSON.stringify({
           ...formData,
-          isExtension
+          isExtension,
+          callbackUrl: redirectTo
         })
       });
       
@@ -75,19 +79,14 @@ function LoginContent() {
         setMessages(prev => ({ ...prev, general: data.error || '로그인에 실패했습니다.' }));
         return;
       }
-      setUser(data.user);
       
-      if (!isExtension) {
-        const redirectTo = searchParams.get('redirect_to') || '/';
+      setUser(data.user);
 
-        if (redirectTo.includes('coupas-auth')) {
-          window.location.href = redirectTo + '?coupas_access_token=' + data.accessToken + '&coupas_refresh_token=' + data.refreshToken;
-        }
-
-        window.location.href = redirectTo;
-
+      // 리다이렉트 URL이 있는 경우 해당 URL로 이동
+      if (data.redirectUrl) {
+        window.location.href = data.redirectUrl;
       } else {
-        window.location.href = `/auth/extension-callback?coupas_access_token=${data.accessToken}&coupas_refresh_token=${data.refreshToken}`;
+        router.push('/');
       }
     } catch (error) {
       console.error('로그인 에러:', error);
@@ -100,9 +99,12 @@ function LoginContent() {
   useEffect(() => {
     const checkAuthAndRedirect = async () => {
       try {
-        const response = await fetch('/api/auth/check', {
-          credentials: 'include'
+        const redirectTo = searchParams.get('redirect_to') || '';
+
+        const response = await fetch('/api/auth/check?callback-url=' + redirectTo, {
+          credentials: 'include',
         });
+
         const data = await response.json();
 
         if (response.ok && data.isLoggedIn) {
@@ -122,14 +124,18 @@ function LoginContent() {
             }
           } else {
             // 이미 로그인된 경우 원래 가려던 페이지로 리다이렉트
-            const redirectTo = searchParams.get('redirect_to');
-            if (redirectTo) {
-              console.log('Redirecting to:', redirectTo);
-              router.push(redirectTo);
-              return;
-            }
+            const redirectTo = searchParams.get('redirect_to') || '';
+
+            if(redirectTo === '') {
             // redirect_to가 없는 경우에만 isAlreadyLoggedIn 설정
             setIsAlreadyLoggedIn(true);
+            return;
+            }else if(redirectTo.includes('coupas-auth')) {
+              window.location.href = redirectTo + '?coupas_access_token=' + data.accessToken + '&coupas_refresh_token=' + data.refreshToken;
+            }else{
+              window.location.href = redirectTo;
+            }
+
           }
         }
       } catch (error) {
