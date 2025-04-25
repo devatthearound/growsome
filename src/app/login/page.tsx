@@ -92,6 +92,40 @@ function LoginContent() {
     }
   }, [formData, isExtension, router, setUser, searchParams]);
 
+  useEffect(() => {
+    const handleRedirect = async () => {
+      // 'redirect_url' 파라미터가 있는 경우 해당 URL로 이동
+      const redirectUrl = searchParams.get('redirect_to');
+      if (redirectUrl && isLoggedIn) {
+        try {
+          if(redirectUrl.startsWith('coupas-auth://')) {
+            const res = await fetch('/api/auth/redirect', {
+              method: 'GET',
+              credentials: 'include'
+            });
+            
+            if (!res.ok) {
+              throw new Error('리다이렉트 요청 실패');
+            }
+            
+            const data = await res.json();
+            if (data.redirectUrl) {
+              window.location.href = data.redirectUrl;
+            } else {
+              router.push('/');
+            }
+          } else {
+            router.push('/');
+          }
+        } catch (error) {
+          console.error('리다이렉트 처리 중 오류:', error);
+          router.push('/');
+        }
+      }
+    }
+    handleRedirect();
+  }, [isLoggedIn, router, searchParams]);
+
   // 로딩 중이거나 인증 체크 중일 때 표시할 내용
   if (isLoading) {
     return (

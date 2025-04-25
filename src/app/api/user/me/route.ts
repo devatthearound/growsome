@@ -50,70 +50,70 @@ async function getUserInfo(request: Request, user: TokenPayload): Promise<NextRe
     const userData = userResult.rows[0];
 
     // 사용자 설정 정보 조회 (선택적)
-    let userSettings = {};
-    try {
-      const settingsResult = await client.query(
-        `SELECT settings FROM user_settings WHERE user_id = $1`,
-        [user.userId]
-      );
+    // let userSettings = {};
+    // try {
+    //   const settingsResult = await client.query(
+    //     `SELECT settings FROM user_settings WHERE user_id = $1`,
+    //     [user.userId]
+    //   );
       
-      if (settingsResult.rows.length > 0) {
-        userSettings = settingsResult.rows[0].settings;
-      }
-    } catch (settingsError) {
-      console.log('사용자 설정 조회 실패 (테이블이 없을 수 있음):', settingsError);
-    }
+    //   if (settingsResult.rows.length > 0) {
+    //     userSettings = settingsResult.rows[0].settings;
+    //   }
+    // } catch (settingsError) {
+    //   console.log('사용자 설정 조회 실패 (테이블이 없을 수 있음):', settingsError);
+    // }
 
     // 구독 정보 조회 (선택적)
-    let subscriptions = [];
-    try {
-      const subscriptionResult = await client.query(
-        `SELECT 
-          s.id,
-          s.product_plan_id,
-          s.status,
-          s.start_date,
-          s.end_date,
-          pp.name as plan_name,
-          p.name as product_name
-        FROM subscriptions s
-        JOIN product_plans pp ON s.product_plan_id = pp.id
-        JOIN products p ON pp.product_id = p.id
-        WHERE s.user_id = $1 AND s.status != 'cancelled'
-        ORDER BY s.created_at DESC`,
-        [user.userId]
-      );
+    // let subscriptions = [];
+    // try {
+    //   const subscriptionResult = await client.query(
+    //     `SELECT 
+    //       s.id,
+    //       s.product_plan_id,
+    //       s.status,
+    //       s.start_date,
+    //       s.end_date,
+    //       pp.name as plan_name,
+    //       p.name as product_name
+    //     FROM subscriptions s
+    //     JOIN product_plans pp ON s.product_plan_id = pp.id
+    //     JOIN products p ON pp.product_id = p.id
+    //     WHERE s.user_id = $1 AND s.status != 'cancelled'
+    //     ORDER BY s.created_at DESC`,
+    //     [user.userId]
+    //   );
       
-      subscriptions = subscriptionResult.rows;
-    } catch (subscriptionError) {
-      console.log('구독 정보 조회 실패 (테이블이 없을 수 있음):', subscriptionError);
-    }
+    //   subscriptions = subscriptionResult.rows;
+    // } catch (subscriptionError) {
+    //   console.log('구독 정보 조회 실패 (테이블이 없을 수 있음):', subscriptionError);
+    // }
 
     // 이용권 정보 조회 (선택적)
-    let tickets = [];
-    try {
-      const ticketResult = await client.query(
-        `SELECT 
-          t.id,
-          t.product_plan_id,
-          t.status,
-          t.start_date,
-          t.end_date,
-          t.remaining_uses,
-          pp.name as plan_name,
-          p.name as product_name
-        FROM user_tickets t
-        JOIN product_plans pp ON t.product_plan_id = pp.id
-        JOIN products p ON pp.product_id = p.id
-        WHERE t.user_id = $1 AND t.status = 'active'
-        ORDER BY t.created_at DESC`,
-        [user.userId]
-      );
+   // let tickets = [];
+    // try {
+    //   const ticketResult = await client.query(
+    //     `SELECT 
+    //       t.id,
+    //       t.product_plan_id,
+    //       t.status,
+    //       t.start_date,
+    //       t.end_date,
+    //       t.remaining_uses,
+    //       pp.name as plan_name,
+    //       p.name as product_name
+    //     FROM user_tickets t
+    //     JOIN product_plans pp ON t.product_plan_id = pp.id
+    //     JOIN products p ON pp.product_id = p.id
+    //     WHERE t.user_id = $1 AND t.status = 'active'
+    //     ORDER BY t.created_at DESC`,
+    //     [user.userId]
+    //   );
       
-      tickets = ticketResult.rows;
-    } catch (ticketError) {
-      console.log('이용권 정보 조회 실패 (테이블이 없을 수 있음):', ticketError);
-    }
+    //   tickets = ticketResult.rows;
+    // } catch (ticketError) {
+    //   console.log('이용권 정보 조회 실패 (테이블이 없을 수 있음):', ticketError);
+    // }
 
     return NextResponse.json({
       success: true,
@@ -128,9 +128,9 @@ async function getUserInfo(request: Request, user: TokenPayload): Promise<NextRe
         created_at: userData.created_at,
         last_login_at: userData.last_login_at,
         referral_source: userData.referral_source,
-        settings: userSettings,
-        subscriptions: subscriptions.length > 0 ? subscriptions : undefined,
-        tickets: tickets.length > 0 ? tickets : undefined
+        // settings: userSettings,
+        // subscriptions: subscriptions.length > 0 ? subscriptions : undefined,
+        // tickets: tickets.length > 0 ? tickets : undefined
       }
     });
 

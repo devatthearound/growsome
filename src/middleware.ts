@@ -30,6 +30,10 @@ export async function middleware(request: NextRequest) {
     if (url.searchParams.has('auth_code')) {
       return NextResponse.next();
     }
+
+    if(url.pathname === 'redirect_url') {
+      console.log('Middleware - Redirecting to redirect_url', url.pathname);
+    }
     
     // 1. 쿠키에서 토큰 가져오기
     const accessToken = request.cookies.get(ACCESS_TOKEN_NAME)?.value;
