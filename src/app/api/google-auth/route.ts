@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { OAuth2Client } from 'google-auth-library';
 import pool from '@/lib/db';
+import { withAuth, TokenPayload } from '@/lib/auth';
+
 
 // Environment variables should be set in your .env.local file
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
@@ -29,17 +31,16 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Exchange code for tokens
-export async function POST(request: NextRequest) {
-  const userId = request.headers.get('x-user-id');
-  
-  if (!userId) {
-    return NextResponse.json(
-      { message: '사용자 ID가 필요합니다.' },
-      { status: 401 }
-    );
-  }
 
+/**
+ * 현재 로그인한 사용자의 정보를 반환하는 API
+ */
+export async function POST(request: Request) {
+  return withAuth(request, exchangeCodeForTokens);
+}
+
+// Exchange code for tokens
+export async function exchangeCodeForTokens(request: Request, user: TokenPayload): Promise<NextResponse> {
   try {
     const { code } = await request.json();
     
@@ -60,14 +61,14 @@ export async function POST(request: NextRequest) {
       // 기존 토큰 비활성화
       await client.query(
         `UPDATE google_auth SET is_active = false WHERE user_id = $1`,
-        [userId]
+        [user.userId]
       );
       
       // 새 토큰 저장
       await client.query(
         `INSERT INTO google_auth (user_id, access_token, refresh_token, scope, token_type, expiry_date)
          VALUES ($1, $2, $3, $4, $5, $6)`,
-        [userId, tokens.access_token, tokens.refresh_token, tokens.scope, 
+        [user.userId, tokens.access_token, tokens.refresh_token, tokens.scope, 
          tokens.token_type, new Date(tokens.expiry_date || new Date().getTime() + 3600000)]
       );
       

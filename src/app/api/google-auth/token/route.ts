@@ -1,21 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { OAuth2Client } from 'google-auth-library';
 import pool from '@/lib/db';
+import { withAuth, TokenPayload } from '@/lib/auth';
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
 
+
+export async function POST(request: Request) {
+    return withAuth(request, saveGoogleAuthInfo);
+  }
+  
+
 // 구글 인증 정보 저장
-export async function POST(request: NextRequest) {
-    const userId = request.headers.get('x-user-id');
-
-    if (!userId) {
-        return NextResponse.json(
-            { message: '사용자 ID가 필요합니다.' },
-            { status: 401 }
-        );
-    }
-
+export async function saveGoogleAuthInfo(request: Request, user: TokenPayload): Promise<NextResponse> {
     try {
         const { accessToken, refreshToken, scope, tokenType, expiryDate } = await request.json();
 
@@ -36,7 +34,7 @@ export async function POST(request: NextRequest) {
                 `UPDATE google_auth 
                 SET is_active = false, updated_at = CURRENT_TIMESTAMP 
                 WHERE user_id = $1 AND is_active = true`,
-                [userId]
+                [user.userId]
             );
 
             // 새 인증 정보 저장
@@ -44,7 +42,7 @@ export async function POST(request: NextRequest) {
                 `INSERT INTO google_auth 
                 (user_id, access_token, refresh_token, scope, token_type, expiry_date) 
                 VALUES ($1, $2, $3, $4, $5, $6)`,
-                [userId, accessToken, refreshToken, scope, tokenType, new Date(expiryDate)]
+                [user.userId, accessToken, refreshToken, scope, tokenType, new Date(expiryDate)]
             );
 
             await client.query('COMMIT');
@@ -94,24 +92,21 @@ async function refreshAccessToken(refreshToken: string) {
     }
 }
 
+
+
 // 구글 인증 정보 조회
-export async function GET(request: NextRequest) {
-    const userId = request.headers.get('x-user-id');
+export async function GET(request: Request) {
+    return withAuth(request, getGoogleAuthInfo);
+}
 
-    if (!userId) {
-        return NextResponse.json(
-            { message: '사용자 ID가 필요합니다.' },
-            { status: 401 }
-        );
-    }
-
+async function getGoogleAuthInfo(request: Request, user: TokenPayload): Promise<NextResponse> {
     const client = await pool.connect();
     try {
         const result = await client.query(
             `SELECT access_token, refresh_token, scope, token_type, expiry_date 
             FROM google_auth 
             WHERE user_id = $1 AND is_active = true`,
-            [userId]
+            [user.userId]
         );
 
         if (result.rows.length === 0) {
@@ -136,7 +131,7 @@ export async function GET(request: NextRequest) {
                     `UPDATE google_auth 
                     SET access_token = $1, expiry_date = $2, updated_at = CURRENT_TIMESTAMP 
                     WHERE user_id = $3 AND is_active = true`,
-                    [accessToken, new Date(newExpiryDate || Date.now() + 3600000), userId]
+                    [accessToken, new Date(newExpiryDate || Date.now() + 3600000), user.userId]
                 );
 
                 return NextResponse.json({
@@ -154,7 +149,7 @@ export async function GET(request: NextRequest) {
                 await client.query(
                     `UPDATE google_auth SET is_active = false 
                     WHERE user_id = $1 AND is_active = true`,
-                    [userId]
+                    [user.userId]
                 );
                 return NextResponse.json(
                     { message: '인증이 만료되었습니다. 재인증이 필요합니다.' },
