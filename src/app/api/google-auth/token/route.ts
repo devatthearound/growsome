@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   
 
 // 구글 인증 정보 저장
-export async function saveGoogleAuthInfo(request: Request, user: TokenPayload): Promise<NextResponse> {
+async function saveGoogleAuthInfo(request: Request, user: TokenPayload): Promise<NextResponse> {
     try {
         const { accessToken, refreshToken, scope, tokenType, expiryDate } = await request.json();
 

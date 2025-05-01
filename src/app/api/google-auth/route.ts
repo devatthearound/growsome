@@ -40,7 +40,7 @@ export async function POST(request: Request) {
 }
 
 // Exchange code for tokens
-export async function exchangeCodeForTokens(request: Request, user: TokenPayload): Promise<NextResponse> {
+async function exchangeCodeForTokens(request: Request, user: TokenPayload): Promise<NextResponse> {
   try {
     const { code } = await request.json();
     
