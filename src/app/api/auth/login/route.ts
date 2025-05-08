@@ -30,7 +30,8 @@ export async function POST(request: Request) {
         u.position,
         u.phone_number
       FROM users u
-      WHERE u.email = $1`,
+      WHERE u.email = $1
+      AND u.status = 'active'`,
       [email]
     );
 

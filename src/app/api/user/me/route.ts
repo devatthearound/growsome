@@ -32,7 +32,8 @@ async function getUserInfo(request: Request, user: TokenPayload): Promise<NextRe
         rs.source_name as referral_source
       FROM users u
       LEFT JOIN referral_sources rs ON u.referral_source_id = rs.id
-      WHERE u.id = $1`,
+      WHERE u.id = $1
+      AND u.status = 'active'`,
       [user.userId]
     );
 
