@@ -81,7 +81,8 @@ export async function GET(request: Request) {
           position,
           phone_number
         FROM users
-        WHERE id = $1`,
+        WHERE id = $1
+        AND status = 'active'`,
         [userId]
       );
       

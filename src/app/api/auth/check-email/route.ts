@@ -8,8 +8,8 @@ export async function POST(request: Request) {
     const { email } = await request.json();
     
     const result = await client.query(
-      'SELECT EXISTS (SELECT 1 FROM users WHERE email = $1) as exists',
-      [email]
+      'SELECT EXISTS (SELECT 1 FROM users WHERE email = $1 AND status = $2) as exists',
+      [email, 'active']
     );
     
     return NextResponse.json({
