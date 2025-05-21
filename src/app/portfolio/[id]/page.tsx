@@ -99,6 +99,59 @@ const projectData = {
       imageBgColor: '#E6FCFF',
       link: 'https://growsome.kr/coupas'
     },
+    pickup: {
+      title: '픽업해',
+      description: '소상공인을 위한 0% 수수료 픽업 예약 자동화 솔루션',
+      category: 'Service SaaS',
+      client: '그로우썸',
+      year: '2025',
+      mainImage: '/images/projects/pickuphae/screen1.png',
+      overview: '픽업해는 배달앱 수수료 부담을 느끼는 소상공인을 위한 예약 및 픽업 자동화 솔루션입니다. 고객은 웹페이지에서 메뉴 확인 및 시간 예약을 간편하게 진행하고, 사장님은 사장님전용앱으로 실시간 예약 알림을 받아 빠르게 대응할 수 있습니다.',
+      challenge: '✔ 배달앱의 높은 수수료 부담 – 고정비용 없이 운영 가능한 대안 플랫폼이 필요했습니다. ✔ 예약 및 수령 시간 조율의 번거로움 – 전화 없이 고객과 효율적인 예약 소통이 가능한 시스템이 요구되었습니다. ✔ 고객 편의와 사장님 사용성을 모두 만족시키는 UX 설계 필요',
+      solution: '고객은 링크를 통해 웹에서 간편하게 예약하고 카카오톡으로 알림받고, 사장님은 사장님 전용앱 알림으로 빠르게 확인 및 응대, 메뉴 등록과 시간 관리가 쉬운 관리자 페이지 제공',
+      features: [
+        {
+          icon: faGlobe,
+          title: '웹 기반 예약-픽업 자동화',
+          description: '소상공인이 직접 메뉴 등록 후 예약 링크 생성, 고객은 앱 설치 없이 웹으로 예약, 사장님은 사장님 전용앱으로 실시간 응대'
+        }
+      ],
+      images: [
+        '/images/projects/pickup/screen1.png',
+        '/images/projects/pickup/screen2.png',
+        '/images/projects/pickup/screen3.png'
+      ],
+      bgColor: '#F7621F',
+      imageBgColor: '#FFF6F2',
+      link: 'https://start.growsome.kr/pickup'
+    },
+    doasome: {
+      title: '두어썸',
+      description: '성과 퍼널을 복사하면 전환이 시작되는 마케팅 자동화 솔루션',
+      category: 'Marketing SaaS',
+      client: '그로우썸',
+      year: '2025',
+      mainImage: '/images/projects/doasome/screen1.png',
+      overview: '두어썸은 전환 중심의 실행 퍼널을 SkillBlock 형태로 제공하여, 마케터나 1인 기업이 별도의 기획이나 개발 없이 실전 성과를 바로 실행할 수 있게 돕는 마케팅 자동화 SaaS입니다. 누구나 쉽게 복사하고 실행할 수 있으며, 평균 10분 안에 전환 퍼널을 완성할 수 있습니다.',
+      challenge: '✔ 전환 퍼널 기획의 어려움 – 마케팅 구조 설계에 익숙하지 않은 사용자도 실전 전략을 쉽게 적용할 수 있어야 했습니다. ✔ 마케팅 실행의 번거로움 – 설계, 디자인, 개발 없이 곧바로 실행할 수 있는 형태가 필요했습니다. ✔ 빠른 실험과 성과 측정 – 복붙만으로도 A/B 테스트 및 성과 측정이 가능한 구조가 요구되었습니다.',
+      solution: '성과 검증된 SkillBlock 템플릿 제공, 복사-붙여넣기만으로 실전 마케팅 퍼널 완성, 전환 전까지 과금되지 않는 성과 기반 모델',
+      features: [
+        {
+          icon: faGlobe,
+          title: '복사만 하면 실행되는 SkillBlock',
+          description: '검증된 전환 퍼널을 블록 단위로 제공, 사용자는 기획/디자인/개발 없이 그대로 복사하여 즉시 마케팅 실행 가능'
+        }
+      ],
+      images: [
+        '/images/projects/doasome/screen1.png',
+        '/images/projects/doasome/screen2.png',
+        '/images/projects/doasome/screen3.png'
+      ],
+      bgColor: '#5C59E8',
+      imageBgColor: '#FFFDF5',
+      link: 'https://start.growsome.kr/doasome'
+    },
+    
 };
 
 const ChallengeText = ({ text }: { text: string }) => (
