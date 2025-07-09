@@ -13,6 +13,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { CoupangApiProvider } from './contexts/CoupangApiContext';
 import { EmailProvider } from './contexts/EmailContext';
 import Script from 'next/script';
+import ClarityAnalytics from '../components/common/ClarityAnalytics';
 
 // export const metadata: Metadata = {
 //   title: "Create Next App",
@@ -50,15 +51,7 @@ export default function RootLayout({
             })(window,document,'script','dataLayer','GTM-TNM368S3');
           `}
         </Script>
-        <Script id="microsoft-clarity" strategy="afterInteractive">
-          {`
-            (function(c,l,a,r,i,t,y){
-                c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-                t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-                y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-            })(window, document, "clarity", "script", "sc5g8v1frb");
-          `}
-        </Script>
+
       </head>
       <body>
         <noscript>
@@ -71,6 +64,7 @@ export default function RootLayout({
         </noscript>
         <StyledComponentsRegistry>
           <GlobalStyle />
+          <ClarityAnalytics />
           <AuthProvider>
             <CoupangApiProvider>
               <EmailProvider>

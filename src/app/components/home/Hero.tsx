@@ -4,6 +4,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { clarityUtils } from '../../../utils/clarity';
 
 const Hero = () => {
   const fadeIn = {
@@ -40,7 +41,13 @@ const Hero = () => {
         </JoinColumn>
         <JoinColumn>
           <JoinForm>
-            <a href="https://open.kakao.com/o/gqWxH1Zg" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+            <a 
+              href="https://open.kakao.com/o/gqWxH1Zg" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              style={{ textDecoration: 'none' }}
+              onClick={() => clarityUtils.trackButtonClick("join_research_lab", "hero_section")}
+            >
               <SubscribeButton>
                 비밀연구소 참여하기
               </SubscribeButton>
