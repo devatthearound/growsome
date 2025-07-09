@@ -1,0 +1,492 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ReferralSource {
+  id         Int       @id @default(autoincrement())
+  sourceName String    @map("source_name") @db.VarChar(100)
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  users      User[]
+
+  @@map("referral_sources")
+}
+
+model TermsVersion {
+  id             Int             @id @default(autoincrement())
+  termsType      String          @map("terms_type") @db.VarChar(50)
+  content        String
+  version        String          @db.VarChar(20)
+  effectiveDate  DateTime        @map("effective_date") @db.Timestamptz(6)
+  createdAt      DateTime?       @default(now()) @map("created_at") @db.Timestamptz(6)
+  userAgreements UserAgreement[]
+
+  @@map("terms_versions")
+}
+
+model User {
+  id               Int                @id @default(autoincrement())
+  email            String             @db.VarChar(255)
+  password         String             @db.VarChar(255)
+  username         String             @db.VarChar(100)
+  phoneNumber      String             @map("phone_number") @db.VarChar(20)
+  companyName      String?            @map("company_name") @db.VarChar(200)
+  position         String?            @db.VarChar(100)
+  referralSourceId Int?               @map("referral_source_id")
+  createdAt        DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime?          @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  lastLogin        DateTime?          @map("last_login") @db.Timestamptz(6)
+  avatar           String?            @db.VarChar(255)
+  status           String             @default("active") @db.VarChar(20)
+  billing_keys     billing_keys[]
+  coupang_api_keys coupang_api_keys[]
+  google_auth      google_auth[]
+  media            media[]
+  orders           Order[]
+  payment_methods  payment_methods[]
+  post_comments    post_comments[]
+  post_likes       post_likes[]
+  posts            posts[]
+  subscriptions    Subscription[]
+  ticket_usage     ticket_usage[]
+  user_tickets     user_tickets[]
+  referralSource   ReferralSource?    @relation(fields: [referralSourceId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  video_templates  video_templates[]
+
+  @@index([companyName], map: "idx_users_company")
+  @@index([email], map: "idx_users_email")
+  @@index([phoneNumber], map: "idx_users_phone")
+  @@index([status], map: "idx_users_status")
+  @@map("users")
+}
+
+model UserAgreement {
+  id             Int           @id @default(autoincrement())
+  userId         Int?          @map("user_id")
+  termsVersionId Int?          @map("terms_version_id")
+  agreedAt       DateTime?     @default(now()) @map("agreed_at") @db.Timestamptz(6)
+  ipAddress      String?       @map("ip_address") @db.VarChar(45)
+  termsVersion   TermsVersion? @relation(fields: [termsVersionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([userId, termsVersionId])
+  @@index([userId], map: "idx_user_agreements_user_id")
+  @@map("user_agreements")
+}
+
+model Session {
+  id            Int       @id @default(autoincrement())
+  userId        Int?      @map("user_id")
+  access_token  String    @unique(map: "sessions_token_key") @db.VarChar(255)
+  expiresAt     DateTime  @map("expires_at") @db.Timestamptz(6)
+  createdAt     DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  refresh_token String
+
+  @@index([access_token], map: "idx_sessions_token")
+  @@index([userId], map: "idx_sessions_user_id")
+  @@map("sessions")
+}
+
+model Category {
+  id          Int        @id @default(autoincrement())
+  name        String     @db.VarChar(100)
+  description String?
+  parentId    Int?       @map("parent_id")
+  createdAt   DateTime?  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime?  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children    Category[] @relation("CategoryHierarchy")
+
+  @@index([parentId], map: "idx_categories_parent_id")
+  @@map("categories")
+}
+
+model Product {
+  product_id      Int               @id @default(autoincrement())
+  name            String            @db.VarChar(255)
+  description     String?
+  createdAt       DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime?         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  order_items     order_items[]
+  product_options product_options[]
+  user_tickets    user_tickets[]
+
+  @@map("products")
+}
+
+model Coupon {
+  id                  Int       @id @default(autoincrement())
+  code                String    @unique @db.VarChar(50)
+  name                String    @db.VarChar(100)
+  description         String?
+  discountType        String    @map("discount_type") @db.VarChar(20)
+  discountValue       Int       @map("discount_value")
+  min_purchase_amount Int?
+  max_discount_amount Int?
+  start_date          DateTime  @db.Timestamptz(6)
+  end_date            DateTime? @db.Timestamptz(6)
+  usage_limit         Int?
+  user_usage_limit    Int?      @default(1)
+  isActive            Boolean?  @default(true) @map("is_active")
+  createdAt           DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at          DateTime? @default(now()) @db.Timestamptz(6)
+
+  @@index([code], map: "idx_coupons_code")
+  @@map("coupons")
+}
+
+model Order {
+  order_id     Int           @id @default(autoincrement())
+  userId       Int           @map("user_id")
+  orderNumber  String        @unique @map("order_number") @db.VarChar(50)
+  order_status String        @default("pending") @db.VarChar(20)
+  subtotal     Decimal       @db.Decimal(10, 2)
+  tax          Decimal       @default(0.00) @db.Decimal(10, 2)
+  discount     Decimal       @default(0.00) @db.Decimal(10, 2)
+  totalAmount  Decimal       @map("total_amount") @db.Decimal(10, 2)
+  notes        String?
+  createdAt    DateTime?     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime?     @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  order_items  order_items[]
+  users        User          @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  payments     Payment[]
+
+  @@index([createdAt], map: "idx_orders_created_at")
+  @@index([order_status], map: "idx_orders_order_status")
+  @@index([userId], map: "idx_orders_user_id")
+  @@map("orders")
+}
+
+model Payment {
+  paymentId      Int       @id @default(autoincrement()) @map("payment_id")
+  orderId        Int       @map("order_id")
+  paymentMethod  String    @map("payment_method") @db.VarChar(20)
+  paymentStatus  String    @default("pending") @map("payment_status") @db.VarChar(20)
+  amount         Decimal   @db.Decimal(10, 2)
+  transaction_id String?   @db.VarChar(255)
+  paymentDate    DateTime? @map("payment_date") @db.Timestamptz(6)
+  createdAt      DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updated_at     DateTime? @default(now()) @db.Timestamptz(6)
+  order          Order     @relation(fields: [orderId], references: [order_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([orderId], map: "idx_payments_order_id")
+  @@index([paymentStatus], map: "idx_payments_payment_status")
+  @@index([transaction_id], map: "idx_payments_transaction_id")
+  @@map("payments")
+}
+
+model Subscription {
+  subscription_id      Int                    @id @default(autoincrement())
+  userId               Int                    @map("user_id")
+  product_option_id    Int
+  status               String                 @default("active") @db.VarChar(20)
+  startDate            DateTime               @map("start_date") @db.Date
+  nextBillingDate      DateTime               @map("next_billing_date") @db.Date
+  payment_method_id    Int
+  createdAt            DateTime?              @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime?              @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  subscription_history subscription_history[]
+  payment_methods      payment_methods        @relation(fields: [payment_method_id], references: [payment_method_id], onDelete: NoAction, onUpdate: NoAction)
+  product_options      product_options        @relation(fields: [product_option_id], references: [product_option_id], onDelete: NoAction, onUpdate: NoAction)
+  user                 User                   @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([nextBillingDate], map: "idx_subscriptions_next_billing_date")
+  @@index([product_option_id], map: "idx_subscriptions_product_option_id")
+  @@index([status], map: "idx_subscriptions_status")
+  @@index([userId], map: "idx_subscriptions_user_id")
+  @@map("subscriptions")
+}
+
+model billing_keys {
+  id             Int       @id @default(autoincrement())
+  user_id        Int
+  billing_key    String
+  status         String    @default("active") @db.VarChar(20)
+  created_at     DateTime  @db.Timestamp(6)
+  deactivated_at DateTime? @db.Timestamp(6)
+  users          User      @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([user_id, billing_key])
+}
+
+model coupang_api_keys {
+  id         Int       @id @default(autoincrement())
+  user_id    Int
+  access_key String    @db.VarChar(255)
+  secret_key String    @db.VarChar(255)
+  is_active  Boolean?  @default(true)
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at DateTime? @default(now()) @db.Timestamptz(6)
+  users      User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([user_id], map: "idx_coupang_api_keys_user_id")
+}
+
+model google_auth {
+  id            Int       @id @default(autoincrement())
+  user_id       Int?
+  access_token  String    @db.VarChar(255)
+  refresh_token String    @db.VarChar(255)
+  scope         String    @db.VarChar(255)
+  token_type    String    @db.VarChar(50)
+  expiry_date   DateTime  @db.Timestamptz(6)
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime? @default(now()) @db.Timestamptz(6)
+  is_active     Boolean?  @default(true)
+  users         User?     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model media {
+  id          Int       @id @default(autoincrement())
+  file_name   String    @db.VarChar(255)
+  file_path   String    @db.VarChar(255)
+  file_type   String    @db.VarChar(50)
+  file_size   Int
+  alt_text    String?   @db.VarChar(255)
+  uploaded_by Int?
+  created_at  DateTime? @default(now()) @db.Timestamptz(6)
+  users       User?     @relation(fields: [uploaded_by], references: [id], onUpdate: NoAction)
+}
+
+model order_items {
+  order_item_id     Int             @id @default(autoincrement())
+  order_id          Int
+  product_id        Int
+  product_option_id Int
+  quantity          Int
+  unit_price        Decimal         @db.Decimal(10, 2)
+  total_price       Decimal         @db.Decimal(10, 2)
+  created_at        DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?       @default(now()) @db.Timestamptz(6)
+  orders            Order           @relation(fields: [order_id], references: [order_id], onDelete: NoAction, onUpdate: NoAction)
+  products          Product         @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction)
+  product_options   product_options @relation(fields: [product_option_id], references: [product_option_id], onDelete: NoAction, onUpdate: NoAction)
+  user_tickets      user_tickets[]
+
+  @@index([order_id], map: "idx_order_items_order_id")
+  @@index([product_id], map: "idx_order_items_product_id")
+  @@index([product_option_id], map: "idx_order_items_product_option_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model payment_methods {
+  payment_method_id Int            @id @default(autoincrement())
+  user_id           Int
+  payment_type      String         @db.VarChar(20)
+  payment_details   String
+  expiry_date       String?        @db.VarChar(10)
+  is_default        Boolean?       @default(false)
+  created_at        DateTime?      @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?      @default(now()) @db.Timestamptz(6)
+  users             User           @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subscriptions     Subscription[]
+
+  @@index([user_id], map: "idx_payment_methods_user_id")
+}
+
+model post_categories {
+  id                    Int               @id @default(autoincrement())
+  name                  String            @db.VarChar(100)
+  slug                  String            @unique @db.VarChar(100)
+  description           String?
+  parent_id             Int?
+  created_at            DateTime?         @default(now()) @db.Timestamptz(6)
+  updated_at            DateTime?         @default(now()) @db.Timestamptz(6)
+  post_categories       post_categories?  @relation("post_categoriesTopost_categories", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_post_categories post_categories[] @relation("post_categoriesTopost_categories")
+  posts                 posts[]
+
+  @@index([slug], map: "idx_post_categories_slug")
+}
+
+model post_comments {
+  id                  Int             @id @default(autoincrement())
+  post_id             Int?
+  user_id             Int?
+  parent_id           Int?
+  content             String
+  is_approved         Boolean?        @default(false)
+  created_at          DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at          DateTime?       @default(now()) @db.Timestamptz(6)
+  post_comments       post_comments?  @relation("post_commentsTopost_comments", fields: [parent_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  other_post_comments post_comments[] @relation("post_commentsTopost_comments")
+  posts               posts?          @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users               User?           @relation(fields: [user_id], references: [id], onUpdate: NoAction)
+
+  @@index([post_id], map: "idx_post_comments_post_id")
+  @@index([user_id], map: "idx_post_comments_user_id")
+}
+
+model post_likes {
+  id         Int       @id @default(autoincrement())
+  post_id    Int?
+  user_id    Int?
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  posts      posts?    @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users      User?     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([post_id, user_id])
+  @@index([post_id], map: "idx_post_likes_post_id")
+  @@index([user_id], map: "idx_post_likes_user_id")
+}
+
+model posts {
+  id              Int              @id @default(autoincrement())
+  title           String           @db.VarChar(200)
+  slug            String           @unique @db.VarChar(200)
+  content         String
+  excerpt         String?
+  featured_image  String?          @db.VarChar(255)
+  author_id       Int?
+  category_id     Int?
+  status          String           @default("draft") @db.VarChar(20)
+  published_at    DateTime?        @db.Timestamptz(6)
+  seo_title       String?          @db.VarChar(200)
+  seo_description String?
+  view_count      Int?             @default(0)
+  tags            String[]         @default([]) @db.VarChar(50)
+  created_at      DateTime?        @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime?        @default(now()) @db.Timestamptz(6)
+  post_comments   post_comments[]
+  post_likes      post_likes[]
+  users           User?            @relation(fields: [author_id], references: [id], onUpdate: NoAction)
+  post_categories post_categories? @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([author_id], map: "idx_posts_author_id")
+  @@index([category_id], map: "idx_posts_category_id")
+  @@index([published_at], map: "idx_posts_published_at")
+  @@index([slug], map: "idx_posts_slug")
+  @@index([status], map: "idx_posts_status")
+}
+
+model product_option_price_history {
+  history_id        Int             @id @default(autoincrement())
+  product_option_id Int
+  price             Decimal         @db.Decimal(10, 2)
+  effective_from    DateTime        @db.Timestamptz(6)
+  effective_to      DateTime?       @db.Timestamptz(6)
+  created_at        DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?       @default(now()) @db.Timestamptz(6)
+  product_options   product_options @relation(fields: [product_option_id], references: [product_option_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([effective_from, effective_to], map: "idx_price_history_effective_dates")
+  @@index([product_option_id], map: "idx_price_history_product_option_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model product_options {
+  product_option_id            Int                            @id @default(autoincrement())
+  product_id                   Int
+  name                         String                         @db.VarChar(255)
+  description                  String?
+  price                        Decimal                        @db.Decimal(10, 2)
+  purchase_type                String                         @db.VarChar(20)
+  renewal_period_unit          String?                        @db.VarChar(10)
+  renewal_period_value         Int?
+  created_at                   DateTime?                      @default(now()) @db.Timestamptz(6)
+  updated_at                   DateTime?                      @default(now()) @db.Timestamptz(6)
+  order_items                  order_items[]
+  product_option_price_history product_option_price_history[]
+  products                     Product                        @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction)
+  subscriptions                Subscription[]
+  user_tickets                 user_tickets[]
+
+  @@index([product_id], map: "idx_product_options_product_id")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model subscription_history {
+  history_id      Int          @id @default(autoincrement())
+  subscription_id Int
+  action          String       @db.VarChar(20)
+  action_date     DateTime?    @default(now()) @db.Timestamptz(6)
+  notes           String?
+  subscriptions   Subscription @relation(fields: [subscription_id], references: [subscription_id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([action], map: "idx_subscription_history_action")
+  @@index([action_date], map: "idx_subscription_history_action_date")
+  @@index([subscription_id], map: "idx_subscription_history_subscription_id")
+}
+
+model ticket_usage {
+  usage_id      Int          @id @default(autoincrement())
+  ticket_id     Int
+  user_id       Int
+  usage_type    String       @db.VarChar(50)
+  usage_details Json?
+  usage_time    DateTime     @db.Timestamptz(6)
+  created_at    DateTime?    @default(now()) @db.Timestamptz(6)
+  user_tickets  user_tickets @relation(fields: [ticket_id], references: [ticket_id], onDelete: NoAction, onUpdate: NoAction)
+  users         User         @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([usage_details], map: "idx_ticket_usage_details", type: Gin)
+  @@index([ticket_id], map: "idx_ticket_usage_ticket_id")
+  @@index([usage_time], map: "idx_ticket_usage_usage_time")
+  @@index([usage_type], map: "idx_ticket_usage_usage_type")
+  @@index([user_id], map: "idx_ticket_usage_user_id")
+}
+
+model toy_projects {
+  id            Int       @id @default(autoincrement())
+  title         String    @db.VarChar(200)
+  description   String
+  url           String    @db.VarChar(200)
+  is_active     Boolean?  @default(true)
+  tags          String[]  @default([]) @db.VarChar(50)
+  created_at    DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at    DateTime? @default(now()) @db.Timestamptz(6)
+  thumbnail_img String?   @db.VarChar
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model user_tickets {
+  ticket_id         Int             @id @default(autoincrement())
+  user_id           Int
+  product_id        Int
+  product_option_id Int
+  order_item_id     Int?
+  status            String          @default("active") @db.VarChar(20)
+  start_date        DateTime        @db.Timestamptz(6)
+  end_date          DateTime?       @db.Timestamptz(6)
+  last_accessed     DateTime?       @db.Timestamptz(6)
+  access_count      Int?            @default(0)
+  metadata          Json?
+  created_at        DateTime?       @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime?       @default(now()) @db.Timestamptz(6)
+  ticket_usage      ticket_usage[]
+  order_items       order_items?    @relation(fields: [order_item_id], references: [order_item_id], onDelete: NoAction, onUpdate: NoAction)
+  products          Product         @relation(fields: [product_id], references: [product_id], onDelete: NoAction, onUpdate: NoAction)
+  product_options   product_options @relation(fields: [product_option_id], references: [product_option_id], onDelete: NoAction, onUpdate: NoAction)
+  users             User            @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([start_date, end_date], map: "idx_user_tickets_dates")
+  @@index([metadata], map: "idx_user_tickets_metadata", type: Gin)
+  @@index([product_id], map: "idx_user_tickets_product_id")
+  @@index([status], map: "idx_user_tickets_status")
+  @@index([user_id], map: "idx_user_tickets_user_id")
+}
+
+model video_templates {
+  id                     Int       @id @default(autoincrement())
+  user_id                Int
+  template_name          String    @db.VarChar(100)
+  description            String?
+  intro_video_path       String?   @db.VarChar(255)
+  outro_video_path       String?   @db.VarChar(255)
+  background_music_path  String?   @db.VarChar(255)
+  output_directory       String?   @db.VarChar(255)
+  image_display_duration Int       @default(3) @db.SmallInt
+  is_default             Boolean   @default(false)
+  is_active              Boolean   @default(true)
+  last_used_at           DateTime? @db.Timestamptz(6)
+  created_at             DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at             DateTime  @default(now()) @db.Timestamptz(6)
+  users                  User      @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([user_id, template_name])
+  @@index([last_used_at], map: "idx_video_templates_last_used")
+  @@index([user_id], map: "idx_video_templates_user_id")
+}
