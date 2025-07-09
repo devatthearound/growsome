@@ -21,7 +21,11 @@ const nextConfig: NextConfig = {
     styledComponents: true
   },
   images: {
-    domains: ['api.tosspayments.com'],
+    domains: [
+      'api.tosspayments.com',
+      'images.unsplash.com',
+      'randomuser.me'
+    ],
   },
 }
 

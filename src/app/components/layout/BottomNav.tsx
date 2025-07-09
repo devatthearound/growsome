@@ -8,7 +8,8 @@ import {
   faUser, 
   faGraduationCap, 
   faShoppingBag,
-  faComments
+  faComments,
+  faBlog
 } from '@fortawesome/free-solid-svg-icons';
 
 interface NavItemProps {
@@ -29,6 +30,10 @@ const BottomNav = () => {
       <NavItem href="/class" $active={isActive('/class')}>
         <FontAwesomeIcon icon={faGraduationCap} />
         <span>강의</span>
+      </NavItem>
+      <NavItem href="/blog" $active={isActive('/blog') || pathname.startsWith('/blog')}>
+        <FontAwesomeIcon icon={faBlog} />
+        <span>블로그</span>
       </NavItem>
       <NavItem href="/store" $active={isActive('/store')}>
         <FontAwesomeIcon icon={faShoppingBag} />

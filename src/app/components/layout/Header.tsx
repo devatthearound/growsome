@@ -39,6 +39,7 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
     { path: '/product', label: '실전솔루션' },
     { path: '/portfolio', label: '포트폴리오' },
     { path: '/services', label: '개발 서비스' },
+    { path: '/blog', label: '블로그' },
      ];
 
   const handleMenuClick = (path: string) => {
@@ -59,7 +60,7 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
             <NavList>
               {
                 navigationLinks.map((link) => {
-                  const isActive = currentPath === link.path;
+                  const isActive = link.path === '/blog' ? currentPath.startsWith('/blog') : currentPath === link.path;
                   return (
                     <NavItem key={link.path}>
                     <NavLink 
@@ -129,7 +130,7 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
         <MobileNavList>
         {
                 navigationLinks.map((link) => {
-                  const isActive = currentPath === link.path;
+                  const isActive = link.path === '/blog' ? currentPath.startsWith('/blog') : currentPath === link.path;
                   return (
                     <MobileNavItem 
                       key={link.path} 

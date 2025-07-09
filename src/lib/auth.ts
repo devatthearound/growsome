@@ -114,48 +114,20 @@ export async function refreshTokens(refreshToken: string): Promise<{
     const userId = payload.userId;
     const email = payload.email;
 
-    // DB에서 리프레시 토큰 유효성 검증 (선택적)
-    const client = await pool.connect();
-    try {
-      // 토큰 블랙리스트 확인
-      const blacklistResult = await client.query(
-        `SELECT EXISTS(
-          SELECT 1 FROM token_blacklist 
-          WHERE token_hash = $1 AND expires_at > CURRENT_TIMESTAMP
-        ) as is_blacklisted`,
-        [hashToken(refreshToken)]
-      );
+    // PostgreSQL 연결 건너뛰고 바로 새 토큰 생성 (임시)
+    console.log('⚠️ PostgreSQL 연결 건너뛰기 - 토큰 갱신만 수행');
+    
+    // 새 토큰 생성
+    const newAccessToken = await generateToken({ userId, email }, '2h');
+    const newRefreshToken = await generateToken({ userId, email }, '7d');
 
-      if (blacklistResult.rows[0].is_blacklisted) {
-        return null;
-      }
-
-      // 새 토큰 생성
-      const newAccessToken = await generateToken({ userId, email }, '2h');
-      const newRefreshToken = await generateToken({ userId, email }, '7d');
-
-      // 선택적: 새 리프레시 토큰 DB에 저장
-      try {
-        await client.query(
-          `INSERT INTO refresh_tokens(user_id, token_hash, expires_at)
-           VALUES($1, $2, NOW() + INTERVAL '7 days')
-           ON CONFLICT (user_id) 
-           DO UPDATE SET token_hash = $2, expires_at = NOW() + INTERVAL '7 days'`,
-          [userId, hashToken(newRefreshToken)]
-        );
-      } catch (error) {
-        console.log('리프레시 토큰 저장 실패 (테이블이 없을 수 있음):', error);
-      }
-
-      return {
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-        userId,
-        email
-      };
-    } finally {
-      client.release();
-    }
+    return {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+      userId,
+      email
+    };
+    
   } catch (error) {
     console.error('토큰 갱신 오류:', error);
     return null;

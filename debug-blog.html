@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Database Debug</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f8f9fa;
+        }
+        .debug-section {
+            background: white;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .debug-title {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+        .debug-output {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: Monaco, Consolas, monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .warning { color: #ffc107; }
+        .info { color: #007bff; }
+        button {
+            background: #514FE4;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0.5rem 0.5rem 0 0;
+        }
+        button:hover {
+            background: #4338ca;
+        }
+        .post-link {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 0.5rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #495057;
+            border: 1px solid #ced4da;
+        }
+        .post-link:hover {
+            background: #dee2e6;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Blog Database Debug Tool</h1>
+    <p>이 도구는 블로그 시스템의 데이터베이스 연결과 데이터를 확인하는 데 도움을 줍니다.</p>
+
+    <div class="debug-section">
+        <h2 class="debug-title">🚀 빠른 진단</h2>
+        <button onclick="runFullDiagnostic()">전체 진단 실행</button>
+        <button onclick="clearOutput()">출력 지우기</button>
+        <div id="fullDiagnostic" class="debug-output"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2 class="debug-title">📋 포스트 목록 테스트</h2>
+        <button onclick="testPostsList()">포스트 목록 가져오기</button>
+        <div id="postsOutput" class="debug-output"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2 class="debug-title">📄 개별 포스트 테스트</h2>
+        <button onclick="testSinglePost()">첫 번째 포스트 상세 정보</button>
+        <div id="singlePostOutput" class="debug-output"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2 class="debug-title">🏷️ 카테고리 테스트</h2>
+        <button onclick="testCategories()">카테고리 목록 가져오기</button>
+        <div id="categoriesOutput" class="debug-output"></div>
+    </div>
+
+    <div class="debug-section">
+        <h2 class="debug-title">🔗 유효한 링크들</h2>
+        <div id="validLinks"></div>
+    </div>
+
+    <script>
+        let postsData = null;
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const emoji = {
+                'success': '✅',
+                'error': '❌',
+                'warning': '⚠️',
+                'info': 'ℹ️'
+            };
+            
+            return `${emoji[type]} [${timestamp}] ${message}\n`;
+        }
+
+        function output(elementId, message) {
+            const element = document.getElementById(elementId);
+            element.textContent += message;
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function clearOutput() {
+            ['fullDiagnostic', 'postsOutput', 'singlePostOutput', 'categoriesOutput'].forEach(id => {
+                document.getElementById(id).textContent = '';
+            });
+            document.getElementById('validLinks').innerHTML = '';
+        }
+
+        async function testPostsList() {
+            const outputId = 'postsOutput';
+            document.getElementById(outputId).textContent = '';
+            
+            output(outputId, log('포스트 목록 API 테스트 시작...'));
+            
+            try {
+                const response = await fetch('/api/blog/posts');
+                output(outputId, log(`응답 상태: ${response.status} ${response.statusText}`));
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                postsData = data; // 전역 변수에 저장
+                
+                output(outputId, log('API 응답 성공!', 'success'));
+                output(outputId, log(`응답 데이터: ${JSON.stringify(data, null, 2)}`));
+                
+                if (data.success && data.posts && data.posts.length > 0) {
+                    output(outputId, log(`발견된 포스트 수: ${data.posts.length}`, 'success'));
+                    
+                    // UUID 검증
+                    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+                    data.posts.forEach((post, index) => {
+                        const isValidUUID = uuidRegex.test(post.id);
+                        output(outputId, log(`포스트 ${index + 1}: "${post.title}" - ID: ${post.id} ${isValidUUID ? '(유효한 UUID)' : '(유효하지 않은 UUID)'}`, isValidUUID ? 'success' : 'error'));
+                    });
+                    
+                    updateValidLinks(data.posts);
+                } else {
+                    output(outputId, log('포스트를 찾을 수 없습니다', 'warning'));
+                }
+                
+            } catch (error) {
+                output(outputId, log(`오류: ${error.message}`, 'error'));
+            }
+        }
+
+        async function testSinglePost() {
+            const outputId = 'singlePostOutput';
+            document.getElementById(outputId).textContent = '';
+            
+            if (!postsData || !postsData.posts || postsData.posts.length === 0) {
+                output(outputId, log('먼저 포스트 목록을 가져와야 합니다', 'warning'));
+                return;
+            }
+            
+            const firstPost = postsData.posts[0];
+            output(outputId, log(`첫 번째 포스트 ID로 상세 정보 테스트: ${firstPost.id}`));
+            
+            try {
+                const response = await fetch(`/api/blog/posts/${firstPost.id}`);
+                output(outputId, log(`응답 상태: ${response.status} ${response.statusText}`));
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                output(outputId, log('상세 포스트 API 성공!', 'success'));
+                output(outputId, log(`상세 데이터: ${JSON.stringify(data, null, 2)}`));
+                
+                if (data.success && data.post) {
+                    output(outputId, log(`포스트 제목: "${data.post.title}"`, 'success'));
+                    output(outputId, log(`포스트 ID: ${data.post.id}`, 'success'));
+                    output(outputId, log(`올바른 URL: /blog/${data.post.id}`, 'success'));
+                }
+                
+            } catch (error) {
+                output(outputId, log(`오류: ${error.message}`, 'error'));
+            }
+        }
+
+        async function testCategories() {
+            const outputId = 'categoriesOutput';
+            document.getElementById(outputId).textContent = '';
+            
+            output(outputId, log('카테고리 API 테스트 시작...'));
+            
+            try {
+                const response = await fetch('/api/blog/categories');
+                output(outputId, log(`응답 상태: ${response.status} ${response.statusText}`));
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                output(outputId, log('카테고리 API 성공!', 'success'));
+                output(outputId, log(`카테고리 데이터: ${JSON.stringify(data, null, 2)}`));
+                
+                if (data.success && data.categories) {
+                    output(outputId, log(`발견된 카테고리 수: ${data.categories.length}`, 'success'));
+                    data.categories.forEach((category, index) => {
+                        output(outputId, log(`카테고리 ${index + 1}: "${category.name}" - ID: ${category.id}`));
+                    });
+                }
+                
+            } catch (error) {
+                output(outputId, log(`오류: ${error.message}`, 'error'));
+            }
+        }
+
+        function updateValidLinks(posts) {
+            const linksContainer = document.getElementById('validLinks');
+            if (posts && posts.length > 0) {
+                linksContainer.innerHTML = '<h3>🔗 테스트할 수 있는 유효한 링크들:</h3>';
+                posts.forEach((post, index) => {
+                    const link = document.createElement('a');
+                    link.href = `/blog/${post.id}`;
+                    link.className = 'post-link';
+                    link.textContent = `${index + 1}. ${post.title} (ID: ${post.id})`;
+                    link.target = '_blank';
+                    linksContainer.appendChild(link);
+                    linksContainer.appendChild(document.createElement('br'));
+                });
+            }
+        }
+
+        async function runFullDiagnostic() {
+            const outputId = 'fullDiagnostic';
+            document.getElementById(outputId).textContent = '';
+            
+            output(outputId, log('=== 전체 시스템 진단 시작 ===', 'info'));
+            
+            // 1. 현재 위치 확인
+            output(outputId, log(`현재 URL: ${window.location.href}`));
+            output(outputId, log(`현재 경로: ${window.location.pathname}`));
+            
+            // 2. 포스트 목록 테스트
+            output(outputId, log('\n1. 포스트 목록 API 테스트...'));
+            try {
+                const postsResponse = await fetch('/api/blog/posts');
+                if (postsResponse.ok) {
+                    const postsData = await postsResponse.json();
+                    if (postsData.success && postsData.posts && postsData.posts.length > 0) {
+                        output(outputId, log(`✅ 포스트 ${postsData.posts.length}개 발견`, 'success'));
+                        
+                        // UUID 검증
+                        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+                        const validPosts = postsData.posts.filter(post => uuidRegex.test(post.id));
+                        
+                        if (validPosts.length === postsData.posts.length) {
+                            output(outputId, log('✅ 모든 포스트 ID가 유효한 UUID 형식', 'success'));
+                        } else {
+                            output(outputId, log(`⚠️ ${validPosts.length}/${postsData.posts.length} 포스트만 유효한 UUID`, 'warning'));
+                        }
+                        
+                        // 첫 번째 포스트로 상세 테스트
+                        if (validPosts.length > 0) {
+                            const firstPost = validPosts[0];
+                            output(outputId, log(`\n2. 상세 포스트 API 테스트 (ID: ${firstPost.id})...`));
+                            
+                            const detailResponse = await fetch(`/api/blog/posts/${firstPost.id}`);
+                            if (detailResponse.ok) {
+                                const detailData = await detailResponse.json();
+                                if (detailData.success) {
+                                    output(outputId, log('✅ 상세 포스트 API 정상 작동', 'success'));
+                                    output(outputId, log(`✅ 테스트 링크: /blog/${firstPost.id}`, 'success'));
+                                } else {
+                                    output(outputId, log('❌ 상세 포스트 데이터 오류', 'error'));
+                                }
+                            } else {
+                                output(outputId, log(`❌ 상세 포스트 API 응답 오류: ${detailResponse.status}`, 'error'));
+                            }
+                        }
+                    } else {
+                        output(outputId, log('⚠️ 포스트가 없거나 데이터 형식 오류', 'warning'));
+                    }
+                } else {
+                    output(outputId, log(`❌ 포스트 목록 API 오류: ${postsResponse.status}`, 'error'));
+                }
+            } catch (error) {
+                output(outputId, log(`❌ 포스트 API 네트워크 오류: ${error.message}`, 'error'));
+            }
+            
+            // 3. 카테고리 테스트
+            output(outputId, log('\n3. 카테고리 API 테스트...'));
+            try {
+                const categoriesResponse = await fetch('/api/blog/categories');
+                if (categoriesResponse.ok) {
+                    const categoriesData = await categoriesResponse.json();
+                    if (categoriesData.success && categoriesData.categories) {
+                        output(outputId, log(`✅ 카테고리 ${categoriesData.categories.length}개 발견`, 'success'));
+                    } else {
+                        output(outputId, log('⚠️ 카테고리 데이터 없음', 'warning'));
+                    }
+                } else {
+                    output(outputId, log(`❌ 카테고리 API 오류: ${categoriesResponse.status}`, 'error'));
+                }
+            } catch (error) {
+                output(outputId, log(`❌ 카테고리 API 네트워크 오류: ${error.message}`, 'error'));
+            }
+            
+            output(outputId, log('\n=== 진단 완료 ===', 'info'));
+            output(outputId, log('\n💡 문제 해결 팁:', 'info'));
+            output(outputId, log('1. 포스트가 없다면 Supabase에서 blog_posts 테이블에 published 상태의 포스트를 추가하세요'));
+            output(outputId, log('2. 404 오류가 발생한다면 위의 유효한 링크를 사용하세요'));
+            output(outputId, log('3. UUID 형식이 아닌 ID가 있다면 데이터베이스 스키마를 확인하세요'));
+        }
+
+        // 페이지 로드 시 자동으로 포스트 목록 가져오기
+        window.onload = function() {
+            testPostsList();
+        };
+    </script>
+</body>
+</html>

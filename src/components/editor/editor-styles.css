@@ -1,0 +1,120 @@
+/* Tiptap 에디터 추가 스타일 */
+
+/* 코드 하이라이팅 테마 */
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 1em;
+  color: #abb2bf;
+  background: #282c34;
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: #5c6370;
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-type {
+  color: #c678dd;
+}
+
+.hljs-string,
+.hljs-attr {
+  color: #98c379;
+}
+
+.hljs-number,
+.hljs-literal,
+.hljs-meta .hljs-meta-string {
+  color: #d19a66;
+}
+
+.hljs-name,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-class .hljs-title {
+  color: #e06c75;
+}
+
+.hljs-function .hljs-title {
+  color: #61dafb;
+}
+
+.hljs-built_in,
+.hljs-doctag,
+.hljs-section,
+.hljs-title {
+  color: #e6c07b;
+}
+
+/* 테이블 hover 효과 */
+.ProseMirror table tr:hover {
+  background-color: #f8fafc;
+}
+
+/* 링크 호버 효과 */
+.ProseMirror a:hover {
+  background-color: #dbeafe;
+  border-radius: 2px;
+}
+
+/* 체크박스 커스터마이징 */
+.ProseMirror ul[data-type="taskList"] li input[type="checkbox"] {
+  accent-color: #3b82f6;
+  width: 16px;
+  height: 16px;
+}
+
+/* 이미지 hover 효과 */
+.ProseMirror img:hover {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+/* 코드 블록 언어 표시 */
+.ProseMirror pre[data-language]::before {
+  content: attr(data-language);
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: #9ca3af;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+}
+
+/* 반응형 테이블 */
+@media (max-width: 768px) {
+  .ProseMirror table {
+    font-size: 0.875rem;
+  }
+  
+  .ProseMirror td,
+  .ProseMirror th {
+    padding: 4px 6px;
+  }
+}
+
+/* 포커스 상태 개선 */
+.ProseMirror:focus-within {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+}
+
+/* 드래그 앤 드롭 표시 */
+.ProseMirror.drag-cursor {
+  cursor: grabbing;
+}
+
+/* 선택 영역 스타일 */
+.ProseMirror ::selection {
+  background: #dbeafe;
+}
+
+.ProseMirror ::-moz-selection {
+  background: #dbeafe;
+}

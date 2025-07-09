@@ -40,9 +40,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true);
       const response = await fetch('/api/auth/check');
+      
       if (response.ok) {
         const data = await response.json();
-        setUser(data.user);
+        if (data.isLoggedIn && data.user) {
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
+      } else {
+        // 401 등의 에러는 정상적인 로그아웃 상태로 처리
+        setUser(null);
+        if (response.status !== 401) {
+          console.warn(`Auth check returned ${response.status}`);
+        }
       }
     } catch (error) {
       console.error('Auth check failed:', error);
