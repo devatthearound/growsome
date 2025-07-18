@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import styled from 'styled-components';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -139,12 +139,13 @@ const CategoriesPage = () => {
   if (loading) {
     return (
       <PageContainer>
-        <BlogNavigation 
-          categories={[]}
-          selectedCategory="all"
-          onCategoryChange={() => {}}
-          onSearch={() => {}}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <BlogNavigation 
+            categories={[]}
+            onCategoryChange={() => {}}
+            onSearch={() => {}}
+          />
+        </Suspense>
         <LoadingContainer>
           <LoadingSpinner />
           <LoadingText>카테고리를 불러오는 중...</LoadingText>
@@ -156,12 +157,13 @@ const CategoriesPage = () => {
   if (error) {
     return (
       <PageContainer>
-        <BlogNavigation 
-          categories={[]}
-          selectedCategory="all"
-          onCategoryChange={() => {}}
-          onSearch={() => {}}
-        />
+        <Suspense fallback={<div>Loading...</div>}>
+          <BlogNavigation 
+            categories={[]}
+            onCategoryChange={() => {}}
+            onSearch={() => {}}
+          />
+        </Suspense>
         <ErrorContainer>
           <ErrorIcon>😅</ErrorIcon>
           <ErrorTitle>오류가 발생했습니다</ErrorTitle>
@@ -174,12 +176,13 @@ const CategoriesPage = () => {
 
   return (
     <PageContainer>
-      <BlogNavigation 
-        categories={categories}
-        selectedCategory="all"
-        onCategoryChange={() => {}}
-        onSearch={() => {}}
-      />
+      <Suspense fallback={<div>Loading...</div>}>
+        <BlogNavigation 
+          categories={categories}
+          onCategoryChange={() => {}}
+          onSearch={() => {}}
+        />
+      </Suspense>
       
       <MainContent>
         <Header>

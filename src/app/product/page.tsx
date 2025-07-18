@@ -4,7 +4,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import styled, { keyframes, createGlobalStyle } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCheck, faRocket, faClock, faUsers, faLightbulb, faChartLine, faComments, faFileAlt } from '@fortawesome/free-solid-svg-icons';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Check, X, TrendingUp, CheckCircle, Clock, AlertTriangle, ArrowRight, Smile, Frown, HelpCircle, Wallet, Users, FileCheck, Rocket } from 'lucide-react';
 import Link from 'next/link';
 
@@ -12,6 +12,11 @@ import Link from 'next/link';
 const GlobalStyle = createGlobalStyle`
   a {
     text-decoration: none;
+  }
+  
+  /* Suppress console warnings for styled-components */
+  * {
+    box-sizing: border-box;
   }
 `;
 
@@ -35,7 +40,7 @@ const ProductPage = styled.div`
   width: 100%;
   background: ${colors.secondary};
   color: ${colors.primary};
-  padding-top: 75px;
+  padding-top: 0;
 `;
 
 const Container = styled.div`
@@ -96,7 +101,9 @@ const HeroContent = styled.div`
   padding: 0 24px;
 `;
 
-const Title = styled(motion.h1)`
+const Title = styled(motion.h1).withConfig({
+  shouldForwardProp: (prop) => !['initial', 'animate', 'transition'].includes(prop)
+})`
   font-size: 5rem;
   font-weight: 800;
   color: white;
@@ -127,7 +134,9 @@ const Title = styled(motion.h1)`
   }
 `;
 
-const Subtitle = styled(motion.p)`
+const Subtitle = styled(motion.p).withConfig({
+  shouldForwardProp: (prop) => !['initial', 'animate', 'transition'].includes(prop)
+})`
   font-size: 1.4rem;
   color: rgba(255, 255, 255, 0.9);
   margin-top: 24px;
@@ -180,7 +189,9 @@ interface PackageCardProps {
   $isPremium?: boolean;
 }
 
-const PurchaseButton = styled(motion.button)<{ $isPremium?: boolean }>`
+const PurchaseButton = styled(motion.button).withConfig({
+  shouldForwardProp: (prop) => !['$isPremium', 'whileHover', 'whileTap'].includes(prop)
+})<{ $isPremium?: boolean }>`
   width: 100%;
   background: ${props => props.$isPremium ? colors.gradient.accent : 'transparent'};
   color: ${props => props.$isPremium ? colors.text.light : colors.text.primary};
@@ -201,7 +212,9 @@ const PurchaseButton = styled(motion.button)<{ $isPremium?: boolean }>`
   }
 `;
 
-const PackageCard = styled(motion.div)<PackageCardProps>`
+const PackageCard = styled(motion.div).withConfig({
+  shouldForwardProp: (prop) => !['$isPremium', 'whileHover', 'transition'].includes(prop)
+})<PackageCardProps>`
   background: ${colors.secondary};
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 16px;
@@ -359,7 +372,9 @@ const TimelineGrid = styled.div`
   }
 `;
 
-const TimelineStep = styled(motion.div)`
+const TimelineStep = styled(motion.div).withConfig({
+  shouldForwardProp: (prop) => !['initial', 'whileInView', 'transition', 'viewport'].includes(prop)
+})`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -468,7 +483,9 @@ const Timeline = () => {
   );
 };
 
-const HeroButton = styled(motion.button)`
+const HeroButton = styled(motion.button).withConfig({
+  shouldForwardProp: (prop) => !['initial', 'animate', 'transition', 'as'].includes(prop)
+})`
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -519,14 +536,14 @@ const Hero = () => (
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       >
-        <span>AI로 단 2주 만에!</span><br />사업계획서 + MVP 완성!
+        <span>Growsome</span><br />AI 사업계획서 작성<br />완성 솔루션
       </Title>
       <Subtitle
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
       >
-        사업계획서 초안 작성부터 MVP 목업 제작까지,<br /> 2주 만에 완벽하게 준비하세요!
+        사업전략 전문가와 AI가 함께하는<br />2주 완성 사업계획서 + MVP 패키지
       </Subtitle>
       <Link href="/purchase" passHref>
         <HeroButton
@@ -536,7 +553,7 @@ const Hero = () => (
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
           onClick={() => {}}
         >
-          지금 바로 AI 실행 패키지 구매하기
+          사업계획서 작성 패키지 시작하기
           <ArrowRight size={20} />
         </HeroButton>
       </Link>
@@ -684,7 +701,9 @@ const CTATitle = styled.h2`
   }
 `;
 
-const CTAButton = styled(motion.a)`
+const CTAButton = styled(motion.a).withConfig({
+  shouldForwardProp: (prop) => !['whileHover', 'whileTap'].includes(prop)
+})`
   background: ${colors.gradient.accent};
   color: ${colors.text.light};
   padding: 16px 32px;
@@ -862,7 +881,9 @@ const Section = styled.section`
   text-align: center;
 `;
 
-const Header = styled(motion.div)`
+const Header = styled(motion.div).withConfig({
+  shouldForwardProp: (prop) => !['initial', 'animate', 'transition'].includes(prop)
+})`
   text-align: center;
   margin-bottom: 40px;
 `;
@@ -883,7 +904,9 @@ const PriceIncreaseLine = styled.div`
   background: #E5E7EB;
 `;
 
-const PriceIncreaseItem = styled(motion.div)`
+const PriceIncreaseItem = styled(motion.div).withConfig({
+  shouldForwardProp: (prop) => !['initial', 'animate', 'transition'].includes(prop)
+})`
   position: relative;
   padding-left: 48px;
   margin-bottom: 24px;
@@ -903,7 +926,9 @@ const PriceIncreaseCircle = styled.div<{ $active?: boolean; $warning?: boolean }
   z-index: 2;
 `;
 
-const PriceBox = styled(motion.div)<{ $active?: boolean; $warning?: boolean; $completed?: boolean }>`
+const PriceBox = styled(motion.div).withConfig({
+  shouldForwardProp: (prop) => !['$active', '$warning', '$completed'].includes(prop)
+})<{ $active?: boolean; $warning?: boolean; $completed?: boolean }>`
   background: ${props => props.$warning ? '#FFF5F5' : props.$active ? '#efefff' : '#fff'};
   border-radius: 16px;
   padding: 24px;
@@ -1457,7 +1482,9 @@ const ChangeList = styled.div`
   }
 `;
 
-const ChangeItem = styled(motion.div)`
+const ChangeItem = styled(motion.div).withConfig({
+  shouldForwardProp: (prop) => !['initial', 'whileInView', 'transition', 'viewport'].includes(prop)
+})`
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
@@ -1738,7 +1765,9 @@ const FinalCTATitle = styled.h2`
   }
 `;
 
-const FinalCTAButton = styled(HeroButton)`
+const FinalCTAButton = styled(HeroButton).withConfig({
+  shouldForwardProp: (prop) => !['initial', 'animate', 'transition', 'as'].includes(prop)
+})`
   background: #06FF01;
   box-shadow: 0 6px 25px rgba(6, 255, 1, 0.4);
 
@@ -1762,7 +1791,7 @@ const FinalCTA = () => (
         transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
         onClick={() => {}}
       >
-        지금 바로 AI 실행 패키지 구매하기
+        사업계획서 작성 패키지 시작하기
         <ArrowRight size={20} />
       </FinalCTAButton>
     </Link>
@@ -1774,7 +1803,11 @@ const GlobalStyleWrapper = () => {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
+    try {
+      setMounted(true);
+    } catch (error) {
+      console.error('Error mounting GlobalStyleWrapper:', error);
+    }
   }, []);
 
   if (!mounted) return null;
@@ -1786,7 +1819,11 @@ const ProductLanding = () => {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
+    try {
+      setIsMounted(true);
+    } catch (error) {
+      console.error('Error mounting ProductLanding:', error);
+    }
   }, []);
 
   if (!isMounted) {

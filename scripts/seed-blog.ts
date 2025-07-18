@@ -16,7 +16,7 @@ async function main() {
       create: {
         email: 'admin@growsome.co.kr',
         username: 'Growsome 관리자',
-        password: 'password123', // 개발용 단순 비밀번호
+        password: 'password123', // 개발용 비밀번호
         companyName: 'Growsome',
         position: 'Admin',
         phoneNumber: '010-1234-5678',

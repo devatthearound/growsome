@@ -72,7 +72,7 @@ async function main() {
       `
       console.log('Raw SQL로 컨텐츠 생성 성공!')
     } catch (error) {
-      console.error('Raw SQL 컨텐츠 생성 실패:', error.message)
+      console.error('Raw SQL 컨텐츠 생성 실패:', error instanceof Error ? error.message : 'Unknown error')
       
       // 실패 시 기본값으로 다시 시도
       try {
@@ -100,7 +100,7 @@ async function main() {
         `
         console.log('기본값으로 컨텐츠 생성 성공!')
       } catch (error2) {
-        console.error('기본값 컨텐츠 생성도 실패:', error2.message)
+        console.error('기본값 컨텐츠 생성도 실패:', error2 instanceof Error ? error2.message : 'Unknown error')
       }
     }
 
@@ -119,7 +119,7 @@ async function main() {
     console.log('✅ 간단한 시드 완료!')
 
   } catch (error) {
-    console.error('❌ 시드 중 오류:', error)
+    console.error('❌ 시드 중 오류:', error instanceof Error ? error.message : 'Unknown error')
   } finally {
     await prisma.$disconnect()
   }

@@ -1,21 +1,12 @@
 'use client';
 
 import React from 'react';
-import styled, { ThemeProvider } from 'styled-components';
+import styled, { ThemeProvider, keyframes } from 'styled-components';
 import { useRouter } from 'next/navigation';
-import {
-  growsomeTheme,
-  Typography,
-  ColumnBox,
-  RowBox,
-  Container,
-  Section,
-  Card,
-  Grid,
-  PrimaryButton,
-  GreenButton,
-  SecondaryButton,
-} from '@/components/design-system';
+import { growsomeTheme } from '@/components/design-system/theme';
+import { Typography } from '@/components/design-system/Typography';
+import { ColumnBox, RowBox, Container, Section, Card } from '@/components/design-system/Layout';
+import { GreenButton, SecondaryButton, PrimaryButton } from '@/components/design-system/Button';
 
 // Services Page Component
 const Services = () => {
@@ -29,535 +20,912 @@ const Services = () => {
     window.open('https://pf.kakao.com/_Lpaln/chat', '_blank');
   };
 
+  const problems = [
+    "AI 붙이고 싶은데 PHP 홈페이지로는 불가능해요",
+    "6개월 기다렸는데 결과물이 2020년 수준이에요",
+    "해외 개발자와 소통이 안 돼서 스트레스받아요",
+    "만들고 나니 운영을 어떻게 해야 할지 모르겠어요",
+    "브랜드 아이덴티티가 없어서 경쟁력이 떨어져요"
+  ];
+
+  const solutions = [
+    {
+      icon: "🚀",
+      title: "개발 기간 50% 단축",
+      description: "3개월 → 6주",
+    },
+    {
+      icon: "💰",
+      title: "비용 75% 절감",
+      description: "2,000만원 → 500만원",
+    },
+    {
+      icon: "📈",
+      title: "광고 효율 10배",
+      description: "ROAS 200% → 2,000%",
+    },
+    {
+      icon: "📊",
+      title: "데이터 수집 10배",
+      description: "월 100건 → 1,000건",
+    },
+    {
+      icon: "🤖",
+      title: "1인 운영 가능",
+      description: "완전 자동화 시스템",
+    }
+  ];
+
+  const features = [
+    {
+      icon: "🤖",
+      title: "AI 확장 가능성 점수",
+      description: "현재 비즈니스의 AI 적용 가능성을 점수로 측정하고 맞춤형 기술 스택을 추천합니다."
+    },
+    {
+      icon: "📊",
+      title: "10배 성장 전략 분석",
+      description: "광고 효율 10배 달성을 위한 구체적인 전략과 데이터 수집 방법을 제시합니다."
+    },
+    {
+      icon: "🎯",
+      title: "브랜드 포지셔닝 진단",
+      description: "시장에서의 차별화 포인트를 발굴하고 브랜드 아이덴티티를 구체화합니다."
+    },
+    {
+      icon: "💡",
+      title: "투자 효율성 분석",
+      description: "예상 개발 기간과 총 투자 비용을 정확히 산출하여 명확한 로드맵을 제공합니다."
+    },
+    {
+      icon: "🚀",
+      title: "단계별 ROI 예측",
+      description: "10배 성장을 위한 단계별 계획과 각 단계별 예상 수익률을 상세히 분석합니다."
+    }
+  ];
+
+  const urgencyItems = [
+    "🔴 예비 1인 창업가: 월 5팀 → 3팀으로 축소",
+    "🔴 100억 매출 기업: 분기 3팀 → 반기 3팀으로 축소",
+    "🔴 2025년 하반기 일정 조기 마감 예상"
+  ];
+
   return (
     <ThemeProvider theme={growsomeTheme}>
       <ServicesContainer>
         {/* Hero Section */}
         <HeroSection>
+          <HeroBackground />
           <Container>
-            <ColumnBox $gap={4} $ai="center">
-              <RowBox $gap={4} $ai="flex-start" style={{flexWrap: 'wrap', width: '100%'}}>
-                {/* Problem Section */}
-                <ColumnBox $f={1} $gap={2} style={{minWidth: '300px'}}>
-                  <Typography.DisplayS600 color={growsomeTheme.color.White}>
-                    ⚠️ 아직도 이런 고민 하고 계신가요?
-                  </Typography.DisplayS600>
+            <HeroContent>
+              <ColumnBox $gap={4} $ai="center">
+                <ColumnBox $gap={3} $ai="center">
+                  <HeroTitle>
+                    <Typography.DisplayXL700 color={growsomeTheme.color.White} style={{textAlign: 'center', lineHeight: '1.1'}}>
+                      <span style={{display: 'block', marginBottom: '1rem'}}>🚀 잘 만든 홈페이지 하나로</span>
+                      <GradientText>광고도, 데이터도 모두 10배 성장</GradientText>
+                    </Typography.DisplayXL700>
+                  </HeroTitle>
                   
-                  <ColumnBox $gap={1}>
-                    <ProblemItem>
-                      <span>❌</span>
-                      <Typography.TextM400 color={growsomeTheme.color.White}>
-                        "AI 붙이고 싶은데 PHP 홈페이지로는 불가능해요"
-                      </Typography.TextM400>
-                    </ProblemItem>
-                    
-                    <ProblemItem>
-                      <span>❌</span>
-                      <Typography.TextM400 color={growsomeTheme.color.White}>
-                        "6개월 기다렸는데 결과물이 2020년 수준이에요"
-                      </Typography.TextM400>
-                    </ProblemItem>
-                    
-                    <ProblemItem>
-                      <span>❌</span>
-                      <Typography.TextM400 color={growsomeTheme.color.White}>
-                        "해외 개발자와 소통이 안 돼서 스트레스받아요"
-                      </Typography.TextM400>
-                    </ProblemItem>
-                    
-                    <ProblemItem>
-                      <span>❌</span>
-                      <Typography.TextM400 color={growsomeTheme.color.White}>
-                        "AI 시대인데 우리 서비스만 뒤처지는 것 같아요"
-                      </Typography.TextM400>
-                    </ProblemItem>
-                  </ColumnBox>
-                  
-                  <EndingCard>
-                    <Typography.TextL500 color={growsomeTheme.color.White}>
-                      이제 그런 고민 끝내세요!
-                    </Typography.TextL500>
-                  </EndingCard>
+                  <HeroSubtitle>
+                    <Typography.TextXL500 color={growsomeTheme.color.White} style={{textAlign: 'center', opacity: 0.9}}>
+                      AI 시대, 타겟별 맞춤형 비즈니스 성장 엔진
+                    </Typography.TextXL500>
+                    <Typography.TextL400 color={growsomeTheme.color.White} style={{textAlign: 'center', opacity: 0.8}}>
+                      예비 1인 창업가부터 100억 매출 기업까지 - 10배 성장 보장
+                    </Typography.TextL400>
+                  </HeroSubtitle>
                 </ColumnBox>
 
-                {/* Solution Section */}
-                <ColumnBox $f={1} $gap={2} style={{minWidth: '300px'}}>
-                  <Typography.DisplayS600 color={growsomeTheme.color.White}>
-                    ✨ 그로우썸은 다릅니다!
-                  </Typography.DisplayS600>
-                  
-                  <ColumnBox $gap={1}>
-                    <SolutionItem>
-                      <span>✅</span>
-                      <Typography.TextM400 color={growsomeTheme.color.White}>
-                        처음부터 AI 확장을 고려한 Next.js 14 아키텍처
-                      </Typography.TextM400>
-                    </SolutionItem>
-                    
-                    <SolutionItem>
-                      <span>✅</span>
-                      <Typography.TextM400 color={growsomeTheme.color.White}>
-                        6주만에 완성하는 초고속 개발 프로세스
-                      </Typography.TextM400>
-                    </SolutionItem>
-                    
-                    <SolutionItem>
-                      <span>✅</span>
-                      <Typography.TextM400 color={growsomeTheme.color.White}>
-                        10년+ 경력 국내 시니어 개발팀 전담 배정
-                      </Typography.TextM400>
-                    </SolutionItem>
-                    
-                    <SolutionItem>
-                      <span>✅</span>
-                      <Typography.TextM400 color={growsomeTheme.color.White}>
-                        AI API 연동부터 클라우드 배포까지 원스톱
-                      </Typography.TextM400>
-                    </SolutionItem>
-                  </ColumnBox>
-                  
-                  <SolutionCard>
-                    <Typography.TextL500 color={growsomeTheme.color.White}>
-                      AI 시대의 승자가 되고 싶다면<br />
-                      <strong style={{color: growsomeTheme.color.Green500}}>지금 바로 시작하세요.</strong>
-                    </Typography.TextL500>
-                  </SolutionCard>
-                </ColumnBox>
-              </RowBox>
-            </ColumnBox>
+                <CTAButtonsHero>
+                  <GreenButton $size="large" onClick={handleFreeDiagnosisClick}>
+                    💡 무료 10배 성장 진단 (5분 완료)
+                  </GreenButton>
+
+                </CTAButtonsHero>
+
+                <StatsGrid>
+                  <StatCard>
+                    <StatNumber>50%</StatNumber>
+                    <StatLabel>개발 기간 단축</StatLabel>
+                  </StatCard>
+                  <StatCard>
+                    <StatNumber>75%</StatNumber>
+                    <StatLabel>비용 절감</StatLabel>
+                  </StatCard>
+                  <StatCard>
+                    <StatNumber>10배</StatNumber>
+                    <StatLabel>광고 효율</StatLabel>
+                  </StatCard>
+                  <StatCard>
+                    <StatNumber>10배</StatNumber>
+                    <StatLabel>데이터 수집</StatLabel>
+                  </StatCard>
+                </StatsGrid>
+              </ColumnBox>
+            </HeroContent>
           </Container>
         </HeroSection>
 
-        {/* Main Message Section */}
-        <Section $bg={growsomeTheme.color.White}>
+        {/* Problems Section */}
+        <ProblemsSection>
           <Container>
-            <ColumnBox $ai="center" $gap={2}>
-              <Typography.DisplayXL700 style={{textAlign: 'center', lineHeight: '1.2'}}>
-                AI 시대, 6주만에 완성하는<br />
-                <span style={{color: growsomeTheme.color.Primary500}}>월 매출 1억 서비스</span>를 만드세요
-              </Typography.DisplayXL700>
+            <ColumnBox $gap={4} $ai="center">
+              <SectionHeader>
+                <Typography.DisplayL600 style={{textAlign: 'center', marginBottom: '2rem'}}>
+                  <span style={{color: growsomeTheme.color.Red500}}>⚠️</span> 아직도 이런 고민 하고 계신가요?
+                </Typography.DisplayL600>
+              </SectionHeader>
               
-              <Typography.TextL400 style={{textAlign: 'center', maxWidth: '600px'}} color={growsomeTheme.color.Black600}>
-                최신 기술 + 국내 시니어팀 + AI 확장성<br />
-                레거시는 버리고 미래를 선택하세요
-              </Typography.TextL400>
+              <ProblemsGrid>
+                {problems.map((problem, index) => (
+                  <ProblemCard key={index}>
+                    <ProblemIcon>
+                      <CrossIcon>❌</CrossIcon>
+                    </ProblemIcon>
+                    <Typography.TextL400 color={growsomeTheme.color.Black800}>
+                      "{problem}"
+                    </Typography.TextL400>
+                  </ProblemCard>
+                ))}
+              </ProblemsGrid>
+              
+              <WarningCard>
+                <WarningIcon>⏰</WarningIcon>
+                <ColumnBox $gap={1} $ai="center">
+                  <Typography.TextL600 color={growsomeTheme.color.Black800} style={{textAlign: 'center'}}>
+                    ChatGPT, Claude 등 AI가 비즈니스를 바꾸고 있는데,
+                  </Typography.TextL600>
+                  <Typography.TextL600 color={growsomeTheme.color.Red500} style={{textAlign: 'center'}}>
+                    매월 뒤처지고 있습니다
+                  </Typography.TextL600>
+                </ColumnBox>
+              </WarningCard>
             </ColumnBox>
           </Container>
-        </Section>
+        </ProblemsSection>
 
-        {/* Differentiation Section */}
-        <Section $bg={growsomeTheme.color.Gray50}>
+        {/* Solution Section */}
+        <SolutionSection>
           <Container>
-            <ColumnBox $ai="center" $gap={4}>
-              <Typography.DisplayL600 style={{textAlign: 'center'}}>
-                💎 5대 핵심 차별화 포인트
-              </Typography.DisplayL600>
+            <ColumnBox $gap={4} $ai="center">
+              <SectionBadge>
+                <span style={{fontSize: '2rem'}}>✨</span>
+                <Typography.TextL500 color={growsomeTheme.color.Primary600}>
+                  그로우썸 10배 성장 모델!
+                </Typography.TextL500>
+              </SectionBadge>
               
-              <Grid $minColumnWidth="400px">
-                {/* 1. 최신 기술 스택 */}
-                <Card>
-                  <ColumnBox $gap={2}>
-                    <Typography.DisplayS600>🔥</Typography.DisplayS600>
-                    <Typography.DisplayS600>최신 기술 스택 + AI 확장성</Typography.DisplayS600>
-                    <Typography.TextM500 color={growsomeTheme.color.Primary500}>
-                      "레거시 PHP는 이제 그만! Next.js 14 + AI API로 미래를 준비하세요"
-                    </Typography.TextM500>
-                    
+              <SolutionsGrid>
+                {solutions.map((solution, index) => (
+                  <SolutionCard key={index}>
+                    <SolutionIcon>{solution.icon}</SolutionIcon>
                     <ColumnBox $gap={1}>
-                      <FeatureItem>
-                        <CheckIcon>✓</CheckIcon>
-                        <Typography.TextM400>
-                          2025년 최신 기술 스택 (Next.js 14, TypeScript, Prisma)
-                        </Typography.TextM400>
-                      </FeatureItem>
-                      
-                      <FeatureItem>
-                        <CheckIcon>✓</CheckIcon>
-                        <Typography.TextM400>
-                          AI 확장성 100% 보장 (OpenAI, Claude API 즉시 연결)
-                        </Typography.TextM400>
-                      </FeatureItem>
-                      
-                      <FeatureItem>
-                        <CheckIcon>✓</CheckIcon>
-                        <Typography.TextM400>
-                          글로벌 스탠다드 아키텍처 (AWS 클라우드 네이티브)
-                        </Typography.TextM400>
-                      </FeatureItem>
-                      
-                      <AntiFeatureItem>
-                        <CrossIcon>✗</CrossIcon>
-                        <Typography.TextM400 color={growsomeTheme.color.Black600}>
-                          구식 PHP/그누보드는 AI 시대에 도태됩니다
-                        </Typography.TextM400>
-                      </AntiFeatureItem>
-                    </ColumnBox>
-                  </ColumnBox>
-                </Card>
-
-                {/* 2. 초고속 개발 */}
-                <Card>
-                  <ColumnBox $gap={2}>
-                    <Typography.DisplayS600>⚡</Typography.DisplayS600>
-                    <Typography.DisplayS600>6주 초고속 개발</Typography.DisplayS600>
-                    <Typography.TextM500 color={growsomeTheme.color.Primary500}>
-                      "6개월 기다릴 시간에 이미 수익을 창출하세요"
-                    </Typography.TextM500>
-                    
-                    <ColumnBox $gap={1}>
-                      <ComparisonCard>
-                        <AntiFeatureItem>
-                          <CrossIcon>✗</CrossIcon>
-                          <Typography.TextM400 color={growsomeTheme.color.Black600}>
-                            일반 개발사: 6개월 + 2,000만원
-                          </Typography.TextM400>
-                        </AntiFeatureItem>
-                        
-                        <FeatureItem>
-                          <CheckIcon>✓</CheckIcon>
-                          <Typography.TextM400>
-                            그로우썸: 6주 + 600만원 (70% 절감)
-                          </Typography.TextM400>
-                        </FeatureItem>
-                      </ComparisonCard>
-                      
-                      <Typography.TextM400>
-                        🚀 빠른 시장 진입 = 경쟁 우위 선점
+                      <Typography.TextL600 color={growsomeTheme.color.Black800}>
+                        {solution.title}
+                      </Typography.TextL600>
+                      <Typography.TextM400 color={growsomeTheme.color.Black600}>
+                        {solution.description}
                       </Typography.TextM400>
                     </ColumnBox>
-                  </ColumnBox>
-                </Card>
-
-                {/* 3. 국내 시니어팀 */}
-                <Card>
-                  <ColumnBox $gap={2}>
-                    <Typography.DisplayS600>🇰🇷</Typography.DisplayS600>
-                    <Typography.DisplayS600>국내 시니어 개발팀</Typography.DisplayS600>
-                    <Typography.TextM500 color={growsomeTheme.color.Primary500}>
-                      "해외 개발자 커뮤니케이션 스트레스는 이제 그만!"
-                    </Typography.TextM500>
-                    
-                    <ColumnBox $gap={1}>
-                      <FeatureItem>
-                        <CheckIcon>✓</CheckIcon>
-                        <Typography.TextM400>
-                          실시간 한국어 소통 (슬랙/노션 실시간 협업)
-                        </Typography.TextM400>
-                      </FeatureItem>
-                      
-                      <FeatureItem>
-                        <CheckIcon>✓</CheckIcon>
-                        <Typography.TextM400>
-                          한국 비즈니스 환경 완벽 이해
-                        </Typography.TextM400>
-                      </FeatureItem>
-                      
-                      <FeatureItem>
-                        <CheckIcon>✓</CheckIcon>
-                        <Typography.TextM400>
-                          3개월 무료 애프터서비스 책임감
-                        </Typography.TextM400>
-                      </FeatureItem>
-                      
-                      <AntiFeatureItem>
-                        <CrossIcon>✗</CrossIcon>
-                        <Typography.TextM400 color={growsomeTheme.color.Black600}>
-                          해외 개발자 시차/언어 장벽/책임감 부족 걱정 끝
-                        </Typography.TextM400>
-                      </AntiFeatureItem>
-                    </ColumnBox>
-                  </ColumnBox>
-                </Card>
-
-                {/* 4. 데이터 기반 성장 엔진 */}
-                <Card>
-                  <ColumnBox $gap={2}>
-                    <Typography.DisplayS600>📊</Typography.DisplayS600>
-                    <Typography.DisplayS600>데이터 기반 성장 엔진</Typography.DisplayS600>
-                    <Typography.TextM500 color={growsomeTheme.color.Primary500}>
-                      "감으로 사업하지 마세요! 데이터로 매출을 증명하세요"
-                    </Typography.TextM500>
-                    
-                    <ColumnBox $gap={1}>
-                      <FeatureItem>
-                        <CheckIcon>✓</CheckIcon>
-                        <Typography.TextM400>
-                          Microsoft Clarity 히트맵 실시간 사용자 행동 분석
-                        </Typography.TextM400>
-                      </FeatureItem>
-                      
-                      <FeatureItem>
-                        <CheckIcon>✓</CheckIcon>
-                        <Typography.TextM400>
-                          GA4 고급 설정 및 맞춤 이벤트 트래킹
-                        </Typography.TextM400>
-                      </FeatureItem>
-                      
-                      <FeatureItem>
-                        <CheckIcon>✓</CheckIcon>
-                        <Typography.TextM400>
-                          데이터 기반 UX 개선 컨설팅 제공
-                        </Typography.TextM400>
-                      </FeatureItem>
-                      
-                      <FeatureItem>
-                        <CheckIcon>✓</CheckIcon>
-                        <Typography.TextM400>
-                          월간 성과 리포트 및 개선 제안
-                        </Typography.TextM400>
-                      </FeatureItem>
-                      
-                      <AntiFeatureItem>
-                        <CrossIcon>✗</CrossIcon>
-                        <Typography.TextM400 color={growsomeTheme.color.Black600}>
-                          일반 개발사는 "만들고 끝", 성과 측정 불가
-                        </Typography.TextM400>
-                      </AntiFeatureItem>
-                    </ColumnBox>
-                  </ColumnBox>
-                </Card>
-
-                {/* 5. 콘텐츠 자동화 */}
-                <Card>
-                  <ColumnBox $gap={2}>
-                    <Typography.DisplayS600>🤖</Typography.DisplayS600>
-                    <Typography.DisplayS600>n8n 콘텐츠 자동화 엔진</Typography.DisplayS600>
-                    <Typography.TextM500 color={growsomeTheme.color.Primary500}>
-                      "콘텐츠 제작에 시간 낭비하지 마세요!"
-                    </Typography.TextM500>
-                    
-                    <ColumnBox $gap={1}>
-                      <FeatureItem>
-                        <CheckIcon>✓</CheckIcon>
-                        <Typography.TextM400>
-                          n8n 워크플로우 자동화 시스템 구축
-                        </Typography.TextM400>
-                      </FeatureItem>
-                      
-                      <FeatureItem>
-                        <CheckIcon>✓</CheckIcon>
-                        <Typography.TextM400>
-                          AI 콘텐츠 생성 + 소셜미디어 자동 발행
-                        </Typography.TextM400>
-                      </FeatureItem>
-                      
-                      <FeatureItem>
-                        <CheckIcon>✓</CheckIcon>
-                        <Typography.TextM400>
-                          멀티 채널 동시 배포 (블로그, SNS, 뉴스레터)
-                        </Typography.TextM400>
-                      </FeatureItem>
-                      
-                      <FeatureItem>
-                        <CheckIcon>✓</CheckIcon>
-                        <Typography.TextM400>
-                          고객 여정별 자동화된 마케팅 시퀀스
-                        </Typography.TextM400>
-                      </FeatureItem>
-                      
-                      <AntiFeatureItem>
-                        <CrossIcon>✗</CrossIcon>
-                        <Typography.TextM400 color={growsomeTheme.color.Black600}>
-                          일반 개발사는 콘텐츠 마케팅까지 지원 불가
-                        </Typography.TextM400>
-                      </AntiFeatureItem>
-                    </ColumnBox>
-                  </ColumnBox>
-                </Card>
-              </Grid>
-            </ColumnBox>
-          </Container>
-        </Section>
-
-        {/* CTA Section */}
-        <CTASection>
-          <Container>
-            <ColumnBox $ai="center" $gap={3}>
-              <Typography.DisplayL600 color={growsomeTheme.color.White} style={{textAlign: 'center'}}>
-                💡 무료 AI 확장성 진단받기
-              </Typography.DisplayL600>
+                  </SolutionCard>
+                ))}
+              </SolutionsGrid>
               
-              <Typography.TextL400 color={growsomeTheme.color.White} style={{textAlign: 'center', maxWidth: '600px'}}>
-                현재 보유한 서비스/아이디어의<br />
-                AI 확장 가능성을 무료로 진단해드립니다.
-              </Typography.TextL400>
-
-              <RowBox $gap={2} $jc="center" style={{flexWrap: 'wrap'}}>
-                <GreenButton $size="large" onClick={handleFreeDiagnosisClick}>
-                  🚀 무료 진단 신청하기
-                </GreenButton>
-                <SecondaryButton 
-                  $size="large"
-                  onClick={handleGetPriceClick}
-                  style={{
-                    color: growsomeTheme.color.White, 
-                    borderColor: growsomeTheme.color.White
-                  }}
-                >
-                  💰 가격 확인하기
-                </SecondaryButton>
-              </RowBox>
-
-              <LimitedOfferCard>
-                <ColumnBox $gap={2} $ai="center">
-                  <Typography.DisplayS600 color={growsomeTheme.color.Green500}>
-                    🔥 지금 주문하면 특별 혜택
-                  </Typography.DisplayS600>
-                  
-                  <ColumnBox $gap={1} style={{textAlign: 'left', maxWidth: '500px'}}>
-                    <Typography.TextM400 color={growsomeTheme.color.White}>
-                      • 얼리버드 할인: 추가 20% 할인
-                    </Typography.TextM400>
-                    <Typography.TextM400 color={growsomeTheme.color.White}>
-                      • 무료 기술 지원: 6개월 → 12개월 연장
-                    </Typography.TextM400>
-                    <Typography.TextM400 color={growsomeTheme.color.White}>
-                      • AI 확장성 보장: 추후 AI 기능 추가 시 50% 할인
-                    </Typography.TextM400>
-                  </ColumnBox>
-                  
-                  <Typography.TextM600 color={growsomeTheme.color.Red500} style={{animation: 'pulse 2s infinite'}}>
-                    ⏰ 한정 혜택입니다. 놓치면 후회합니다.
-                  </Typography.TextM600>
-                </ColumnBox>
-              </LimitedOfferCard>
+              <SolutionCTA>
+                <Typography.DisplayS600 color={growsomeTheme.color.Black800} style={{textAlign: 'center'}}>
+                  AI 시대에 맞는 진짜 성장 파트너
+                </Typography.DisplayS600>
+                <Typography.TextL400 color={growsomeTheme.color.Black600} style={{textAlign: 'center'}}>
+                  지금 바로 시작하세요!
+                </Typography.TextL400>
+              </SolutionCTA>
             </ColumnBox>
           </Container>
-        </CTASection>
+        </SolutionSection>
+
+        {/* Target Section */}
+        <TargetSection>
+          <Container>
+            <ColumnBox $ai="center" $gap={4}>
+              <SectionTitleWrapper>
+                <Typography.DisplayL600 style={{textAlign: 'center'}}>
+                  🎯 당신의 비즈니스 단계는?
+                </Typography.DisplayL600>
+              </SectionTitleWrapper>
+              
+              <TargetGrid>
+                {/* 예비 1인 창업가 */}
+                <TargetCard>
+                  <CardHeader>
+                    <TargetIconWrapper>
+                      <TargetIcon>👤</TargetIcon>
+                    </TargetIconWrapper>
+                    <ColumnBox $gap={1}>
+                      <Typography.TextXL500 color={growsomeTheme.color.Black800}>
+                        예비 1인 창업가
+                      </Typography.TextXL500>
+                      <Typography.TextM400 color={growsomeTheme.color.Black600}>
+                        백만원 단위 투자로 시작하는 성장 엔진
+                      </Typography.TextM400>
+                    </ColumnBox>
+                  </CardHeader>
+                  
+                  <FeaturesList>
+                    <FeatureItem>
+                      <CheckIcon>✓</CheckIcon>
+                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
+                        혼자서도 10명 규모 운영 가능한 자동화 시스템
+                      </Typography.TextM400>
+                    </FeatureItem>
+                    <FeatureItem>
+                      <CheckIcon>✓</CheckIcon>
+                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
+                        500만원으로 시작 (기존 2,000만원 대비 75% 절감)
+                      </Typography.TextM400>
+                    </FeatureItem>
+                    <FeatureItem>
+                      <CheckIcon>✓</CheckIcon>
+                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
+                        3개월 → 6주로 빠른 시장 진입
+                      </Typography.TextM400>
+                    </FeatureItem>
+                    <FeatureItem>
+                      <CheckIcon>✓</CheckIcon>
+                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
+                        24시간 AI 고객 응대 시스템
+                      </Typography.TextM400>
+                    </FeatureItem>
+                  </FeaturesList>
+                  
+                  <ROICard>
+                    <ROIIcon>🚀</ROIIcon>
+                    <ColumnBox $gap={1}>
+                      <Typography.TextL600 color={growsomeTheme.color.Green600}>
+                        투자 수익률: 2,100% (21배 수익)
+                      </Typography.TextL600>
+                      <Typography.TextS400 color={growsomeTheme.color.Black600}>
+                        * 시간 가치 + 인력 절감 + 자동화 효과 합산
+                      </Typography.TextS400>
+                    </ColumnBox>
+                  </ROICard>
+                  
+                  <GreenButton $size="large" $width="100%" onClick={handleFreeDiagnosisClick}>
+                    예비 창업가 상담 신청
+                  </GreenButton>
+                </TargetCard>
+
+                {/* 100억 매출 기업 */}
+                <TargetCard>
+                  <CardHeader>
+                    <TargetIconWrapper>
+                      <TargetIcon>🏢</TargetIcon>
+                    </TargetIconWrapper>
+                    <ColumnBox $gap={1}>
+                      <Typography.TextXL500 color={growsomeTheme.color.Black800}>
+                        100억 매출 기업
+                      </Typography.TextXL500>
+                      <Typography.TextM400 color={growsomeTheme.color.Black600}>
+                        천만원 단위 투자로 시스템 고도화
+                      </Typography.TextM400>
+                    </ColumnBox>
+                  </CardHeader>
+                  
+                  <FeaturesList>
+                    <FeatureItem>
+                      <CheckIcon>✓</CheckIcon>
+                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
+                        이미 고객 확보 완료, 다음 단계 확장 준비
+                      </Typography.TextM400>
+                    </FeatureItem>
+                    <FeatureItem>
+                      <CheckIcon>✓</CheckIcon>
+                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
+                        2,000만원으로 시스템 고도화 (기존 4,000만원 대비 50% 절감)
+                      </Typography.TextM400>
+                    </FeatureItem>
+                    <FeatureItem>
+                      <CheckIcon>✓</CheckIcon>
+                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
+                        빅데이터 분석 및 예측 시스템
+                      </Typography.TextM400>
+                    </FeatureItem>
+                    <FeatureItem>
+                      <CheckIcon>✓</CheckIcon>
+                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
+                        글로벌 확장 대응 시스템
+                      </Typography.TextM400>
+                    </FeatureItem>
+                  </FeaturesList>
+                  
+                  <ROICard>
+                    <ROIIcon>🚀</ROIIcon>
+                    <ColumnBox $gap={1}>
+                      <Typography.TextL600 color={growsomeTheme.color.Green600}>
+                        투자 수익률: 13,200% (132배 수익)
+                      </Typography.TextL600>
+                      <Typography.TextS400 color={growsomeTheme.color.Black600}>
+                        * 시장 선점 + 운영 효율화 + 매출 증대 합산
+                      </Typography.TextS400>
+                    </ColumnBox>
+                  </ROICard>
+                  
+                  <GreenButton $size="large" $width="100%" onClick={handleFreeDiagnosisClick}>
+                    대기업 상담 신청
+                  </GreenButton>
+                </TargetCard>
+              </TargetGrid>
+            </ColumnBox>
+          </Container>
+        </TargetSection>
+
+        {/* Diagnosis Section - 개선된 버전 */}
+        <DiagnosisSection>
+          <Container>
+            <ColumnBox $ai="center" $gap={5}>
+              <SectionHeaderDiagnosis>
+                <SectionBadge>
+                  <span style={{fontSize: '2rem'}}>💡</span>
+                  <Typography.TextL600 color={growsomeTheme.color.Green600}>
+                    무료 10배 성장 진단 (5분 완료)
+                  </Typography.TextL600>
+                </SectionBadge>
+                
+                <Typography.TextL400 color={growsomeTheme.color.Black600} style={{textAlign: 'center', maxWidth: '600px'}}>
+                  현재 보유한 서비스/아이디어의 10배 성장 가능성을 무료로 진단해드립니다.
+                </Typography.TextL400>
+              </SectionHeaderDiagnosis>
+
+              <FeaturesGrid>
+                {features.map((feature, index) => (
+                  <FeatureCard key={index}>
+                    <FeatureIcon>{feature.icon}</FeatureIcon>
+                    <FeatureContent>
+                      <Typography.TextL600 color={growsomeTheme.color.Black800} style={{marginBottom: '1rem'}}>
+                        {feature.title}
+                      </Typography.TextL600>
+                      <Typography.TextM400 color={growsomeTheme.color.Black600} style={{lineHeight: '1.6'}}>
+                        {feature.description}
+                      </Typography.TextM400>
+                    </FeatureContent>
+                  </FeatureCard>
+                ))}
+              </FeaturesGrid>
+
+              <UrgencyCard>
+                <UrgencyHeader>
+                  <UrgencyIcon>⏰</UrgencyIcon>
+                  <Typography.TextXL500 color={growsomeTheme.color.Red500}>
+                    마감 임박 알림
+                  </Typography.TextXL500>
+                </UrgencyHeader>
+                
+                <UrgencyList>
+                  {urgencyItems.map((item, index) => (
+                    <UrgencyItem key={index}>
+                      <UrgencyBullet>🔴</UrgencyBullet>
+                      <Typography.TextM500 color={growsomeTheme.color.Black700}>
+                        {item.replace('🔴 ', '')}
+                      </Typography.TextM500>
+                    </UrgencyItem>
+                  ))}
+                </UrgencyList>
+              </UrgencyCard>
+
+              <CTAButtons>
+                <GreenButton $size="large" onClick={handleFreeDiagnosisClick}>
+                  💡 지금 무료 진단 받기 (5분 완료)
+                </GreenButton>
+                <Typography.TextS400 color={growsomeTheme.color.Black600} style={{textAlign: 'center'}}>
+                  * 진단 결과는 24시간 내 개별 연락드립니다
+                </Typography.TextS400>
+              </CTAButtons>
+            </ColumnBox>
+          </Container>
+        </DiagnosisSection>
 
         {/* Final Message Section */}
-        <Section $bg={growsomeTheme.color.Black800}>
+        <FinalSection>
           <Container>
             <ColumnBox $ai="center">
-              <Typography.DisplayM600 color={growsomeTheme.color.Gray200} style={{textAlign: 'center', lineHeight: '1.8'}}>
-                "AI 시대의 기술 선택이<br />
-                5년 후 당신의 비즈니스를 결정합니다.<br /><br />
-                
-                레거시 기술로 과거에 머물 것인가?<br />
-                최신 기술로 미래를 선점할 것인가?<br /><br />
-                
-                <strong style={{color: growsomeTheme.color.Green500}}>
-                  선택은 당신의 몫입니다.<br />
-                  그로우썸은 준비되어 있습니다.
-                </strong>
-              </Typography.DisplayM600>
+              <FinalMessage>
+                <Typography.DisplayM600 color={growsomeTheme.color.Gray200} style={{textAlign: 'center', lineHeight: '1.7'}}>
+                  "단순 에이전시는 홈페이지를 만들지만,<br />
+                  스타트업 경험팀은 사업을 탄생시킵니다.<br /><br />
+                  
+                  <MessageHighlight>완성도 중심 vs 사업 성공 중심</MessageHighlight><br />
+                  <MessageHighlight>단발성 작품 vs 성장하는 생명체</MessageHighlight><br />
+                  <MessageHighlight>디자이너 감성 vs 고객 중심 데이터</MessageHighlight><br /><br />
+                  
+                  남들이 예쁜 홈페이지를 만드는 동안,<br />
+                  당신은 AI와 스타트업 경험이 결합된<br />
+                  진짜 성장 엔진을 얻으세요.<br /><br />
+                  
+                  <FinalCTA>
+                    선택은 당신의 몫입니다.<br />
+                    그로우썸은 준비되어 있습니다.
+                  </FinalCTA>
+                </Typography.DisplayM600>
+              </FinalMessage>
             </ColumnBox>
           </Container>
-        </Section>
+        </FinalSection>
       </ServicesContainer>
     </ThemeProvider>
   );
 };
 
-// Styled Components (for custom elements not covered by design system)
+// Animations
+const float = keyframes`
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+`;
+
+const pulse = keyframes`
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+`;
+
+const gradientShift = keyframes`
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+`;
+
+// Styled Components
 const ServicesContainer = styled.div`
   width: 100%;
   background: ${growsomeTheme.color.Gray50};
   min-height: 100vh;
+  overflow-x: hidden;
 `;
 
 const HeroSection = styled.section`
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
   background: linear-gradient(135deg, ${growsomeTheme.color.Primary500} 0%, ${growsomeTheme.color.Primary700} 100%);
-  padding: ${growsomeTheme.spacing["4xl"]} 0;
+  color: ${growsomeTheme.color.White};
   
   @media ${growsomeTheme.device.mobile} {
+    min-height: 80vh;
     padding: ${growsomeTheme.spacing["3xl"]} 0;
   }
 `;
 
-const CTASection = styled.section`
-  background: linear-gradient(135deg, ${growsomeTheme.color.Primary500} 0%, ${growsomeTheme.color.Primary700} 100%);
-  padding: ${growsomeTheme.spacing["4xl"]} 0;
-  
-  @media ${growsomeTheme.device.mobile} {
-    padding: ${growsomeTheme.spacing["3xl"]} 0;
-  }
+const HeroBackground = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(circle at 20% 50%, rgba(6, 255, 1, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 50%, rgba(81, 79, 228, 0.1) 0%, transparent 50%);
 `;
 
-const ProblemItem = styled.div`
+const HeroContent = styled.div`
+  position: relative;
+  z-index: 2;
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+`;
+
+const HeroTitle = styled.div`
+  position: relative;
+`;
+
+const GradientText = styled.span`
+  background: linear-gradient(90deg, ${growsomeTheme.color.Green400}, ${growsomeTheme.color.Green500});
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: ${gradientShift} 3s ease-in-out infinite;
+  background-size: 200% 200%;
+  font-weight: bold;
+`;
+
+const HeroSubtitle = styled.div`
+  animation: ${float} 6s ease-in-out infinite;
+`;
+
+const CTAButtonsHero = styled.div`
   display: flex;
-  align-items: flex-start;
-  gap: ${growsomeTheme.spacing.md};
+  flex-direction: column;
+  gap: ${growsomeTheme.spacing.lg};
+  align-items: center;
   
-  span {
-    margin-top: 0.2rem;
-    flex-shrink: 0;
+  @media ${growsomeTheme.device.tablet} {
+    flex-direction: row;
+    justify-content: center;
   }
 `;
 
-const SolutionItem = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: ${growsomeTheme.spacing.md};
+const StatsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: ${growsomeTheme.spacing.lg};
+  max-width: 600px;
+  margin: 0 auto;
   
-  span {
-    margin-top: 0.2rem;
-    flex-shrink: 0;
+  @media ${growsomeTheme.device.tablet} {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 800px;
+  }
+  
+  @media ${growsomeTheme.device.pc} {
+    grid-template-columns: repeat(4, 1fr);
+    max-width: 1000px;
   }
 `;
 
-const EndingCard = styled.div`
-  background: rgba(255, 255, 255, 0.2);
-  padding: ${growsomeTheme.spacing.lg};
+const StatCard = styled.div`
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  padding: ${growsomeTheme.spacing.xl};
   border-radius: ${growsomeTheme.radius.radius2};
   text-align: center;
-  backdrop-filter: blur(10px);
+`;
+
+const StatNumber = styled.div`
+  font-size: 2rem;
+  font-weight: ${growsomeTheme.fontWeight.Bold};
+  color: ${growsomeTheme.color.Green400};
+  margin-bottom: ${growsomeTheme.spacing.sm};
+`;
+
+const StatLabel = styled.div`
+  font-size: ${growsomeTheme.fontSize.TextS};
+  opacity: 0.8;
+`;
+
+const ProblemsSection = styled.section`
+  padding: ${growsomeTheme.spacing["4xl"]} 0;
+  background: ${growsomeTheme.color.White};
+`;
+
+const SectionHeader = styled.div`
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+`;
+
+const ProblemsGrid = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${growsomeTheme.spacing.lg};
+  max-width: 800px;
+  margin: 0 auto;
+`;
+
+const ProblemCard = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: ${growsomeTheme.spacing.lg};
+  padding: ${growsomeTheme.spacing.xl};
+  background: ${growsomeTheme.color.White};
+  border-radius: ${growsomeTheme.radius.radius2};
+  box-shadow: ${growsomeTheme.shadow.Elevation1};
+  border: 1px solid ${growsomeTheme.color.Gray200};
+  text-align: left;
+`;
+
+const ProblemIcon = styled.div`
+  background: ${growsomeTheme.color.Gray50};
+  padding: ${growsomeTheme.spacing.sm};
+  border-radius: ${growsomeTheme.radius.radius1};
+  flex-shrink: 0;
+`;
+
+const CrossIcon = styled.div`
+  width: 20px;
+  height: 20px;
+  color: ${growsomeTheme.color.Red500};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+const WarningCard = styled.div`
+  background: ${growsomeTheme.color.Gray50};
+  border: 1px solid ${growsomeTheme.color.Yellow300};
+  border-radius: ${growsomeTheme.radius.radius2};
+  padding: ${growsomeTheme.spacing.xl};
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+`;
+
+const WarningIcon = styled.div`
+  font-size: 2rem;
+  margin-bottom: ${growsomeTheme.spacing.md};
+`;
+
+const SolutionSection = styled.section`
+  padding: ${growsomeTheme.spacing["4xl"]} 0;
+  background: ${growsomeTheme.color.Gray50};
+`;
+
+const SectionBadge = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: ${growsomeTheme.spacing.sm};
+  background: ${growsomeTheme.color.Gray50};
+  color: ${growsomeTheme.color.Primary600};
+  padding: ${growsomeTheme.spacing.sm} ${growsomeTheme.spacing.lg};
+  border-radius: ${growsomeTheme.radius.radius5};
+  margin-bottom: ${growsomeTheme.spacing.xl};
+`;
+
+const SolutionsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: ${growsomeTheme.spacing.xl};
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  @media ${growsomeTheme.device.tablet} {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media ${growsomeTheme.device.pc} {
+    grid-template-columns: repeat(3, 1fr);
+  }
 `;
 
 const SolutionCard = styled.div`
-  background: rgba(255, 255, 255, 0.2);
-  padding: ${growsomeTheme.spacing.lg};
+  background: ${growsomeTheme.color.White};
+  padding: ${growsomeTheme.spacing.xl};
   border-radius: ${growsomeTheme.radius.radius2};
+  box-shadow: ${growsomeTheme.shadow.Elevation1};
+  border: 1px solid ${growsomeTheme.color.Gray200};
   text-align: center;
-  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: ${growsomeTheme.shadow.Elevation2};
+  }
+`;
+
+const SolutionIcon = styled.div`
+  font-size: 3rem;
+  margin-bottom: ${growsomeTheme.spacing.lg};
+  animation: ${float} 3s ease-in-out infinite;
+`;
+
+const SolutionCTA = styled.div`
+  text-align: center;
+  margin-top: ${growsomeTheme.spacing.xl};
+`;
+
+const TargetSection = styled.section`
+  padding: ${growsomeTheme.spacing["4xl"]} 0;
+  background: ${growsomeTheme.color.White};
+`;
+
+const SectionTitleWrapper = styled.div`
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+`;
+
+const TargetGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: ${growsomeTheme.spacing["3xl"]};
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  @media ${growsomeTheme.device.mobile} {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const TargetCard = styled(Card)`
+  background: ${growsomeTheme.color.White};
+  border: 1px solid ${growsomeTheme.color.Gray200};
+  padding: ${growsomeTheme.spacing.xl};
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: ${growsomeTheme.shadow.Elevation2};
+  }
+`;
+
+const CardHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${growsomeTheme.spacing.lg};
+  margin-bottom: ${growsomeTheme.spacing.xl};
+`;
+
+const TargetIconWrapper = styled.div`
+  width: 64px;
+  height: 64px;
+  background: ${growsomeTheme.color.Primary50};
+  border-radius: ${growsomeTheme.radius.radius2};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+`;
+
+const TargetIcon = styled.div`
+  font-size: 2rem;
+  animation: ${float} 4s ease-in-out infinite;
+`;
+
+const FeaturesList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: ${growsomeTheme.spacing.lg};
+  margin-bottom: ${growsomeTheme.spacing.xl};
 `;
 
 const FeatureItem = styled.div`
   display: flex;
   align-items: flex-start;
-  gap: ${growsomeTheme.spacing.sm};
-`;
-
-const AntiFeatureItem = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: ${growsomeTheme.spacing.sm};
+  gap: ${growsomeTheme.spacing.md};
 `;
 
 const CheckIcon = styled.span`
   color: ${growsomeTheme.color.Green500};
   font-weight: ${growsomeTheme.fontWeight.Bold};
+  font-size: 1.2rem;
   margin-top: 0.2rem;
   flex-shrink: 0;
 `;
 
-const CrossIcon = styled.span`
-  color: ${growsomeTheme.color.Red500};
-  font-weight: ${growsomeTheme.fontWeight.Bold};
-  margin-top: 0.2rem;
-  flex-shrink: 0;
-`;
-
-const ComparisonCard = styled.div`
-  background: ${growsomeTheme.color.Gray50};
-  padding: ${growsomeTheme.spacing.lg};
+const ROICard = styled.div`
+  background: ${growsomeTheme.color.Green50};
+  border: 1px solid ${growsomeTheme.color.Green200};
+  padding: ${growsomeTheme.spacing.xl};
   border-radius: ${growsomeTheme.radius.radius2};
-  gap: ${growsomeTheme.spacing.sm};
+  display: flex;
+  align-items: center;
+  gap: ${growsomeTheme.spacing.lg};
+  margin-bottom: ${growsomeTheme.spacing.xl};
+`;
+
+const ROIIcon = styled.div`
+  font-size: 2rem;
+  animation: ${pulse} 2s ease-in-out infinite;
+`;
+
+const DiagnosisSection = styled.section`
+  padding: ${growsomeTheme.spacing["4xl"]} 0;
+  background: ${growsomeTheme.color.Gray50};
+`;
+
+const SectionHeaderDiagnosis = styled.div`
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+`;
+
+const FeaturesGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: ${growsomeTheme.spacing.xl};
+  max-width: 1200px;
+  margin: 0 auto;
+  
+  @media ${growsomeTheme.device.mobile} {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const FeatureCard = styled.div`
+  background: ${growsomeTheme.color.Primary50};
+  border: 1px solid ${growsomeTheme.color.Primary100};
+  border-radius: ${growsomeTheme.radius.radius2};
+  padding: ${growsomeTheme.spacing.xl};
+  display: flex;
+  align-items: flex-start;
+  gap: ${growsomeTheme.spacing.lg};
+  text-align: left;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: ${growsomeTheme.shadow.Elevation1};
+  }
+`;
+
+const FeatureIcon = styled.div`
+  font-size: 2.5rem;
+  background: ${growsomeTheme.color.Primary100};
+  padding: ${growsomeTheme.spacing.md};
+  border-radius: ${growsomeTheme.radius.radius2};
+  flex-shrink: 0;
+`;
+
+const FeatureContent = styled.div`
+  flex: 1;
+`;
+
+const UrgencyCard = styled.div`
+  background: ${growsomeTheme.color.Red50};
+  border: 1px solid ${growsomeTheme.color.Red200};
+  border-radius: ${growsomeTheme.radius.radius2};
+  padding: ${growsomeTheme.spacing.xl};
+  max-width: 800px;
+  margin: 0 auto;
+`;
+
+const UrgencyHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: ${growsomeTheme.spacing.lg};
+  margin-bottom: ${growsomeTheme.spacing.xl};
+`;
+
+const UrgencyIcon = styled.div`
+  font-size: 2rem;
+  animation: ${pulse} 1s ease-in-out infinite;
+`;
+
+const UrgencyList = styled.div`
   display: flex;
   flex-direction: column;
+  gap: ${growsomeTheme.spacing.md};
 `;
 
-const LimitedOfferCard = styled.div`
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: ${growsomeTheme.radius.radius3};
-  padding: ${growsomeTheme.spacing["2xl"]};
-  backdrop-filter: blur(10px);
-  max-width: 600px;
+const UrgencyItem = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: ${growsomeTheme.spacing.md};
+`;
+
+const UrgencyBullet = styled.div`
+  font-size: 1rem;
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+`;
+
+const CTAButtons = styled.div`
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: ${growsomeTheme.spacing.lg};
+  align-items: center;
+`;
+
+const FinalSection = styled.section`
+  background: linear-gradient(135deg, ${growsomeTheme.color.Black800} 0%, ${growsomeTheme.color.Black700} 100%);
+  padding: ${growsomeTheme.spacing["4xl"]} 0;
+  position: relative;
   
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(81, 79, 228, 0.1) 0%, transparent 70%);
   }
+`;
+
+const FinalMessage = styled.div`
+  position: relative;
+  z-index: 2;
+  max-width: 800px;
+  margin: 0 auto;
+`;
+
+const MessageHighlight = styled.strong`
+  color: ${growsomeTheme.color.Primary400};
+  text-shadow: 0 0 20px rgba(81, 79, 228, 0.5);
+`;
+
+const FinalCTA = styled.strong`
+  color: ${growsomeTheme.color.Green400};
+  text-shadow: 0 0 20px rgba(6, 255, 1, 0.5);
 `;
 
 export default Services;

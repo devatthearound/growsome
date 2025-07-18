@@ -4,6 +4,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 
 export default function BlogDebugPage() {
   const [testResults, setTestResults] = useState<any>(null);
@@ -132,7 +133,7 @@ export default function BlogDebugPage() {
 
     } catch (error) {
       console.error('테스트 실패:', error);
-      setTestResults({ error: error.message });
+      setTestResults({ error: error instanceof Error ? error.message : 'Unknown error' });
     } finally {
       setLoading(false);
     }
@@ -213,24 +214,24 @@ export default function BlogDebugPage() {
             >
               📄 GraphQL Playground (개발 모드에서만)
             </a>
-            <a 
+            <Link 
               href="/blog" 
               className="block text-blue-600 hover:underline"
             >
               📝 블로그 메인 페이지
-            </a>
-            <a 
+            </Link>
+            <Link 
               href="/blog/nextjs-15-new-features" 
               className="block text-blue-600 hover:underline"
             >
               📖 테스트 포스트: Next.js 15 새 기능
-            </a>
-            <a 
+            </Link>
+            <Link 
               href="/blog/react-performance-optimization" 
               className="block text-blue-600 hover:underline"
             >
               📖 테스트 포스트: React 성능 최적화
-            </a>
+            </Link>
           </div>
         </div>
 

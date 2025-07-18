@@ -15,13 +15,13 @@ const Hero = () => {
   return (
     <HeroSection id="hero">
       <FloatingAgents>
-        <FloatingAgent left="20%" top="15%">
+        <FloatingAgent $left="20%" $top="15%">
           <Image src="/images/home/ai-agent1.png" alt="Floating Agent 1" width={200} height={200} />
         </FloatingAgent>
-        <FloatingAgent right="25%" top="40%">
+        <FloatingAgent $right="25%" $top="40%">
           <Image src="/images/home/ai-agent2.png" alt="Floating Agent 2" width={200} height={200} />
         </FloatingAgent>
-        <FloatingAgent left="35%" bottom="20%">
+        <FloatingAgent $left="35%" $bottom="20%">
           <Image src="/images/home/ai-agent3.png" alt="Floating Agent 3" width={200} height={200} />
         </FloatingAgent>
       </FloatingAgents>
@@ -149,7 +149,7 @@ const FloatingAgents = styled.div`
   display: none;
 `;
 
-const FloatingAgent = styled.div<{ left?: string; right?: string; top?: string; bottom?: string }>`
+const FloatingAgent = styled.div<{ $left?: string; $right?: string; $top?: string; $bottom?: string }>`
   position: absolute;
   width: 200px;
   height: 200px;
@@ -157,10 +157,10 @@ const FloatingAgent = styled.div<{ left?: string; right?: string; top?: string; 
   background: rgba(255, 255, 255, 0.25);
   backdrop-filter: blur(15px);
   padding: 20px;
-  left: ${props => props.left || 'auto'};
-  right: ${props => props.right || 'auto'};
-  top: ${props => props.top || 'auto'};
-  bottom: ${props => props.bottom || 'auto'};
+  left: ${props => props.$left || 'auto'};
+  right: ${props => props.$right || 'auto'};
+  top: ${props => props.$top || 'auto'};
+  bottom: ${props => props.$bottom || 'auto'};
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;

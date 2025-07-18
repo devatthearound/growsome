@@ -234,7 +234,7 @@ const resolvers = {
     version: () => '4.0.0',
     
     // Category 리졸버들
-    categories: async (_, { isVisible }) => {
+    categories: async (_: any, { isVisible }: { isVisible?: boolean }) => {
       try {
         const where = isVisible !== undefined ? { is_visible: isVisible } : {}
         

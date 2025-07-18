@@ -76,9 +76,9 @@ export const ColumnBox = styled(Box)`
 // Specialized Layout Components
 export const Container = styled(Box)`
   width: 100%;
-  max-width: 1200px;
+  max-width: 1240px;
   margin: 0 auto;
-  padding: 0 ${growsomeTheme.spacing.lg};
+  padding: 0;
   
   @media ${growsomeTheme.device.mobile} {
     padding: 0 ${growsomeTheme.spacing.md};

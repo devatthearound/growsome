@@ -195,7 +195,7 @@ async function main() {
         console.log(`⏭️  Post already exists: ${post.title}`)
       }
     } catch (error) {
-      console.error(`❌ Failed to create post ${post.title}:`, error.message)
+      console.error(`❌ Failed to create post ${post.title}:`, error instanceof Error ? error.message : 'Unknown error')
       
       // 스키마 정보 확인
       try {
@@ -207,7 +207,7 @@ async function main() {
         `
         console.log('📋 Table schema:', columns)
       } catch (schemaError) {
-        console.error('❌ Failed to get schema:', schemaError)
+        console.error('❌ Failed to get schema:', schemaError instanceof Error ? schemaError.message : 'Unknown error')
       }
     }
   }
@@ -231,13 +231,13 @@ async function main() {
    👥 Users: ${userCnt}
     `)
   } catch (error) {
-    console.error('❌ Failed to get final counts:', error)
+    console.error('❌ Failed to get final counts:', error instanceof Error ? error.message : 'Unknown error')
   }
 }
 
 main()
   .catch((e) => {
-    console.error('❌ Seed failed:', e)
+    console.error('❌ Seed failed:', e instanceof Error ? e.message : 'Unknown error')
     process.exit(1)
   })
   .finally(async () => {

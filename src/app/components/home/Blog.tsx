@@ -117,78 +117,77 @@ export default function BlogSection() {
       
       <BlogGrid>
         {featuredPosts.map((post, index) => (
-          <BlogCard 
-            key={post.id}
-            as={Link}
-            href={`/blog/${post.slug}`}
-            whileHover={{ y: -8 }}
-            transition={{ duration: 0.3 }}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            style={{ transitionDelay: `${index * 0.1}s` }}
-          >
-            {post.thumbnailUrl && (
-              <BlogImage>
-                <Image
-                  src={post.thumbnailUrl}
-                  alt={post.title}
-                  fill
-                  style={{ objectFit: 'cover' }}
-                />
-                {post.isFeatured && (
-                  <FeaturedBadge>
-                    ⭐ 추천
-                  </FeaturedBadge>
-                )}
-              </BlogImage>
-            )}
-            
-            <BlogContent $hasImage={!!post.thumbnailUrl}>
-              <CategoryTag>{post.category?.name || '일반'}</CategoryTag>
-              <Title>{post.title}</Title>
-              <Description>
-                {post.excerpt || post.contentBody.replace(/<[^>]*>/g, '').substring(0, 120) + '...'}
-              </Description>
-              
-              <MetaInfo>
-                <AuthorInfo>
-                  {post.author?.avatar && (
-                    <AuthorAvatar>
-                      <Image
-                        src={post.author.avatar}
-                        alt={post.author.username}
-                        width={24}
-                        height={24}
-                        style={{ borderRadius: '50%' }}
-                      />
-                    </AuthorAvatar>
+          <Link key={post.id} href={`/blog/${post.slug}`} style={{textDecoration: 'none', color: 'inherit'}}>
+            <BlogCard 
+              whileHover={{ y: -8 }}
+              transition={{ duration: 0.3 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              style={{ transitionDelay: `${index * 0.1}s` }}
+            >
+              {post.thumbnailUrl && (
+                <BlogImage>
+                  <Image
+                    src={post.thumbnailUrl}
+                    alt={post.title}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                  />
+                  {post.isFeatured && (
+                    <FeaturedBadge>
+                      ⭐ 추천
+                    </FeaturedBadge>
                   )}
-                  <span>{post.author?.username || '작성자'}</span>
-                </AuthorInfo>
-                
-                <MetaDetails>
-                  <span>{formatDate(post.publishedAt || post.createdAt)}</span>
-                  <span>•</span>
-                  <span>{getReadingTime(post.contentBody)} 읽기</span>
-                </MetaDetails>
-              </MetaInfo>
+                </BlogImage>
+              )}
               
-              <BlogStats>
-                <StatItem>
-                  <span>👁</span>
-                  <span>{post.viewCount}</span>
-                </StatItem>
-                <StatItem>
-                  <span>❤️</span>
-                  <span>{post.likeCount}</span>
-                </StatItem>
-                <StatItem>
-                  <span>💬</span>
-                  <span>{post.commentCount}</span>
-                </StatItem>
-              </BlogStats>
-            </BlogContent>
-          </BlogCard>
+              <BlogContent $hasImage={!!post.thumbnailUrl}>
+                <CategoryTag>{post.category?.name || '일반'}</CategoryTag>
+                <Title>{post.title}</Title>
+                <Description>
+                  {post.excerpt || post.contentBody.replace(/<[^>]*>/g, '').substring(0, 120) + '...'}
+                </Description>
+                
+                <MetaInfo>
+                  <AuthorInfo>
+                    {post.author?.avatar && (
+                      <AuthorAvatar>
+                        <Image
+                          src={post.author.avatar}
+                          alt={post.author.username}
+                          width={24}
+                          height={24}
+                          style={{ borderRadius: '50%' }}
+                        />
+                      </AuthorAvatar>
+                    )}
+                    <span>{post.author?.username || '작성자'}</span>
+                  </AuthorInfo>
+                  
+                  <MetaDetails>
+                    <span>{formatDate(post.publishedAt || post.createdAt)}</span>
+                    <span>•</span>
+                    <span>{getReadingTime(post.contentBody)} 읽기</span>
+                  </MetaDetails>
+                </MetaInfo>
+                
+                <BlogStats>
+                  <StatItem>
+                    <span>👁</span>
+                    <span>{post.viewCount}</span>
+                  </StatItem>
+                  <StatItem>
+                    <span>❤️</span>
+                    <span>{post.likeCount}</span>
+                  </StatItem>
+                  <StatItem>
+                    <span>💬</span>
+                    <span>{post.commentCount}</span>
+                  </StatItem>
+                </BlogStats>
+              </BlogContent>
+            </BlogCard>
+          </Link>
         ))}
       </BlogGrid>
       

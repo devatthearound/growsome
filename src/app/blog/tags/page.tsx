@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import styled from 'styled-components';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -95,11 +95,13 @@ const TagsPage = () => {
 
   return (
     <>
-      <BlogNavigation 
-        categories={categories}
-        onSearch={() => {}}
-        onCategoryChange={() => {}}
-      />
+      <Suspense fallback={<div>Loading...</div>}>
+        <BlogNavigation 
+          categories={categories}
+          onSearch={() => {}}
+          onCategoryChange={() => {}}
+        />
+      </Suspense>
       <Container>
         <Header>
           <h1>태그</h1>

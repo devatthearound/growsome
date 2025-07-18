@@ -2,7 +2,7 @@
 import { ApolloServer } from '@apollo/server'
 import { startServerAndCreateNextHandler } from '@as-integrations/next'
 import { NextRequest } from 'next/server'
-import { blogPrisma } from '../../../lib/prisma-blog'
+import { prisma } from '../../../lib/prisma'
 
 // 가장 간단한 GraphQL 스키마 (문자열로 정의)
 const typeDefs = `
@@ -31,7 +31,7 @@ const server = new ApolloServer({
 const handler = startServerAndCreateNextHandler<NextRequest>(server, {
   context: async (request) => {
     return {
-      prisma: blogPrisma,
+      prisma: prisma,
       user: null // 임시로 null
     }
   }

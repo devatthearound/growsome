@@ -3,7 +3,7 @@ import { ApolloServer } from '@apollo/server'
 import { startServerAndCreateNextHandler } from '@as-integrations/next'
 import { NextRequest } from 'next/server'
 import { schema } from '../../../graphql/schema-simple'
-import { blogPrisma } from '../../../lib/prisma-blog'
+import { prisma } from '../../../lib/prisma'
 
 // 사용자 인증 함수 (JWT 토큰에서 사용자 정보 추출)
 async function getUser(request: NextRequest) {
@@ -36,22 +36,7 @@ async function getUser(request: NextRequest) {
 const server = new ApolloServer({
   schema,
   // 개발 환경에서만 GraphQL Playground 활성화
-  introspection: process.env.NODE_ENV !== 'production',
-  plugins: [
-    // 요청/응답 로깅 플러그인
-    {
-      requestDidStart() {
-        return {
-          didResolveOperation(requestContext) {
-            console.log('GraphQL Operation:', requestContext.request.operationName)
-          },
-          didEncounterErrors(requestContext) {
-            console.error('GraphQL Errors:', requestContext.errors)
-          }
-        }
-      }
-    }
-  ]
+  introspection: process.env.NODE_ENV !== 'production'
 })
 
 // Next.js handler 생성
@@ -60,7 +45,7 @@ const handler = startServerAndCreateNextHandler<NextRequest>(server, {
     const user = await getUser(request)
     
     return {
-      prisma: blogPrisma,
+      prisma: prisma,
       user
     }
   }
