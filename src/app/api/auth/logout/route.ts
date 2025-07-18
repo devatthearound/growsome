@@ -1,12 +1,8 @@
-// app/api/auth/logout/route.ts
+// src/app/api/auth/logout/route.ts - 수정된 버전
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
 import { getAuthTokens, verifyToken, removeAuthCookies } from '@/lib/auth';
-import crypto from 'crypto';
 
 export async function POST(request: Request) {
-  const client = await pool.connect();
-  
   try {
     // 현재 인증된 토큰 가져오기
     const { accessToken, refreshToken } = await getAuthTokens();
@@ -26,59 +22,23 @@ export async function POST(request: Request) {
       try {
         const payload = await verifyToken(accessToken);
         userId = payload.userId;
+        console.log('로그아웃 처리 중 - 사용자 ID:', userId);
       } catch (error) {
         // 액세스 토큰이 유효하지 않은 경우 리프레시 토큰 시도
         if (refreshToken) {
           try {
             const payload = await verifyToken(refreshToken);
             userId = payload.userId;
+            console.log('리프레시 토큰으로 사용자 ID 확인:', userId);
           } catch (refreshError) {
-            // 두 토큰 모두 유효하지 않음 - 쿠키만 제거
+            console.log('두 토큰 모두 유효하지 않음 - 쿠키만 제거');
           }
         }
       }
     }
     
-    // 데이터베이스에서 세션 정보 삭제 (사용자 ID가 있는 경우)
-    if (userId) {
-      try {
-        // 리프레시 토큰 DB에서 삭제
-        await client.query(
-          `DELETE FROM refresh_tokens WHERE user_id = $1`,
-          [userId]
-        );
-        
-        // 리프레시 토큰 블랙리스트에 추가 (선택적)
-        if (refreshToken) {
-          const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
-          
-          try {
-            await client.query(
-              `INSERT INTO token_blacklist(token_hash, expires_at)
-               VALUES($1, NOW() + INTERVAL '7 days')
-               ON CONFLICT (token_hash) DO NOTHING`,
-              [tokenHash]
-            );
-          } catch (blacklistError) {
-            console.log('토큰 블랙리스트 저장 실패 (테이블이 없을 수 있음):', blacklistError);
-          }
-        }
-        
-        // 추가적인 세션 정보가 있다면 삭제
-        try {
-          await client.query(
-            'DELETE FROM sessions WHERE user_id = $1',
-            [userId]
-          );
-        } catch (sessionError) {
-          // sessions 테이블이 없을 수 있으므로 오류 무시
-          console.log('세션 테이블 삭제 실패 (테이블이 없을 수 있음):', sessionError);
-        }
-      } catch (dbError) {
-        console.error('데이터베이스 처리 중 오류:', dbError);
-        // 데이터베이스 오류가 있더라도 로그아웃은 진행
-      }
-    }
+    // 현재는 데이터베이스에 세션 정보를 저장하지 않으므로
+    // 토큰만 무효화 (쿠키 제거)
     
     // 응답 객체 생성
     const response = NextResponse.json({
@@ -88,6 +48,7 @@ export async function POST(request: Request) {
     
     // 인증 쿠키 제거
     return removeAuthCookies(response);
+    
   } catch (error: any) {
     console.error('로그아웃 처리 중 오류:', error);
     
@@ -102,7 +63,5 @@ export async function POST(request: Request) {
     );
     
     return removeAuthCookies(response);
-  } finally {
-    client.release();
   }
 }

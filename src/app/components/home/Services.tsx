@@ -7,19 +7,19 @@ import { faCheck } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/navigation';
 
 const Services = () => {
-  const [activeMainTab, setActiveMainTab] = useState('coaching');
+  const [activeMainTab, setActiveMainTab] = useState('development');
   const [activeSubTab, setActiveSubTab] = useState('serviceTarget');
   const contentRefs = useRef<(HTMLDivElement | null)[]>([]);
   const router = useRouter();
 
-  type MainTabKey = 'coaching' | 'development';
+  type MainTabKey = 'development' | 'brand' | 'subscription';
 
   const mainTabs: Record<MainTabKey, {
     title: string;
     subTabs: { id: string; label: string }[];
   }> = {
-    coaching: {
-      title: "올라운드 개발",
+    development: {
+      title: "빠른 AI 개발",
       subTabs: [
         { id: 'serviceTarget', label: '서비스 대상' },
         { id: 'process', label: '프로세스' },
@@ -29,8 +29,18 @@ const Services = () => {
         { id: 'qna', label: 'QnA' }
       ]
     },
-    development: {
-      title: "개발팀 구독",
+    brand: {
+      title: "브랜드구축",
+      subTabs: [
+        { id: 'serviceTarget', label: '서비스 대상' },
+        { id: 'process', label: '프로세스' },
+        { id: 'portfolio', label: '포트폴리오' },
+        { id: 'pricing', label: '가격 안내' },
+        { id: 'qna', label: 'QnA' }
+      ]
+    },
+    subscription: {
+      title: "구독 서비스",
       subTabs: [
         { id: 'serviceTarget', label: '서비스 대상' },
         { id: 'process', label: '프로세스' },
@@ -137,7 +147,53 @@ const Services = () => {
     
     switch (tabId) {
       case 'serviceTarget':
-        if (activeMainTab === 'development') {
+        if (activeMainTab === 'brand') {
+          return (
+            <ServiceTargetSection>
+              <ServiceTargetTitle>
+                브랜드 아이덴티티를 새롭게 만들고 싶어요!
+              </ServiceTargetTitle>
+              <TargetList>
+                <TargetItem>
+                  <IconWrapper>
+                    <FontAwesomeIcon icon={faCheck} />
+                  </IconWrapper>
+                  <ItemContent>
+                    <ItemTitle>사업 시작 단계에서 브랜드가 필요해요.</ItemTitle>
+                    <ItemDescription>
+                      전문적인 로고와 브랜드 아이덴티티로 비즈니스의 첫인상을 만들어드립니다.
+                    </ItemDescription>
+                  </ItemContent>
+                </TargetItem>
+
+                <TargetItem>
+                  <IconWrapper>
+                    <FontAwesomeIcon icon={faCheck} />
+                  </IconWrapper>
+                  <ItemContent>
+                    <ItemTitle>기존 브랜드를 리뉴얼하고 싶어요.</ItemTitle>
+                    <ItemDescription>
+                      시대에 맞는 브랜드 리뉴얼과 브랜드 전략 컴설팅을 제공합니다.
+                    </ItemDescription>
+                  </ItemContent>
+                </TargetItem>
+
+                <TargetItem>
+                  <IconWrapper>
+                    <FontAwesomeIcon icon={faCheck} />
+                  </IconWrapper>
+                  <ItemContent>
+                    <ItemTitle>마케팅 자료를 일관성 있게 만들고 싶어요.</ItemTitle>
+                    <ItemDescription>
+                      브랜드 가이드라인에 따라 모든 마케팅 자료의 일관성을 보장합니다.
+                    </ItemDescription>
+                  </ItemContent>
+                </TargetItem>
+              </TargetList>
+            </ServiceTargetSection>
+          );
+        }
+        if (activeMainTab === 'subscription') {
           return (
             <ServiceTargetSection>
               <ServiceTargetTitle>
@@ -303,7 +359,55 @@ const Services = () => {
           </VoucherSection>
         );
       case 'process':
-        if (activeMainTab === 'development') {
+        if (activeMainTab === 'brand') {
+          const brandSteps = [
+            {
+              step: "STEP 1",
+              title: "브랜드 전략 수립",
+              description: "대상 고객 분석 및 브랜드 포지셔닝 수립",
+              icon: "🎯"
+            },
+            {
+              step: "STEP 2",
+              title: "로고 및 아이덴티티 디자인",
+              description: "로고, 컴러 팔레트, 폰트 등 기본 브랜드 요소 디자인",
+              icon: "🎨"
+            },
+            {
+              step: "STEP 3",
+              title: "브랜드 가이드라인 제작",
+              description: "브랜드의 일관성을 위한 상세 가이드라인 문서 제작",
+              icon: "📝"
+            },
+            {
+              step: "STEP 4",
+              title: "브랜드 적용 및 확장",
+              description: "다양한 매체에 브랜드 적용 및 마케팅 자료 제작",
+              icon: "🚀"
+            }
+          ];
+
+          return (
+            <ProcessSection>
+              <ProcessTitle>브랜드 구축 프로세스</ProcessTitle>
+              <ProcessList>
+                {brandSteps.map((step, index) => (
+                  <ProcessItem key={index}>
+                    <StepBadge>{step.step}</StepBadge>
+                    <ProcessIcon>{step.icon}</ProcessIcon>
+                    <ProcessContent>
+                      <ProcessItemTitle>{step.title}</ProcessItemTitle>
+                      <ProcessDescription>{step.description}</ProcessDescription>
+                    </ProcessContent>
+                    {index < brandSteps.length - 1 && <ArrowIcon>→</ArrowIcon>}
+                  </ProcessItem>
+                ))}
+              </ProcessList>
+              <ProcessNote>* 상세 일정 변경 가능</ProcessNote>
+            </ProcessSection>
+          );
+        }
+        if (activeMainTab === 'subscription') {
           const developmentSteps = [
             {
               step: "STEP 1",
@@ -369,7 +473,97 @@ const Services = () => {
             </ProcessList>
           </ProcessSection>
         );
-      case 'statusCheck':
+      case 'portfolio':
+        if (activeMainTab === 'brand') {
+          return (
+            <PortfolioSection>
+              <ProcessTitle>브랜드 구축 포트폴리오</ProcessTitle>
+              <PortfolioGrid>
+                <PortfolioCard>
+                  <PortfolioImage src="/images/brand-portfolio-1.jpg" alt="브랜드 포트폴리오 1" />
+                  <PortfolioContent>
+                    <PortfolioTitle>테크 스타트업 A사</PortfolioTitle>
+                    <PortfolioDescription>
+                      AI 기반 기업의 브랜드 아이덴티티 구축 및 마케팅 자료 제작
+                    </PortfolioDescription>
+                  </PortfolioContent>
+                </PortfolioCard>
+                <PortfolioCard>
+                  <PortfolioImage src="/images/brand-portfolio-2.jpg" alt="브랜드 포트폴리오 2" />
+                  <PortfolioContent>
+                    <PortfolioTitle>헬스케어 B사</PortfolioTitle>
+                    <PortfolioDescription>
+                      전통 의료 브랜드의 디지털 리브랜딩 프로젝트
+                    </PortfolioDescription>
+                  </PortfolioContent>
+                </PortfolioCard>
+                <PortfolioCard>
+                  <PortfolioImage src="/images/brand-portfolio-3.jpg" alt="브랜드 포트폴리오 3" />
+                  <PortfolioContent>
+                    <PortfolioTitle>이커머스 C사</PortfolioTitle>
+                    <PortfolioDescription>
+                      온라인 쇼핑몰 브랜드 및 패키지 디자인
+                    </PortfolioDescription>
+                  </PortfolioContent>
+                </PortfolioCard>
+              </PortfolioGrid>
+            </PortfolioSection>
+          );
+        }
+        return null;
+      case 'pricing':
+        if (activeMainTab === 'brand') {
+          return (
+            <PricingSection>
+              <ProcessTitle>브랜드 구축 가격 안내</ProcessTitle>
+              <PricingGrid>
+                <PricingCard>
+                  <PricingHeader>
+                    <PricingBadge>브랜딩 베이직</PricingBadge>
+                    <PricingPrice>₩1,500,000</PricingPrice>
+                    <PricingDuration>2주 완성</PricingDuration>
+                  </PricingHeader>
+                  <PricingFeatures>
+                    <PricingFeature>• 로고 디자인 (3안)</PricingFeature>
+                    <PricingFeature>• 브랜드 컴러 팔레트</PricingFeature>
+                    <PricingFeature>• 폰트 가이드라인</PricingFeature>
+                    <PricingFeature>• 명함 디자인</PricingFeature>
+                    <PricingFeature>• 브랜드 가이드북 (20페이지)</PricingFeature>
+                  </PricingFeatures>
+                </PricingCard>
+                <PricingCard isHighlighted>
+                  <PricingHeader>
+                    <PricingBadge>브랜딩 프로</PricingBadge>
+                    <PricingPrice>₩3,500,000</PricingPrice>
+                    <PricingDuration>4주 완성</PricingDuration>
+                  </PricingHeader>
+                  <PricingFeatures>
+                    <PricingFeature>• 베이직 패키지 전체 포함</PricingFeature>
+                    <PricingFeature>• 브랜드 스토리텔링</PricingFeature>
+                    <PricingFeature>• 마케팅 콘텐츠 템플릿 (10종)</PricingFeature>
+                    <PricingFeature>• 소셜미디어 브랜딩 키트</PricingFeature>
+                    <PricingFeature>• 패키징 디자인</PricingFeature>
+                  </PricingFeatures>
+                </PricingCard>
+                <PricingCard>
+                  <PricingHeader>
+                    <PricingBadge>브랜딩 엔터프라이즈</PricingBadge>
+                    <PricingPrice>₩6,000,000</PricingPrice>
+                    <PricingDuration>6주 완성</PricingDuration>
+                  </PricingHeader>
+                  <PricingFeatures>
+                    <PricingFeature>• 프로 패키지 전체 포함</PricingFeature>
+                    <PricingFeature>• 브랜드 전략 컨설팅</PricingFeature>
+                    <PricingFeature>• 경쟁사 분석 리포트</PricingFeature>
+                    <PricingFeature>• 사무용품 일체 디자인</PricingFeature>
+                    <PricingFeature>• 브랜드 런칭 지원</PricingFeature>
+                  </PricingFeatures>
+                </PricingCard>
+              </PricingGrid>
+            </PricingSection>
+          );
+        }
+        return null;
         return (
           <StatusSection>
             <ProcessTitle>작업상황 확인</ProcessTitle>
@@ -414,7 +608,55 @@ const Services = () => {
           </StatusSection>
         );
       case 'qna':
-        if (activeMainTab === 'development') {
+        if (activeMainTab === 'brand') {
+          return (
+            <QuestionBox>
+              <ProcessTitle>브랜드 구축 자주 묻는 질문</ProcessTitle>
+              <FAQList>
+                <FAQItem>
+                  <FAQTitle>Q1. 브랜드 구축에 얼마나 시간이 걸리나요?</FAQTitle>
+                  <FAQAnswer>
+                    브랜드 규모에 따라 다르지만, 베이직 패키지는 2주, 프로 패키지는 4주, 엔터프라이즈 패키지는 6주 정도 소요됩니다.
+                  </FAQAnswer>
+                </FAQItem>
+
+                <FAQItem>
+                  <FAQTitle>Q2. 브랜드 가이드라인에는 어떤 내용이 포함되나요?</FAQTitle>
+                  <FAQAnswer>
+                    로고 사용법, 컴러 팔레트, 폰트 가이드라인, 이미지 스타일, 레이아웃 규칙 등 브랜드의 일관성을 유지하기 위한 모든 시각적 요소에 대한 상세 가이드가 포함됩니다.
+                  </FAQAnswer>
+                </FAQItem>
+
+                <FAQItem>
+                  <FAQTitle>Q3. 기존 브랜드를 리뉴얼하는 경우도 가능한가요?</FAQTitle>
+                  <FAQAnswer>
+                    네, 가능합니다. 기존 브랜드의 장점을 살리면서 시대에 맞는 리뉴얼을 진행합니다. 기존 브랜드 분석과 경쟁사 리서치를 통해 최적의 리브랜딩 전략을 제안해드립니다.
+                  </FAQAnswer>
+                </FAQItem>
+
+                <FAQItem>
+                  <FAQTitle>Q4. 브랜드 구축 후 지속적인 지원이 가능한가요?</FAQTitle>
+                  <FAQAnswer>
+                    네, 브랜드 구축 완료 후에도 브랜드 유지보수와 마케팅 자료 제작 등의 지속적인 지원이 가능합니다. 브랜드 진화와 확장에 대한 컨설팅도 제공합니다.
+                  </FAQAnswer>
+                </FAQItem>
+              </FAQList>
+              <ActionButtonGroup>
+                <TopActionButtons>
+                  <ActionButton onClick={handleSubscriptionClick}>
+                    <ButtonIcon>🎨</ButtonIcon>
+                    브랜드 구축 신청
+                  </ActionButton>
+                  <PrimaryActionButton onClick={handleInquiryClick}>
+                    <ButtonIcon>📞</ButtonIcon>
+                    상담 신청
+                  </PrimaryActionButton>
+                </TopActionButtons>
+              </ActionButtonGroup>
+            </QuestionBox>
+          );
+        }
+        if (activeMainTab === 'subscription') {
           return (
             <QuestionBox>
               <ProcessTitle>자주 묻는 질문</ProcessTitle>
@@ -1520,6 +1762,129 @@ const AITrackingImage = styled.div`
 const TrackingImage = styled.img`
   width: 100%;
   height: auto;
+`;
+
+// Portfolio Components
+const PortfolioSection = styled.div`
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+`;
+
+const PortfolioGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+`;
+
+const PortfolioCard = styled.div`
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+`;
+
+const PortfolioImage = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  background: #f0f0f0;
+`;
+
+const PortfolioContent = styled.div`
+  padding: 1.5rem;
+`;
+
+const PortfolioTitle = styled.h3`
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #333;
+`;
+
+const PortfolioDescription = styled.p`
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.6;
+`;
+
+// Pricing Components
+const PricingSection = styled.div`
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+`;
+
+const PricingGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+  margin-top: 3rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const PricingCard = styled.div<{ isHighlighted?: boolean }>`
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+  border: ${props => props.isHighlighted ? '3px solid #FF6B6B' : '1px solid #eee'};
+  transform: ${props => props.isHighlighted ? 'scale(1.05)' : 'scale(1)'};
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: ${props => props.isHighlighted ? 'scale(1.08)' : 'scale(1.03)'};
+  }
+`;
+
+const PricingHeader = styled.div`
+  text-align: center;
+  margin-bottom: 2rem;
+`;
+
+const PricingBadge = styled.div`
+  background: #FF6B6B;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 1rem;
+`;
+
+const PricingPrice = styled.h3`
+  font-size: 2rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0.5rem;
+`;
+
+const PricingDuration = styled.p`
+  color: #666;
+  font-size: 1rem;
+`;
+
+const PricingFeatures = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+`;
+
+const PricingFeature = styled.li`
+  color: #666;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
 `;
 
 export default Services;

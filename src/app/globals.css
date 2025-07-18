@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Tiptap styles */
+@import '../styles/tiptap.css';
+
 :root {
   --background: #ffffff;
   --foreground: #171717;

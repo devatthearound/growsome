@@ -17,6 +17,7 @@ const Home = () => {
       <Partner />
       <Letters />
       <Solutions />
+      <Blog />
       {/*<Newsletters />*/}
       <JoinUs />
     </HomeContainer>

@@ -24,8 +24,57 @@ const nextConfig: NextConfig = {
     domains: [
       'api.tosspayments.com',
       'images.unsplash.com',
-      'randomuser.me'
+      'randomuser.me',
+      'via.placeholder.com'
     ],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'via.placeholder.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'randomuser.me',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'api.tosspayments.com',
+        port: '',
+        pathname: '/**',
+      }
+    ],
+  },
+  // GraphQL Apollo Studio CORS 설정
+  async headers() {
+    return [
+      {
+        source: '/api/graphql',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+          {
+            key: 'Access-Control-Allow-Methods',
+            value: 'GET, POST, OPTIONS',
+          },
+          {
+            key: 'Access-Control-Allow-Headers',
+            value: 'Content-Type, Authorization',
+          },
+        ],
+      },
+    ];
   },
 }
 

@@ -36,9 +36,9 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
 
   // 중앙 집중식 네비게이션 링크 관리
   const navigationLinks: NavItem[] = [
-    { path: '/product', label: '실전솔루션' },
+    { path: '/product', label: '사업전략' },
     { path: '/portfolio', label: '포트폴리오' },
-    { path: '/services', label: '개발 서비스' },
+    { path: '/services', label: '사업실행' },
     { path: '/blog', label: '블로그' },
      ];
 

@@ -3,12 +3,16 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface User {
-  id: number;
+  id: string;
   email: string;
   username: string;
-  company_name: string;
-  position: string;
-  phone_number: string;
+  slug: string;
+  company_name?: string;
+  position?: string;
+  phone_number?: string;
+  profileImage?: string;
+  role: string;
+  canWriteContent: boolean;
 }
 
 interface AuthContextType {
@@ -17,6 +21,7 @@ interface AuthContextType {
   isLoading: boolean;
   setUser: (user: User | null) => void;
   logout: () => void;
+  refreshAuth: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -25,6 +30,7 @@ const AuthContext = createContext<AuthContextType>({
   isLoading: true,
   setUser: () => {},
   logout: () => {},
+  refreshAuth: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -32,27 +38,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // 페이지 로드시 로그인 상태 확인
     checkAuthStatus();
   }, []);
 
   const checkAuthStatus = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/api/auth/check');
       
+      // 인증 상태 확인 API 호출
+      const response = await fetch('/api/auth/check', {
+        method: 'GET',
+        credentials: 'include', // 쿠키 포함
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
       if (response.ok) {
         const data = await response.json();
         if (data.isLoggedIn && data.user) {
-          setUser(data.user);
+          // 사용자 데이터 변환 (DB 필드명 → 인터페이스 필드명)
+          const transformedUser: User = {
+            id: data.user.id?.toString(),
+            email: data.user.email,
+            username: data.user.username || data.user.name,
+            slug: data.user.slug || createSlugFromUsername(data.user.username || data.user.name),
+            company_name: data.user.company_name,
+            position: data.user.position,
+            phone_number: data.user.phone_number,
+            profileImage: data.user.profileImage || data.user.avatar,
+            role: data.user.role || 'user',
+            canWriteContent: data.user.canWriteContent || true
+          };
+          
+          setUser(transformedUser);
         } else {
           setUser(null);
         }
       } else {
-        // 401 등의 에러는 정상적인 로그아웃 상태로 처리
+        // 인증 실패
         setUser(null);
-        if (response.status !== 401) {
-          console.warn(`Auth check returned ${response.status}`);
+        
+        // 401 또는 403인 경우 토큰 갱신 시도
+        if (response.status === 401) {
+          await attemptTokenRefresh();
         }
       }
     } catch (error) {
@@ -63,13 +92,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const attemptTokenRefresh = async () => {
+    try {
+      const refreshResponse = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (refreshResponse.ok) {
+        const data = await refreshResponse.json();
+        if (data.success) {
+          // 토큰 갱신 성공 시 인증 상태 다시 확인
+          await checkAuthStatus();
+        }
+      }
+    } catch (error) {
+      console.error('Token refresh failed:', error);
+    }
+  };
+
+  const refreshAuth = async () => {
+    await checkAuthStatus();
+  };
+
   const logout = async () => {
     try {
       setIsLoading(true);
-      await fetch('/api/auth/logout', { method: 'POST' });
+      
+      // 로그아웃 API 호출
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      // API 응답과 관계없이 로컬 상태 클리어
       setUser(null);
+      
+      // 로그아웃 후 홈페이지로 리다이렉트
+      if (typeof window !== 'undefined') {
+        window.location.href = '/';
+      }
     } catch (error) {
       console.error('Logout failed:', error);
+      // 에러가 발생해도 로컬 상태는 클리어
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -81,11 +153,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isLoggedIn: !!user, 
       isLoading,
       setUser, 
-      logout 
+      logout,
+      refreshAuth
     }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export const useAuth = () => useContext(AuthContext); 
+// 유틸리티 함수: 사용자명에서 슬러그 생성
+function createSlugFromUsername(username: string): string {
+  return username
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+export const useAuth = () => useContext(AuthContext);

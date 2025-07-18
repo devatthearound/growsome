@@ -1,679 +1,303 @@
-'use client';
+'use client'
 
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import Link from 'next/link';
-import BlogNavigation from '@/components/blog/BlogNavigation';
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { blogAPI, BlogContent, BlogCategory } from '@/lib/graphql-client'
 
-// ✅ FIXED: Updated BlogPost interface with correct types
-interface BlogPost {
-  id: string; // ← Changed from number to string (UUID)
-  title: string;
-  content: string;
-  excerpt: string;
-  featured_image?: string;
-  category_id: string; // ← Changed to string for consistency
-  category_name?: string;
-  tags: string[];
-  published_at: string;
-  view_count?: number;
-  status: 'draft' | 'published';
-  author?: {
-    name: string;
-    avatar?: string;
-  };
-  seo_title?: string;
-  seo_description?: string;
-}
+export default function BlogMainPage() {
+  const [contents, setContents] = useState<BlogContent[]>([])
+  const [categories, setCategories] = useState<BlogCategory[]>([])
+  const [featuredContents, setFeaturedContents] = useState<BlogContent[]>([])
+  const [heroContent, setHeroContent] = useState<BlogContent | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null)
 
-// ✅ FIXED: Updated BlogCategory interface
-interface BlogCategory {
-  id: string; // ← Changed from number to string
-  name: string;
-  slug: string;
-  color?: string;
-  icon?: string;
-}
+  useEffect(() => {
+    loadBlogData()
+  }, [selectedCategory])
 
-const BlogPage = () => {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [filteredPosts, setFilteredPosts] = useState<BlogPost[]>([]);
-  const [categories, setCategories] = useState<BlogCategory[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-
-  // HTML 제거 함수
-  const stripHTML = (html: string) => {
-    if (typeof window !== 'undefined') {
-      const temp = document.createElement('div');
-      temp.innerHTML = html;
-      return temp.textContent || temp.innerText || '';
-    }
-    // 서버 사이드에서는 기본적인 HTML 태그 제거
-    return html.replace(/<[^>]*>/g, '');
-  };
-
-  // 텍스트 자르기 함수
-  const truncateText = (text: string, maxLength: number = 150) => {
-    const cleanText = stripHTML(text);
-    if (cleanText.length <= maxLength) return cleanText;
-    return cleanText.substring(0, maxLength).trim() + '...';
-  };
-
-  // 기본 이미지 선택 함수
-  const getDefaultImage = (title: string, categoryName?: string) => {
-    const images = {
-      tech: 'https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=800&h=600&fit=crop',
-      programming: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=800&h=600&fit=crop',
-      design: 'https://images.unsplash.com/photo-1558655146-d09347e92766?w=800&h=600&fit=crop',
-      business: 'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=800&h=600&fit=crop',
-      lifestyle: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=600&fit=crop',
-      travel: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&h=600&fit=crop',
-      food: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=600&fit=crop',
-      health: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=600&fit=crop',
-      education: 'https://images.unsplash.com/photo-1513475382585-d06e58bcb0e0?w=800&h=600&fit=crop',
-      science: 'https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&h=600&fit=crop',
-      art: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=800&h=600&fit=crop',
-      music: 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop',
-      sports: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&h=600&fit=crop',
-      nature: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=600&fit=crop',
-      default: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=600&fit=crop'
-    };
-
-    // 카테고리에 따라 이미지 선택
-    if (categoryName) {
-      const category = categoryName.toLowerCase();
-      if (category.includes('기술') || category.includes('tech')) return images.tech;
-      if (category.includes('프로그래밍') || category.includes('code')) return images.programming;
-      if (category.includes('디자인') || category.includes('design')) return images.design;
-      if (category.includes('비즈니스') || category.includes('business')) return images.business;
-      if (category.includes('라이프스타일') || category.includes('lifestyle')) return images.lifestyle;
-      if (category.includes('여행') || category.includes('travel')) return images.travel;
-      if (category.includes('음식') || category.includes('food')) return images.food;
-      if (category.includes('건강') || category.includes('health')) return images.health;
-      if (category.includes('교육') || category.includes('education')) return images.education;
-      if (category.includes('과학') || category.includes('science')) return images.science;
-      if (category.includes('예술') || category.includes('art')) return images.art;
-      if (category.includes('음악') || category.includes('music')) return images.music;
-      if (category.includes('스포츠') || category.includes('sport')) return images.sports;
-      if (category.includes('자연') || category.includes('nature')) return images.nature;
-    }
-
-    // 제목에 따라 이미지 선택
-    const titleLower = title.toLowerCase();
-    if (titleLower.includes('react') || titleLower.includes('next') || titleLower.includes('javascript')) return images.programming;
-    if (titleLower.includes('디자인') || titleLower.includes('ui') || titleLower.includes('ux')) return images.design;
-    if (titleLower.includes('비즈니스') || titleLower.includes('마케팅')) return images.business;
-    if (titleLower.includes('여행') || titleLower.includes('휴가')) return images.travel;
-    if (titleLower.includes('음식') || titleLower.includes('요리')) return images.food;
-    if (titleLower.includes('건강') || titleLower.includes('운동')) return images.health;
-    if (titleLower.includes('공부') || titleLower.includes('배우기')) return images.education;
-
-    return images.default;
-  };
-
-  const fetchPosts = async (params: { search?: string; category?: string; tag?: string } = {}) => {
+  const loadBlogData = async () => {
     try {
-      setLoading(true);
-      setError(null);
-      
-      const searchParams = new URLSearchParams();
-      if (params.search) searchParams.append('search', params.search);
-      if (params.category && params.category !== 'all') searchParams.append('categoryId', params.category);
-      if (params.tag) searchParams.append('tag', params.tag);
-      
-      console.log('Fetching posts with params:', params); // Debug log
-      
-      const response = await fetch(`/api/blog/posts?${searchParams.toString()}`);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      
-      console.log('Posts API response:', data); // Debug log
-      
-      if (data.success) {
-        // ✅ ADDED: Validate that posts have UUID format IDs
-        const validPosts = (data.posts || []).filter((post: BlogPost) => {
-          if (!post.id || typeof post.id !== 'string') {
-            console.warn('Invalid post ID found:', post);
-            return false;
-          }
-          return true;
-        });
-        
-        setPosts(validPosts);
-        setFilteredPosts(validPosts);
-      } else {
-        console.warn('Invalid posts data received:', data);
-        setPosts([]);
-        setFilteredPosts([]);
-        setError(data.error || '포스트를 불러올 수 없습니다.');
-      }
+      setLoading(true)
+
+      // 병렬로 데이터 로드
+      const [
+        contentsRes,
+        categoriesRes,
+        featuredRes,
+        heroRes
+      ] = await Promise.all([
+        blogAPI.getContents({ 
+          first: 12, 
+          categoryId: selectedCategory || undefined,
+          status: 'PUBLISHED' 
+        }),
+        blogAPI.getCategories({ isVisible: true }),
+        blogAPI.getFeaturedContents({ limit: 3 }),
+        blogAPI.getHeroContent()
+      ])
+
+      if (contentsRes.data) setContents(contentsRes.data.contents)
+      if (categoriesRes.data) setCategories(categoriesRes.data.categories)
+      if (featuredRes.data) setFeaturedContents(featuredRes.data.featuredContents)
+      if (heroRes.data) setHeroContent(heroRes.data.heroContent)
+
     } catch (error) {
-      console.error('포스트 로딩 중 에러:', error);
-      setPosts([]);
-      setFilteredPosts([]);
-      setError('포스트를 불러오는 중 오류가 발생했습니다. 나중에 다시 시도해주세요.');
+      console.error('블로그 데이터 로드 실패:', error)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  const fetchCategories = async () => {
-    try {
-      const response = await fetch('/api/blog/categories');
-      const data = await response.json();
-      console.log('Categories API response:', data); // Debug log
-      setCategories(data.categories || []);
-    } catch (error) {
-      console.error('카테고리 로딩 중 에러:', error);
-      setCategories([]);
-    }
-  };
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('ko-KR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
 
-  useEffect(() => {
-    fetchPosts();
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    // URL에서 쿼리 파라미터 읽기
-    const urlParams = new URLSearchParams(window.location.search);
-    const categoryParam = urlParams.get('category') || 'all';
-    const searchParam = urlParams.get('search') || '';
-    const tagParam = urlParams.get('tag') || '';
-    
-    setSelectedCategory(categoryParam);
-    setSearchQuery(searchParam);
-    
-    // API 호출로 필터링된 데이터 가져오기
-    fetchPosts({
-      search: searchParam,
-      category: categoryParam,
-      tag: tagParam
-    });
-  }, []);
-
-  const updateURL = (params: { search?: string; category?: string; tag?: string }) => {
-    const url = new URL(window.location.href);
-    
-    if (params.search) {
-      url.searchParams.set('search', params.search);
-    } else {
-      url.searchParams.delete('search');
-    }
-    
-    if (params.category && params.category !== 'all') {
-      url.searchParams.set('category', params.category);
-    } else {
-      url.searchParams.delete('category');
-    }
-    
-    if (params.tag) {
-      url.searchParams.set('tag', params.tag);
-    } else {
-      url.searchParams.delete('tag');
-    }
-    
-    window.history.pushState({}, '', url.toString());
-  };
-
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    updateURL({ search: query, category: selectedCategory });
-    fetchPosts({ search: query, category: selectedCategory });
-  };
-
-  const handleCategoryChange = (categoryId: string) => {
-    setSelectedCategory(categoryId);
-    updateURL({ search: searchQuery, category: categoryId });
-    fetchPosts({ search: searchQuery, category: categoryId });
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-300 rounded w-48 mb-8"></div>
+            <div className="grid md:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white rounded-lg shadow p-6">
+                  <div className="h-48 bg-gray-300 rounded mb-4"></div>
+                  <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+                  <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <>
-      <BlogNavigation 
-        categories={categories}
-        onSearch={handleSearch}
-        onCategoryChange={handleCategoryChange}
-      />
-      <BlogContainer>
-        <Header>
-          <div>
-            <h1>블로그</h1>
-            <PostCount>
-              {searchQuery ? `"${searchQuery}" 검색 결과: ` : ''}
-              총 {filteredPosts.length}개의 포스트
-            </PostCount>
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section */}
+      {heroContent && (
+        <section className="relative h-96 bg-gradient-to-r from-blue-600 to-purple-700 text-white">
+          <div className="absolute inset-0 bg-black/30"></div>
+          <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
+            <div className="max-w-2xl">
+              <div className="mb-4">
+                <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                  {heroContent.category?.name}
+                </span>
+              </div>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                {heroContent.title}
+              </h1>
+              <p className="text-xl mb-6 text-blue-100">
+                {heroContent.excerpt}
+              </p>
+              <div className="flex items-center space-x-4 text-blue-100">
+                <span>{heroContent.author?.username}</span>
+                <span>•</span>
+                <span>{formatDate(heroContent.publishedAt!)}</span>
+                <span>•</span>
+                <span>조회 {heroContent.viewCount}</span>
+              </div>
+              <Link 
+                href={`/blog/${heroContent.slug}`}
+                className="inline-block mt-6 bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-blue-50 transition-colors"
+              >
+                자세히 읽기
+              </Link>
+            </div>
           </div>
-          <Link href="/write">
-            <WriteButton>
-              ✏️ 글쓰기
-            </WriteButton>
-          </Link>
-        </Header>
+        </section>
+      )}
 
-        <PostGrid>
-          {loading ? (
-            // 로딩 상태
-            Array.from({ length: 6 }).map((_, index) => (
-              <LoadingSkeleton key={index}>
-                <div className="skeleton-image" />
-                <div className="skeleton-content">
-                  <div className="skeleton-title" />
-                  <div className="skeleton-excerpt" />
-                  <div className="skeleton-excerpt" />
-                  <div className="skeleton-excerpt" />
-                  <div className="skeleton-meta">
-                    <div className="skeleton-date" />
-                    <div className="skeleton-tags">
-                      <div className="skeleton-tag" />
-                      <div className="skeleton-tag" />
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Growsome 블로그</h1>
+            <p className="text-gray-600">성장하는 기업을 위한 인사이트와 노하우</p>
+          </div>
+          
+          {/* Category Filter */}
+          <div className="mt-4 md:mt-0">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setSelectedCategory(null)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                  selectedCategory === null
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                }`}
+              >
+                전체
+              </button>
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                    selectedCategory === category.id
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                  }`}
+                >
+                  {category.name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Featured Posts */}
+        {featuredContents.length > 0 && !selectedCategory && (
+          <section className="mb-12">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6">추천 글</h2>
+            <div className="grid md:grid-cols-3 gap-6">
+              {featuredContents.map((content) => (
+                <Link key={content.id} href={`/blog/${content.slug}`}>
+                  <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow group">
+                    {content.thumbnailUrl && (
+                      <div className="relative h-48 overflow-hidden">
+                        <Image
+                          src={content.thumbnailUrl}
+                          alt={content.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute top-4 left-4">
+                          <span className="bg-yellow-500 text-white px-2 py-1 rounded text-xs font-medium">
+                            ⭐ 추천
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                    <div className="p-6">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-medium">
+                          {content.category?.name}
+                        </span>
+                        <span className="text-gray-500 text-xs">
+                          {formatDate(content.publishedAt!)}
+                        </span>
+                      </div>
+                      <h3 className="font-semibold text-lg text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                        {content.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm line-clamp-3">
+                        {content.excerpt}
+                      </p>
+                      <div className="flex items-center justify-between mt-4 text-sm text-gray-500">
+                        <span>{content.author?.username}</span>
+                        <div className="flex items-center space-x-3">
+                          <span>👁 {content.viewCount}</span>
+                          <span>❤️ {content.likeCount}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </LoadingSkeleton>
-            ))
-          ) : error ? (
-            // 에러 상태
-            <ErrorState>
-              <ErrorIcon>⚠️</ErrorIcon>
-              <ErrorTitle>오류가 발생했습니다</ErrorTitle>
-              <ErrorDescription>{error}</ErrorDescription>
-              <RetryButton onClick={() => fetchPosts({ search: searchQuery, category: selectedCategory })}>
-                다시 시도
-              </RetryButton>
-            </ErrorState>
-          ) : filteredPosts.length > 0 ? (
-            // 포스트 목록
-            filteredPosts.map(post => {
-              console.log(`링크 생성: /blog/${post.id} (제목: ${post.title})`);
-              return (
-                <PostCard key={post.id}>
-                  {/* ✅ FIXED: Using actual UUID from post.id */}
-                  <Link href={`/blog/${post.id}`}>
-                  <PostImage 
-                    src={post.featured_image || getDefaultImage(post.title, post.category_name)} 
-                    alt={post.title} 
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = getDefaultImage(post.title, post.category_name);
-                    }}
-                  />
-                  <PostContent>
-                    <PostTitle>{post.title}</PostTitle>
-                    <PostExcerpt>
-                      {post.excerpt 
-                        ? truncateText(post.excerpt, 120)
-                        : truncateText(post.content, 120)
-                      }
-                    </PostExcerpt>
-                    <PostMeta>
-                      <PostDate>
-                        {new Date(post.published_at || '').toLocaleDateString('ko-KR')}
-                      </PostDate>
-                      <TagList>
-                        {(post.tags || []).map((tag, index) => (
-                          <Tag key={index}>#{tag}</Tag>
-                        ))}
-                      </TagList>
-                    </PostMeta>
-                  </PostContent>
-                  </Link>
-                </PostCard>
-              );
-            })
+                </Link>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* All Posts */}
+        <section>
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">
+              {selectedCategory 
+                ? `${categories.find(c => c.id === selectedCategory)?.name} 글` 
+                : '최신 글'}
+            </h2>
+            <span className="text-gray-500 text-sm">
+              총 {contents.length}개의 글
+            </span>
+          </div>
+
+          {contents.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-gray-500 text-lg mb-2">😔</div>
+              <p className="text-gray-500">아직 게시된 글이 없습니다.</p>
+            </div>
           ) : (
-            // 빈 상태
-            <EmptyState>
-              <EmptyIcon>📄</EmptyIcon>
-              <EmptyTitle>포스트가 없습니다</EmptyTitle>
-              <EmptyDescription>
-                {searchQuery ? `"${searchQuery}" 검색 결과가 없습니다.` : '첫 번째 블로그 포스트를 작성해보세요!'}
-              </EmptyDescription>
-            </EmptyState>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {contents.map((content) => (
+                <Link key={content.id} href={`/blog/${content.slug}`}>
+                  <article className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow group">
+                    {content.thumbnailUrl && (
+                      <div className="relative h-48 overflow-hidden">
+                        <Image
+                          src={content.thumbnailUrl}
+                          alt={content.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    )}
+                    <div className="p-6">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <span className="bg-gray-100 text-gray-800 px-2 py-1 rounded text-xs font-medium">
+                          {content.category?.name}
+                        </span>
+                        <span className="text-gray-500 text-xs">
+                          {formatDate(content.publishedAt!)}
+                        </span>
+                      </div>
+                      
+                      <h3 className="font-semibold text-lg text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                        {content.title}
+                      </h3>
+                      
+                      <p className="text-gray-600 text-sm line-clamp-3 mb-4">
+                        {content.excerpt}
+                      </p>
+
+                      {content.tags && content.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-4">
+                          {content.tags.slice(0, 3).map((tag) => (
+                            <span
+                              key={tag.id}
+                              className="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs"
+                            >
+                              #{tag.name}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between text-sm text-gray-500">
+                        <div className="flex items-center space-x-2">
+                          <span>{content.author?.username}</span>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <span>👁 {content.viewCount}</span>
+                          <span>❤️ {content.likeCount}</span>
+                          <span>💬 {content.commentCount}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                </Link>
+              ))}
+            </div>
           )}
-        </PostGrid>
-      </BlogContainer>
-    </>
-  );
-};
+        </section>
 
-const BlogContainer = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-  
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
-`;
-
-const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 2rem;
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-
-  h1 {
-    font-size: 2.5rem;
-    color: #333;
-    margin: 0;
-  }
-`;
-
-const WriteButton = styled.button`
-  background: #514FE4;
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-
-  &:hover {
-    background: #4338ca;
-    transform: translateY(-2px);
-  }
-
-  @media (max-width: 768px) {
-    align-self: stretch;
-    justify-content: center;
-  }
-`;
-
-const PostCount = styled.div`
-  color: #666;
-  font-size: 1rem;
-  font-weight: 500;
-`;
-
-const PostGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 2rem;
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-`;
-
-const PostCard = styled.article`
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  border: 1px solid #f0f0f0;
-  position: relative;
-
-  &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
-    border-color: #e0e0e0;
-  }
-
-  a {
-    text-decoration: none;
-    color: inherit;
-    display: block;
-  }
-`;
-
-const PostImage = styled.img`
-  width: 100%;
-  height: 220px;
-  object-fit: cover;
-  transition: transform 0.3s ease;
-  
-  ${PostCard}:hover & {
-    transform: scale(1.05);
-  }
-`;
-
-const PostContent = styled.div`
-  padding: 1.5rem;
-  
-  @media (max-width: 768px) {
-    padding: 1.25rem;
-  }
-`;
-
-const PostTitle = styled.h2`
-  margin: 0 0 0.75rem 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  line-height: 1.4;
-  
-  ${PostCard}:hover & {
-    color: #514FE4;
-  }
-  
-  transition: color 0.3s ease;
-`;
-
-const PostExcerpt = styled.p`
-  color: #666;
-  margin: 0 0 1.25rem 0;
-  line-height: 1.6;
-  font-size: 0.95rem;
-  min-height: 3rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-`;
-
-const PostMeta = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  
-  @media (max-width: 768px) {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-`;
-
-const PostDate = styled.span`
-  color: #888;
-  font-size: 0.875rem;
-  font-weight: 500;
-`;
-
-const TagList = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-`;
-
-const Tag = styled.span`
-  color: #514FE4;
-  background: rgba(81, 79, 228, 0.1);
-  font-size: 0.75rem;
-  font-weight: 500;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  
-  &:hover {
-    background: rgba(81, 79, 228, 0.2);
-    transform: translateY(-1px);
-  }
-`;
-
-
-// 로딩 스켈레톤 컴포넌트
-const LoadingSkeleton = styled.div`
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  border: 1px solid #f0f0f0;
-  
-  .skeleton-image {
-    width: 100%;
-    height: 220px;
-    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-    background-size: 200% 100%;
-    animation: loading 1.5s infinite;
-  }
-  
-  .skeleton-content {
-    padding: 1.5rem;
-    
-    .skeleton-title {
-      height: 1.25rem;
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
-      border-radius: 4px;
-      margin-bottom: 0.75rem;
-      width: 80%;
-    }
-    
-    .skeleton-excerpt {
-      height: 0.95rem;
-      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-      background-size: 200% 100%;
-      animation: loading 1.5s infinite;
-      border-radius: 4px;
-      margin-bottom: 0.5rem;
-      
-      &:nth-child(2) { width: 100%; }
-      &:nth-child(3) { width: 90%; }
-      &:nth-child(4) { width: 60%; }
-    }
-    
-    .skeleton-meta {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 1.25rem;
-      
-      .skeleton-date {
-        height: 0.875rem;
-        width: 80px;
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: loading 1.5s infinite;
-        border-radius: 4px;
-      }
-      
-      .skeleton-tags {
-        display: flex;
-        gap: 0.5rem;
-        
-        .skeleton-tag {
-          height: 1.5rem;
-          width: 60px;
-          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-          background-size: 200% 100%;
-          animation: loading 1.5s infinite;
-          border-radius: 12px;
-        }
-      }
-    }
-  }
-
-  @keyframes loading {
-    0% {
-      background-position: 200% 0;
-    }
-    100% {
-      background-position: -200% 0;
-    }
-  }
-`;
-
-// 빈 상태 컴포넌트
-const EmptyState = styled.div`
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #666;
-`;
-
-const EmptyIcon = styled.div`
-  font-size: 4rem;
-  margin-bottom: 1rem;
-`;
-
-const EmptyTitle = styled.h3`
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #333;
-`;
-
-const EmptyDescription = styled.p`
-  font-size: 1rem;
-  line-height: 1.6;
-  max-width: 400px;
-  margin: 0 auto;
-`;
-
-// 에러 상태 컴포너트
-const ErrorState = styled.div`
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #666;
-`;
-
-const ErrorIcon = styled.div`
-  font-size: 4rem;
-  margin-bottom: 1rem;
-`;
-
-const ErrorTitle = styled.h3`
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #d73527;
-`;
-
-const ErrorDescription = styled.p`
-  font-size: 1rem;
-  line-height: 1.6;
-  max-width: 400px;
-  margin: 0 auto 2rem;
-  color: #666;
-`;
-
-const RetryButton = styled.button`
-  background: #514FE4;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background 0.3s ease;
-
-  &:hover {
-    background: #4338ca;
-  }
-`;
-
-export default BlogPage;
+        {/* Load More */}
+        {contents.length >= 12 && (
+          <div className="text-center mt-12">
+            <button className="bg-white border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors">
+              더 많은 글 보기
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

@@ -8,10 +8,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faTags } from '@fortawesome/free-solid-svg-icons';
 
 interface Category {
-  id: number;
+  id: string; // UUID
   name: string;
   slug: string;
   description?: string;
+  contentCount?: number;
+  sortOrder?: number;
 }
 
 interface BlogNavigationProps {

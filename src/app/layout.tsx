@@ -14,6 +14,7 @@ import { CoupangApiProvider } from './contexts/CoupangApiContext';
 import { EmailProvider } from './contexts/EmailContext';
 import Script from 'next/script';
 import ClarityAnalytics from '../components/common/ClarityAnalytics';
+import '../lib/fontawesome';
 
 // export const metadata: Metadata = {
 //   title: "Create Next App",
