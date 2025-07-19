@@ -583,7 +583,7 @@ export default function BlogDetailPage() {
                         
                         {/* 신고 버튼 */}
                         <button
-                          onClick={() => handleCommentReport(comment.id)}
+                          onClick={() => handleCommentReport(comment.id.toString())}
                           className="flex items-center space-x-1 text-sm text-gray-400 hover:text-red-500 transition-colors"
                           title="댓글 신고"
                         >
