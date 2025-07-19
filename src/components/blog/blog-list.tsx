@@ -1,17 +1,17 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { useBlogContents, useBlogCategories } from '@/hooks/use-blog'
-import { BlogContent } from '@/lib/graphql-client'
-import { Calendar, User, Eye, Heart, MessageSquare, Tag } from 'lucide-react'
+import { useState } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { useBlogContents, useBlogCategories } from '@/hooks/use-blog';
+import { BlogContent } from '@/lib/graphql-client';
+import { Calendar, User, Eye, Heart, MessageSquare, Tag } from 'lucide-react';
 
 interface BlogListProps {
-  initialCategoryId?: number
-  showCategories?: boolean
-  showPagination?: boolean
-  itemsPerPage?: number
+  initialCategoryId?: number;
+  showCategories?: boolean;
+  showPagination?: boolean;
+  itemsPerPage?: number;
 }
 
 const BlogList = ({ 
@@ -20,33 +20,33 @@ const BlogList = ({
   showPagination = true,
   itemsPerPage = 12 
 }: BlogListProps) => {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<number | undefined>(initialCategoryId)
-  const [currentPage, setCurrentPage] = useState(1)
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | undefined>(initialCategoryId);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { contents, loading: contentsLoading, error: contentsError } = useBlogContents({
     first: itemsPerPage,
     categoryId: selectedCategoryId,
     status: 'PUBLISHED'
-  })
+  });
 
-  const { categories, loading: categoriesLoading } = useBlogCategories(true)
+  const { categories, loading: categoriesLoading } = useBlogCategories(true);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
-    })
-  }
+    });
+  };
 
   const truncateHtml = (html: string, maxLength: number = 150) => {
-    const tempDiv = document.createElement('div')
-    tempDiv.innerHTML = html
-    const textContent = tempDiv.textContent || tempDiv.innerText || ''
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
     return textContent.length > maxLength 
       ? textContent.substring(0, maxLength) + '...'
-      : textContent
-  }
+      : textContent;
+  };
 
   if (contentsError) {
     return (
@@ -61,7 +61,7 @@ const BlogList = ({
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -112,7 +112,7 @@ const BlogList = ({
                     </span>
                   )}
                 </button>
-              ))
+              ))}
             </div>
           )}
         </div>
@@ -176,31 +176,31 @@ const BlogList = ({
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
 // 개별 블로그 카드 컴포넌트
 interface BlogCardProps {
-  post: BlogContent
+  post: BlogContent;
 }
 
 const BlogCard = ({ post }: BlogCardProps) => {
   const truncateHtml = (html: string, maxLength: number = 150) => {
-    const tempDiv = document.createElement('div')
-    tempDiv.innerHTML = html
-    const textContent = tempDiv.textContent || tempDiv.innerText || ''
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
     return textContent.length > maxLength 
       ? textContent.substring(0, maxLength) + '...'
-      : textContent
-  }
+      : textContent;
+  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('ko-KR', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
-    })
-  }
+    });
+  };
 
   return (
     <article className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
@@ -300,7 +300,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
         </div>
       </div>
     </article>
-  )
-}
+  );
+};
 
-export default BlogList
+export default BlogList;
