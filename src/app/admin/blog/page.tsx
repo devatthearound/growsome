@@ -223,26 +223,63 @@ const BlogAdmin = () => {
       const response = await fetch('/api/admin/blog');
       const data = await response.json();
       
-      if (!response.ok) {
-        throw new Error(data.error || '포스트 목록을 불러오는데 실패했습니다.');
+      if (data.success) {
+        console.log('Fetched posts:', data.posts); // 디버깅용
+        setPosts(data.posts);
+      } else {
+        console.warn('포스트 데이터:', data.message);
+        setPosts([]);
       }
-
-      console.log('Fetched posts:', data.posts); // 디버깅용
-      setPosts(data.posts);
     } catch (error) {
       console.error('포스트 목록 조회 중 에러:', error);
-      alert('포스트 목록을 불러오는데 실패했습니다.');
+      setPosts([]);
     }
   };
 
   const fetchCategories = async () => {
     try {
       const response = await fetch('/api/admin/categories');
-      if (!response.ok) throw new Error('카테고리 조회 실패');
       const data = await response.json();
-      setCategories(data.categories);
+      
+      if (data.success) {
+        setCategories(data.categories);
+      } else {
+        console.warn('카테고리 데이터:', data.message);
+        setCategories([]);
+      }
     } catch (error) {
       console.error('카테고리 조회 중 에러:', error);
+      setCategories([]);
+    }
+  };
+
+  // 데이터베이스 초기화 함수 추가
+  const initializeDatabase = async () => {
+    if (!confirm('데이터베이스를 초기화하시겠습니까? 이 작업은 필요한 테이블을 생성합니다.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/admin/setup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        alert('데이터베이스가 성공적으로 초기화되었습니다!');
+        // 데이터 재로드
+        fetchCategories();
+        fetchPosts();
+      } else {
+        alert('데이터베이스 초기화 실패: ' + data.error);
+      }
+    } catch (error) {
+      console.error('데이터베이스 초기화 중 에러:', error);
+      alert('데이터베이스 초기화 중 오류가 발생했습니다.');
     }
   };
 
@@ -698,6 +735,17 @@ const CategoryButton = styled(Button)`
 
   &:hover {
     background: #5a6268;
+  }
+`;
+
+const InitButton = styled(Button)`
+  background: #dc3545;
+  color: white;
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+
+  &:hover {
+    background: #c82333;
   }
 `;
 

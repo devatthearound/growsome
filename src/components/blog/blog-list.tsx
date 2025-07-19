@@ -87,7 +87,7 @@ const BlogList = ({
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setSelectedCategoryId(undefined)}
-                className={`px-4 py-2 rounded-full border transition-colors ${
+                className={`px-3 py-1.5 rounded-full border text-sm transition-colors ${
                   selectedCategoryId === undefined
                     ? 'bg-blue-500 text-white border-blue-500'
                     : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
@@ -99,7 +99,7 @@ const BlogList = ({
                 <button
                   key={category.id}
                   onClick={() => setSelectedCategoryId(category.id)}
-                  className={`px-4 py-2 rounded-full border transition-colors ${
+                  className={`px-3 py-1.5 rounded-full border text-sm transition-colors ${
                     selectedCategoryId === category.id
                       ? 'bg-blue-500 text-white border-blue-500'
                       : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
@@ -107,12 +107,12 @@ const BlogList = ({
                 >
                   {category.name}
                   {category.contentCount !== undefined && (
-                    <span className="ml-1 text-sm opacity-75">
+                    <span className="ml-1 text-xs opacity-75">
                       ({category.contentCount})
                     </span>
                   )}
                 </button>
-              ))}
+              ))
             </div>
           )}
         </div>
@@ -246,7 +246,7 @@ const BlogCard = ({ post }: BlogCardProps) => {
         )}
 
         {/* Title */}
-        <h2 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2">
+        <h2 className="text-lg font-bold text-gray-900 mb-3 line-clamp-2">
           <Link 
             href={`/blog/${post.slug}`}
             className="hover:text-blue-600 transition-colors"
@@ -256,44 +256,44 @@ const BlogCard = ({ post }: BlogCardProps) => {
         </h2>
 
         {/* Excerpt */}
-        <p className="text-gray-600 mb-4 line-clamp-3">
+        <p className="text-sm text-gray-600 mb-3 line-clamp-3">
           {post.excerpt || truncateHtml(post.contentBody)}
         </p>
 
         {/* Meta Information */}
-        <div className="flex items-center justify-between text-sm text-gray-500">
-          <div className="flex items-center space-x-4">
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          <div className="flex items-center space-x-3">
             <div className="flex items-center">
-              <User size={14} className="mr-1" />
+              <User size={12} className="mr-1" />
               <span>{post.author.username}</span>
             </div>
             <div className="flex items-center">
-              <Calendar size={14} className="mr-1" />
+              <Calendar size={12} className="mr-1" />
               <span>{formatDate(post.publishedAt || post.createdAt)}</span>
             </div>
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
             <div className="flex items-center">
-              <Eye size={14} className="mr-1" />
+              <Eye size={12} className="mr-1" />
               <span>{post.viewCount}</span>
             </div>
             <div className="flex items-center">
-              <Heart size={14} className="mr-1" />
+              <Heart size={12} className="mr-1" />
               <span>{post.likeCount}</span>
             </div>
             <div className="flex items-center">
-              <MessageSquare size={14} className="mr-1" />
+              <MessageSquare size={12} className="mr-1" />
               <span>{post.commentCount}</span>
             </div>
           </div>
         </div>
 
         {/* Read More Link */}
-        <div className="mt-4 pt-4 border-t border-gray-100">
+        <div className="mt-3 pt-3 border-t border-gray-100">
           <Link 
             href={`/blog/${post.slug}`}
-            className="text-blue-500 hover:text-blue-600 font-medium text-sm transition-colors"
+            className="text-blue-500 hover:text-blue-600 font-medium text-xs transition-colors"
           >
             자세히 읽기 →
           </Link>

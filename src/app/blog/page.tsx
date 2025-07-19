@@ -68,7 +68,6 @@ const BlogPageContainer = styled.div`
 const HeroSection = styled.section`
   background: ${growsomeTheme.color.White};
   padding: ${growsomeTheme.spacing.xl} 0;
-  border-bottom: 1px solid ${growsomeTheme.color.Gray200};
 `;
 
 const HeroContent = styled.div`
@@ -174,9 +173,9 @@ const CategoryButton = styled(motion.button)<{ $active?: boolean }>`
   background: ${props => props.$active ? growsomeTheme.color.Black800 : growsomeTheme.color.White};
   color: ${props => props.$active ? growsomeTheme.color.White : growsomeTheme.color.Gray600};
   border: 1px solid ${props => props.$active ? growsomeTheme.color.Black800 : growsomeTheme.color.Gray300};
-  padding: ${growsomeTheme.spacing.md} ${growsomeTheme.spacing.lg};
+  padding: ${growsomeTheme.spacing.sm} ${growsomeTheme.spacing.md};
   border-radius: ${growsomeTheme.radius.radius1};
-  font-size: ${growsomeTheme.fontSize.TextS};
+  font-size: ${growsomeTheme.fontSize.TextXS};
   font-weight: ${growsomeTheme.fontWeight.Medium};
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -281,7 +280,7 @@ const CategoryTag = styled.span`
 
 
 const BlogTitle = styled.h3`
-  font-size: ${growsomeTheme.fontSize.TextXL};
+  font-size: ${growsomeTheme.fontSize.TextL};
   font-weight: ${growsomeTheme.fontWeight.SemiBold};
   color: ${growsomeTheme.color.Black800};
   margin-bottom: ${growsomeTheme.spacing.sm};
@@ -294,10 +293,10 @@ const BlogTitle = styled.h3`
 `;
 
 const BlogExcerpt = styled.p`
-  font-size: ${growsomeTheme.fontSize.TextM};
+  font-size: ${growsomeTheme.fontSize.TextS};
   color: ${growsomeTheme.color.Gray500};
   line-height: 1.6;
-  margin-bottom: ${growsomeTheme.spacing.lg};
+  margin-bottom: ${growsomeTheme.spacing.md};
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -572,26 +571,54 @@ export default function BlogMainPage() {
   const LoadingComponent = () => (
     <BlogPageContainer>
       <ThemeProvider theme={growsomeTheme}>
+        {/* Hero Section - Loading */}
         <HeroSection>
           <MainContainer>
-            <HeroContent>
-              <ColumnBox $gap={3} $ai="center">
-                <LoadingSkeleton height="40px" width="200px" style={{ 
-                  margin: '0 auto 2rem', 
-                  borderRadius: growsomeTheme.radius.full,
+            <LoadingCard>
+              <div style={{ display: 'flex', minHeight: '320px' }}>
+                <LoadingSkeleton height="320px" width="50%" style={{ 
+                  borderRadius: 0,
                   backgroundColor: growsomeTheme.color.Gray200
                 }} />
-                <LoadingSkeleton height="300px" width="100%" style={{ 
-                  borderRadius: growsomeTheme.radius.radius4, 
-                  maxWidth: '1000px',
-                  backgroundColor: growsomeTheme.color.Gray200
-                }} />
-              </ColumnBox>
-            </HeroContent>
+                <div style={{ width: '50%', padding: growsomeTheme.spacing['2xl'] }}>
+                  <LoadingSkeleton height="20px" width="30%" style={{ marginBottom: '1rem' }} />
+                  <LoadingSkeleton height="40px" width="100%" style={{ marginBottom: '1rem' }} />
+                  <LoadingSkeleton height="80px" width="100%" style={{ marginBottom: '1rem' }} />
+                  <LoadingSkeleton height="20px" width="50%" />
+                </div>
+              </div>
+            </LoadingCard>
           </MainContainer>
         </HeroSection>
+
+        {/* New Stories Section - Loading */}
+        <NewStoriesSection>
+          <MainContainer>
+            <SectionTitle>
+              <LoadingSkeleton height="40px" width="300px" style={{ 
+                backgroundColor: growsomeTheme.color.Gray200
+              }} />
+            </SectionTitle>
+            
+            {/* Filter Tabs - Loading */}
+            <FilterContainer>
+              {[...Array(6)].map((_, i) => (
+                <LoadingSkeleton 
+                  key={i} 
+                  height="40px" 
+                  width="80px" 
+                  style={{ 
+                    backgroundColor: growsomeTheme.color.Gray200,
+                    borderRadius: growsomeTheme.radius.radius1
+                  }} 
+                />
+              ))}
+            </FilterContainer>
+          </MainContainer>
+        </NewStoriesSection>
         
-        <ContentSection>
+        {/* Content Section - Loading */}
+        <ContentSection style={{ paddingTop: 0 }}>
           <MainContainer>
             <PostsGrid>
               {[...Array(6)].map((_, i) => (
@@ -663,15 +690,26 @@ export default function BlogMainPage() {
                       </HeroPostTitle>
                       
                       <HeroExcerpt>
-                        <Typography.TextL400 color={growsomeTheme.color.Gray400} style={{ lineHeight: '1.6', marginBottom: growsomeTheme.spacing.lg }}>
+                        <Typography.TextM400 color={growsomeTheme.color.Gray400} style={{ lineHeight: '1.6', marginBottom: growsomeTheme.spacing.lg }}>
                           {(heroContent || featuredContents[0])?.excerpt}
-                        </Typography.TextL400>
+                        </Typography.TextM400>
                       </HeroExcerpt>
                       
                       <HeroMetaRow>
-
-
-
+                        <div style={{ display: 'flex', alignItems: 'center', gap: growsomeTheme.spacing.lg }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: growsomeTheme.spacing.sm }}>
+                            <Eye size={16} color={growsomeTheme.color.Gray400} />
+                            <Typography.TextS400 color={growsomeTheme.color.Gray400}>
+                              {(heroContent || featuredContents[0])?.viewCount || 0}
+                            </Typography.TextS400>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: growsomeTheme.spacing.sm }}>
+                            <Heart size={16} color={growsomeTheme.color.Gray400} />
+                            <Typography.TextS400 color={growsomeTheme.color.Gray400}>
+                              {(heroContent || featuredContents[0])?.likeCount || 0}
+                            </Typography.TextS400>
+                          </div>
+                        </div>
                       </HeroMetaRow>
                     </HeroContentSection>
                   </HeroCardContainer>
@@ -772,6 +810,20 @@ export default function BlogMainPage() {
                         <BlogTitle>{content.title}</BlogTitle>
                         <BlogExcerpt>{content.excerpt}</BlogExcerpt>
                         
+                        <div style={{ display: 'flex', alignItems: 'center', gap: growsomeTheme.spacing.md, marginTop: growsomeTheme.spacing.md }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: growsomeTheme.spacing.xs }}>
+                            <Eye size={14} color={growsomeTheme.color.Gray400} />
+                            <Typography.TextXS400 color={growsomeTheme.color.Gray400}>
+                              {content.viewCount || 0}
+                            </Typography.TextXS400>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: growsomeTheme.spacing.xs }}>
+                            <Heart size={14} color={growsomeTheme.color.Gray400} />
+                            <Typography.TextXS400 color={growsomeTheme.color.Gray400}>
+                              {content.likeCount || 0}
+                            </Typography.TextXS400>
+                          </div>
+                        </div>
 
                       </BlogContent>
                     </BlogCard>
