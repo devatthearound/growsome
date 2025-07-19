@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import styled from 'styled-components';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import BlogNavigation from '@/components/blog/BlogNavigation';
+import BlogNavigation from '../../../components/blog/BlogNavigation';
 
 // GraphQL 쿼리
 const GET_CATEGORIES_QUERY = `

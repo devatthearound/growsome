@@ -5,12 +5,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import styled, { ThemeProvider, keyframes } from 'styled-components'
 import { motion } from 'framer-motion'
-import { Tag, Search, Filter, ArrowRight, BookOpen, TrendingUp } from 'lucide-react'
-import { growsomeTheme } from '@/components/design-system/theme'
-import { Typography } from '@/components/design-system/Typography'
-import { ColumnBox, RowBox, Container } from '@/components/design-system/Layout'
-import { GreenButton, SecondaryButton, PrimaryButton } from '@/components/design-system/Button'
-import { blogAPI, type BlogContent, type BlogCategory } from '@/lib/graphql-client'
+import { Calendar, Eye, Heart, MessageCircle, User, Tag, Search, Filter, ArrowRight, BookOpen, TrendingUp } from 'lucide-react'
+import { growsomeTheme } from '../../components/design-system/theme'
+import { Typography } from '../../components/design-system/Typography'
+import { ColumnBox, RowBox, Container } from '../../components/design-system/Layout'
+import { GreenButton, SecondaryButton, PrimaryButton } from '../../components/design-system/Button'
+import { blogAPI, type BlogContent, type BlogCategory } from '../../lib/graphql-client'
 
 // Main Container for 1240px width
 const MainContainer = styled.div`

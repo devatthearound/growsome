@@ -62,17 +62,27 @@ jobs:
        echo "Node version: $(node --version)"
        echo "NPM version: $(npm --version)"
        
+       echo "Checking source file structure..."
+       find src -type f -name "*.ts" -o -name "*.tsx" | head -20
+       
        echo "Installing dependencies..."
        npm ci
        
        echo "Generating Prisma client..."
        npx prisma generate
        
+       echo "Testing TypeScript compilation..."
+       npx tsc --noEmit || {
+         echo "⚠️ TypeScript compilation issues found"
+       }
+       
        echo "Attempting local build..."
-       NODE_ENV=production npm run build || {
+       NODE_ENV=production npm run build 2>&1 | tee local-build.log || {
          echo "❌ Local build failed!"
-         echo "Checking for specific errors..."
-         npm run build 2>&1 | head -50
+         echo "Full build log:"
+         cat local-build.log
+         echo "Checking specific import errors:"
+         grep -n "Module not found" local-build.log || echo "No module errors found"
          exit 1
        }
        

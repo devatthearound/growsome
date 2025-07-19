@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import webpack from "webpack";
+import path from "path";
 
 /** @type {import('next').NextConfig} */
 const nextConfig: NextConfig = {
@@ -9,12 +10,26 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  experimental: {
-    serverComponentsExternalPackages: ['@prisma/client', 'prisma'],
-  },
+  serverExternalPackages: ['@prisma/client', 'prisma'],
   webpack: (config: webpack.Configuration, { isServer }: { isServer: boolean }) => {
+    // TypeScript path mapping 지원 강화
+    config.resolve = config.resolve || {};
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, 'src'),
+      '@/components': path.resolve(__dirname, 'src/components'),
+      '@/lib': path.resolve(__dirname, 'src/lib'),
+      '@/app': path.resolve(__dirname, 'src/app'),
+      '@/services': path.resolve(__dirname, 'src/services'),
+    };
+    
+    // 경로 해결 옵션 강화
+    config.resolve.modules = [
+      path.resolve(__dirname, 'src'),
+      'node_modules'
+    ];
+    
     if (!isServer) {
-      config.resolve = config.resolve || {};
       config.resolve.fallback = {
         ...config.resolve?.fallback,
         fs: false,

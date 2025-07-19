@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { blogAPI, BlogContent, BlogComment } from '@/lib/graphql-client'
+import { blogAPI, BlogContent, BlogComment } from '../../../lib/graphql-client'
 
 export default function BlogDetailPage() {
   const params = useParams()

@@ -6,7 +6,7 @@ import {
   getCategories,
   getPosts,
   getPostById
-} from '@/services/postService';
+} from '../../../../../services/postService';
 
 const TestPage = () => {
   const [results, setResults] = useState<string>('');
