@@ -1,15 +1,17 @@
 # 1단계: 환경 설정 및 dependancy 설치
 FROM --platform=linux/amd64 node:18-alpine AS deps
-RUN apk add --no-cache libc6-compat
+RUN apk add --no-cache libc6-compat openssl
 
 # 명령어를 실행할 디렉터리 지정
 WORKDIR /usr/src/app
 
-# Dependancy install을 위해 package.json, package-lock.json, yarn.lock 복사 
+# Dependancy install을 위해 package.json, package-lock.json 복사 
 COPY package.json package-lock.json ./ 
+COPY prisma ./prisma/
 
-# Dependancy 설치 (새로운 lock 파일 수정 또는 생성 방지)
-RUN npm ci --ignore-scripts 
+# Dependancy 설치 및 Prisma 생성
+RUN npm ci --ignore-scripts
+RUN npx prisma generate 
 
 # 2단계: next.js 빌드 단계
 FROM --platform=linux/amd64 node:18-alpine AS builder
@@ -24,10 +26,16 @@ WORKDIR /usr/src/app
 
 # node_modules 등의 dependancy를 복사함.
 COPY --from=deps /usr/src/app/node_modules ./node_modules
+COPY --from=deps /usr/src/app/prisma ./prisma/
 COPY . .
 
 # 구축 환경에 따라 env 변수를 다르게 가져가야 하는 경우 환경 변수를 이용해서 env를 구분해준다.
 COPY .env.production .env.production
+
+# Prisma 클라이언트 재생성 (Alpine Linux 환경에 맞춰)
+RUN npx prisma generate
+
+# Next.js 빌드
 RUN npm run build
 
 
@@ -40,6 +48,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # 명령어를 실행할 디렉터리 지정
 WORKDIR /usr/src/app
+
+# OpenSSL 추가 (Prisma 실행을 위해 필요)
+RUN apk add --no-cache openssl
  
 # container 환경에 시스템 사용자를 추가함
 RUN addgroup --system --gid 1001 nodejs
@@ -51,12 +62,20 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /usr/src/app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /usr/src/app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /usr/src/app/.next/static ./.next/static
+
+# Prisma 클라이언트와 스키마 복사
+COPY --from=builder --chown=nextjs:nodejs /usr/src/app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder --chown=nextjs:nodejs /usr/src/app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder --chown=nextjs:nodejs /usr/src/app/prisma ./prisma
+
+# 사용자 변경
+USER nextjs
  
-# 컨테이너의 수신 대기 포트를 80으로 설정
+# 컨테이너의 수신 대기 포트를 3000으로 설정
 EXPOSE 3000
 
-# node로 애플리케이션 실행
-CMD ["node", "server.js"] 
+ENV PORT 3000
+ENV HOSTNAME "0.0.0.0"
 
-# standalone으로 나온 결과값은 node 자체적으로만 실행 가능
-# CMD ["npm", "start"]
+# node로 애플리케이션 실행
+CMD ["node", "server.js"]
