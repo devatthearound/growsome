@@ -24,14 +24,14 @@ const FontAwesomeIcon = dynamic(
 );
 const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
   const [isMounted, setIsMounted] = useState(false);
-
-  useEffect(() => {
-    setIsMounted(true);
-  }, []);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const router = useRouter();
   const { user, isLoading, isLoggedIn, logout } = useAuth();
   const currentPath = usePathname();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
 
   // 중앙 집중식 네비게이션 링크 관리
@@ -43,10 +43,34 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
      ];
 
   const handleMenuClick = (path: string) => {
-    router.push(path);
-    setIsMenuOpen(false);
+    if (isMounted && router) {
+      try {
+        router.push(path);
+        setIsMenuOpen(false);
+      } catch (error) {
+        console.error('Navigation error:', error);
+        // 폴백: window.location 사용
+        if (typeof window !== 'undefined') {
+          window.location.href = path;
+        }
+      }
+    }
   };
 
+
+  if (!isMounted) {
+    return (
+      <HeaderWrapper $theme={theme}>
+        <HeaderContainer>
+          <NavSection>
+            <LogoLink href="/">
+              <LogoImage src="/logo_growsome.png" alt="Growsome" />
+            </LogoLink>
+          </NavSection>
+        </HeaderContainer>
+      </HeaderWrapper>
+    );
+  }
 
   return (
     <HeaderWrapper $theme={theme}>
@@ -66,6 +90,7 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
                     <NavLink 
                       onClick={() => handleMenuClick(link.path)}
                       $isActive={isActive}
+                      $theme={theme}
                     >
                       {link.label}
                       <NavLinkUnderline $isActive={isActive} />
@@ -100,13 +125,24 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
               </LogoutButton>
             </>
           ) : (
-            <LoginButton 
-              onClick={() => router.push('/login')}
-              $isMobile={false}
-              $theme={theme}
-            >
-              로그인
-            </LoginButton>
+                          <LoginButton 
+                onClick={() => {
+                  if (isMounted && router) {
+                    try {
+                      router.push('/login');
+                    } catch (error) {
+                      console.error('Navigation error:', error);
+                      if (typeof window !== 'undefined') {
+                        window.location.href = '/login';
+                      }
+                    }
+                  }
+                }}
+                $isMobile={false}
+                $theme={theme}
+              >
+                로그인
+              </LoginButton>
           )
         )}
           <a href="https://open.kakao.com/o/gqWxH1Zg" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
@@ -164,7 +200,18 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
               </>
             ) : (
               <LoginButton 
-                onClick={() => router.push('/login')}
+                onClick={() => {
+                  if (isMounted && router) {
+                    try {
+                      router.push('/login');
+                    } catch (error) {
+                      console.error('Navigation error:', error);
+                      if (typeof window !== 'undefined') {
+                        window.location.href = '/login';
+                      }
+                    }
+                  }
+                }}
                 $isMobile={true}
                 $theme={theme}
               >

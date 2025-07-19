@@ -5,6 +5,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:clean": "rm -rf .next && npm run build",
+    "clean": "rm -rf .next",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "prisma generate",

@@ -10,6 +10,14 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  
+  // 빌드 ID 강제 변경으로 캐시 문제 해결
+  generateBuildId: async () => {
+    return `build-${Date.now()}`
+  },
+  
+  // 프로덕션에서 standalone 모드 사용
+  output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
   serverExternalPackages: ['@prisma/client', 'prisma'],
   webpack: (config: webpack.Configuration, { isServer }: { isServer: boolean }) => {
     // TypeScript path mapping 지원 강화
