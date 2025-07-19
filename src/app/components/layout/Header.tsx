@@ -4,10 +4,8 @@ import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import { faUser, faBars, faTimes, faSignOutAlt, faRocket } from '@fortawesome/free-solid-svg-icons';
 import { useAuth } from '@/app/contexts/AuthContext';
-import dynamic from 'next/dynamic';
+import { Menu, X, User, LogOut } from 'lucide-react';
 
 interface HeaderProps {
   theme?: 'light' | 'dark';
@@ -18,10 +16,6 @@ interface NavItem {
   label: string;
 }
 
-const FontAwesomeIcon = dynamic(
-  () => import('@fortawesome/react-fontawesome').then(mod => mod.FontAwesomeIcon),
-  { ssr: false }
-);
 const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
   const [isMounted, setIsMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -38,14 +32,13 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
     return null;
   }
 
-
   // 중앙 집중식 네비게이션 링크 관리
   const navigationLinks: NavItem[] = [
     { path: '/product', label: '사업성장' },
     { path: '/portfolio', label: '포트폴리오' },
     { path: '/services', label: 'AI 솔루션' },
     { path: '/blog', label: '블로그' },
-     ];
+  ];
 
   const handleMenuClick = (path: string) => {
     if (isMounted && router) {
@@ -62,6 +55,14 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setIsMenuOpen(false);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   if (!isMounted) {
     return (
@@ -87,11 +88,10 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
           
           <MainNav>
             <NavList>
-              {
-                navigationLinks.map((link) => {
-                  const isActive = link.path === '/blog' ? currentPath.startsWith('/blog') : currentPath === link.path;
-                  return (
-                    <NavItem key={link.path}>
+              {navigationLinks.map((link) => {
+                const isActive = link.path === '/blog' ? currentPath.startsWith('/blog') : currentPath === link.path;
+                return (
+                  <NavItem key={link.path}>
                     <NavLink 
                       onClick={() => handleMenuClick(link.path)}
                       $isActive={isActive}
@@ -101,122 +101,93 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
                       <NavLinkUnderline $isActive={isActive} />
                     </NavLink>
                   </NavItem>
-                  ) 
-                })
-              }
+                ) 
+              })}
             </NavList>
           </MainNav>
         </NavSection>
 
         <UserSection>
-          {
-          <>
-          {
-          !isLoading && (
+          {!isLoading && (
             isLoggedIn ? (
-            <>
-              <UserProfileGroup onClick={() => handleMenuClick('/mypage')}>
-                {/* {
-                  isMounted && <FontAwesomeIcon icon={faUser} />
-                } */}
-                <UserName>{user?.username}</UserName>
-              </UserProfileGroup>
-              <LogoutButton 
-                onClick={logout}
-                $isMobile={false}
-                $theme={theme}
-              >
-                로그아웃
-              </LogoutButton>
-            </>
-          ) : (
-                          <LoginButton 
-                onClick={() => {
-                  if (isMounted && router) {
-                    try {
-                      router.push('/login');
-                    } catch (error) {
-                      console.error('Navigation error:', error);
-                      if (typeof window !== 'undefined') {
-                        window.location.href = '/login';
-                      }
-                    }
-                  }
-                }}
-                $isMobile={false}
-                $theme={theme}
-              >
-                로그인
-              </LoginButton>
-          )
-        )}
-          <a href="https://open.kakao.com/o/gqWxH1Zg" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-            
-            <SecretLabButton>
-              <span>비밀연구소 참여하기 🚀</span>
-            </SecretLabButton>
-            </a>
-          </>
-          }
-        </UserSection>
-
-        <MobileMenuButton onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          {/* {
-            isMounted && <FontAwesomeIcon icon={faTimes} />
-          } */}
-        </MobileMenuButton>
-      </HeaderContainer>
-
-      <MobileMenu $isOpen={isMenuOpen}>
-        <MobileNavList>
-        {
-                navigationLinks.map((link) => {
-                  const isActive = link.path === '/blog' ? currentPath.startsWith('/blog') : currentPath === link.path;
-                  return (
-                    <MobileNavItem 
-                      key={link.path} 
-                      onClick={() => handleMenuClick(link.path)}
-                      $isActive={isActive}
-                    >
-                      {link.label}
-                    </MobileNavItem>
-                  )
-                })
-            }
-          {
-            <>
-            {
-              !isLoading && (
-                isLoggedIn ? (
               <>
                 <UserProfileGroup onClick={() => handleMenuClick('/mypage')}>
-                  {/* {
-                    isMounted && <FontAwesomeIcon icon={faUser} />
-                  } */}
+                  <User size={16} />
                   <UserName>{user?.username}</UserName>
                 </UserProfileGroup>
                 <LogoutButton 
-                  onClick={logout}
-                  $isMobile={true}
+                  onClick={handleLogout}
+                  $isMobile={false}
                   $theme={theme}
                 >
+                  <LogOut size={16} />
                   로그아웃
                 </LogoutButton>
               </>
             ) : (
               <LoginButton 
-                onClick={() => {
-                  if (isMounted && router) {
-                    try {
-                      router.push('/login');
-                    } catch (error) {
-                      console.error('Navigation error:', error);
-                      if (typeof window !== 'undefined') {
-                        window.location.href = '/login';
-                      }
-                    }
-                  }
-                }}
+                onClick={() => handleMenuClick('/login')}
+                $isMobile={false}
+                $theme={theme}
+              >
+                로그인
+              </LoginButton>
+            )
+          )}
+          
+          <a href="https://open.kakao.com/o/gqWxH1Zg" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+            <SecretLabButton>
+              <span>비밀연구소 참여하기 🚀</span>
+            </SecretLabButton>
+          </a>
+        </UserSection>
+
+        <MobileMenuButton onClick={() => setIsMenuOpen(!isMenuOpen)}>
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </MobileMenuButton>
+      </HeaderContainer>
+
+      {/* 모바일 메뉴 오버레이 */}
+      {isMenuOpen && <MobileOverlay onClick={() => setIsMenuOpen(false)} />}
+
+      <MobileMenu $isOpen={isMenuOpen}>
+        <MobileNavList>
+          {navigationLinks.map((link) => {
+            const isActive = link.path === '/blog' ? currentPath.startsWith('/blog') : currentPath === link.path;
+            return (
+              <MobileNavItem 
+                key={link.path} 
+                onClick={() => handleMenuClick(link.path)}
+                $isActive={isActive}
+              >
+                {link.label}
+              </MobileNavItem>
+            )
+          })}
+          
+          <MobileDivider />
+          
+          {!isLoading && (
+            isLoggedIn ? (
+              <>
+                <MobileUserSection>
+                  <UserProfileGroup onClick={() => handleMenuClick('/mypage')}>
+                    <User size={20} />
+                    <UserName>{user?.username}</UserName>
+                  </UserProfileGroup>
+                </MobileUserSection>
+                <LogoutButton 
+                  onClick={handleLogout}
+                  $isMobile={true}
+                  $theme={theme}
+                >
+                  <LogOut size={16} />
+                  로그아웃
+                </LogoutButton>
+              </>
+            ) : (
+              <LoginButton 
+                onClick={() => handleMenuClick('/login')}
                 $isMobile={true}
                 $theme={theme}
               >
@@ -224,40 +195,61 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
               </LoginButton>
             )
           )}
-            <a href="https://open.kakao.com/o/gqWxH1Zg" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
-                <MobileSecretLabButton>
-                  비밀연구소 참여하기 🚀
-                </MobileSecretLabButton>
-              </a>
-              
-            </>
-          }
+          
+          <a href="https://open.kakao.com/o/gqWxH1Zg" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
+            <MobileSecretLabButton onClick={() => setIsMenuOpen(false)}>
+              비밀연구소 참여하기 🚀
+            </MobileSecretLabButton>
+          </a>
         </MobileNavList>
       </MobileMenu>
     </HeaderWrapper>
   );
 };
 
+// 스타일 컴포넌트들
 interface StyledProps {
   $isMobile?: boolean;
   $theme?: 'light' | 'dark';
 }
 
-const HeaderWrapper = styled.header<StyledProps>`
+interface HeaderWrapperProps {
+  $theme?: 'light' | 'dark';
+}
+
+interface NavLinkProps {
+  $isActive?: boolean;
+  $theme?: 'light' | 'dark';
+}
+
+interface NavLinkUnderlineProps {
+  $isActive?: boolean;
+}
+
+interface MobileMenuProps {
+  $isOpen: boolean;
+}
+
+interface MobileNavItemProps {
+  $isActive?: boolean;
+}
+
+const HeaderWrapper = styled.header<HeaderWrapperProps>`
   position: fixed;
   width: 100%;
   top: 0;
   z-index: 1000;
-  background: ${props => props.$theme === 'dark' 
+  background: ${(props) => props.$theme === 'dark' 
     ? 'rgba(8, 13, 52, 0.98)' 
     : 'rgba(255, 255, 255, 0.98)'
   };
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid ${props => props.$theme === 'dark' 
+  border-bottom: 1px solid ${(props) => props.$theme === 'dark' 
     ? 'rgba(255, 255, 255, 0.1)' 
     : 'rgba(0, 0, 0, 0.05)'
   };
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  height: 70px;
 `;
 
 const HeaderContainer = styled.div`
@@ -267,6 +259,7 @@ const HeaderContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  height: 100%;
 
   @media (max-width: 1280px) {
     padding: 0.8rem 1rem;
@@ -305,25 +298,24 @@ const NavList = styled.ul`
 
 const NavItem = styled.li`
   position: relative;
-
 `;
 
-const NavLinkUnderline = styled.span<{ $isActive?: boolean }>`
+const NavLinkUnderline = styled.span<NavLinkUnderlineProps>`
   position: absolute;
   bottom: -2px;
   left: 0;
-  width: ${props => props.$isActive ? '100%' : '0'};
+  width: ${(props) => props.$isActive ? '100%' : '0'};
   height: 2px;
   background-color: #514FE4;
   transition: width 0.3s ease;
 `;
 
-const NavLink = styled.button<{ $isActive?: boolean } & StyledProps>`
+const NavLink = styled.button<NavLinkProps>`
   background: none;
   border: none;
   font-size: 1.2rem;
-  font-weight: ${props => props.$isActive ? '800' : '600'};
-  color: ${props => props.$theme === 'dark' ? '#ffffff' : '#080d34'};
+  font-weight: ${(props) => props.$isActive ? '800' : '600'};
+  color: ${(props) => props.$theme === 'dark' ? '#ffffff' : '#080d34'};
   padding: 0.5rem 0;
   cursor: pointer;
   position: relative;
@@ -344,13 +336,6 @@ const UserSection = styled.div`
   }
 `;
 
-const UserInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.2rem;
-`;
-
 const UserName = styled.span`
   font-size: 1.1rem;
   font-weight: 600;
@@ -360,16 +345,18 @@ const UserName = styled.span`
 const UserProfileGroup = styled.button<StyledProps>`
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 8px;
   background: none;
   border: none;
   padding: 0.5rem;
   cursor: pointer;
-  color: ${props => props.$theme === 'dark' ? '#ffffff' : '#666'};
+  color: ${(props) => props.$theme === 'dark' ? '#ffffff' : '#666'};
   transition: color 0.2s ease;
+  border-radius: 8px;
 
   &:hover {
     color: #514FE4;
+    background: ${(props) => props.$theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(81, 79, 228, 0.1)'};
   }
 `;
 
@@ -395,14 +382,14 @@ const SecretLabButton = styled.button`
 
 const LoginButton = styled.button<StyledProps>`
   background: transparent;
-  color: ${props => props.$theme === 'dark' ? '#ffffff' : '#514FE4'};
+  color: ${(props) => props.$theme === 'dark' ? '#ffffff' : '#514FE4'};
   border: 2px solid #514FE4;
   border-radius: 24px;
   padding: 0.6rem 1.5rem;
-  font-size: ${props => props.$isMobile ? '1.1rem' : '1.2rem'};
+  font-size: ${(props) => props.$isMobile ? '1.1rem' : '1.2rem'};
   font-weight: 500;
   cursor: pointer;
-  width: ${props => props.$isMobile ? '100%' : 'auto'};
+  width: ${(props) => props.$isMobile ? '100%' : 'auto'};
   transition: all 0.2s ease;
 
   &:hover {
@@ -412,22 +399,62 @@ const LoginButton = styled.button<StyledProps>`
   }
 `;
 
+const LogoutButton = styled.button<StyledProps>`
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: ${(props) => props.$theme === 'dark' ? '#ffffff80' : '#666'};
+  cursor: pointer;
+  padding: 0.5rem;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  width: ${(props) => props.$isMobile ? '100%' : 'auto'};
+  justify-content: ${(props) => props.$isMobile ? 'center' : 'flex-start'};
+
+  &:hover {
+    color: #514FE4;
+    background: ${(props) => props.$theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(81, 79, 228, 0.1)'};
+  }
+`;
+
 const MobileMenuButton = styled.button`
   display: none;
   background: none;
   border: none;
-  font-size: 1.5rem;
   color: #333;
   cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background: rgba(0, 0, 0, 0.05);
+  }
 
   @media (max-width: 1280px) {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 `;
 
-interface MobileMenuProps {
-  $isOpen: boolean;
-}
+const MobileOverlay = styled.div`
+  display: none;
+  
+  @media (max-width: 1280px) {
+    display: block;
+    position: fixed;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 70px);
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+`;
 
 const MobileMenu = styled.div<MobileMenuProps>`
   display: none;
@@ -435,14 +462,17 @@ const MobileMenu = styled.div<MobileMenuProps>`
   @media (max-width: 1280px) {
     display: block;
     position: fixed;
-    top: 64px;
-    left: 0;
-    width: 100%;
-    height: calc(100vh - 64px);
+    top: 70px;
+    right: 0;
+    width: 320px;
+    max-width: 90vw;
+    height: calc(100vh - 70px);
     background: white;
-    transform: translateX(${props => props.$isOpen ? '0' : '100%'});
+    transform: translateX(${(props) => props.$isOpen ? '0' : '100%'});
     transition: transform 0.3s ease;
     overflow-y: auto;
+    z-index: 1000;
+    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
   }
 `;
 
@@ -450,44 +480,45 @@ const MobileNavList = styled.div`
   padding: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 `;
 
-const MobileNavItem = styled.button<{ $isActive?: boolean }>`
+const MobileNavItem = styled.button<MobileNavItemProps>`
   background: none;
   border: none;
-  font-weight: ${props => props.$isActive ? '800' : '600'};
+  font-weight: ${(props) => props.$isActive ? '800' : '600'};
   font-size: 1.3rem;
-  color: ${props => props.$isActive ? '#514FE4' : '#333'};
+  color: ${(props) => props.$isActive ? '#514FE4' : '#333'};
   text-align: left;
-  padding: 0.5rem;
+  padding: 1rem;
   cursor: pointer;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
   width: 100%;
+  border-radius: 12px;
 
   &:hover {
     color: #514FE4;
+    background: rgba(81, 79, 228, 0.1);
   }
+`;
+
+const MobileDivider = styled.div`
+  height: 1px;
+  background: #e5e5e5;
+  margin: 1rem 0;
+`;
+
+const MobileUserSection = styled.div`
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin-bottom: 1rem;
 `;
 
 const MobileSecretLabButton = styled(SecretLabButton)`
   width: 100%;
   justify-content: center;
   margin-top: 1rem;
-`;
-
-const LogoutButton = styled.button<StyledProps>`
-  background: none;
-  border: none;
-  font-size: 1rem;
-  color: ${props => props.$theme === 'dark' ? '#ffffff80' : '#666'};
-  cursor: pointer;
-  padding: 0.5rem;
-  transition: color 0.2s ease;
-
-  &:hover {
-    color: #514FE4;
-  }
 `;
 
 export default Header;

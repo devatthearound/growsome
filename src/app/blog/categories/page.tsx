@@ -300,7 +300,7 @@ const CategoryCard = styled.div<{ colors: { bg: string; text: string; border: st
   border: 2px solid transparent;
   
   &:hover {
-    border-color: ${props => props.colors.border};
+    border-color: ${(props) => props.colors.border};
   }
 
   a {

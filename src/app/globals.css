@@ -2,8 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Import Tiptap styles */
-@import '../styles/tiptap.css';
+/* Import Editor styles */
+@import '../styles/editor.css';
+@import '../components/editor/editor-styles.css';
+
+/* SafeEditor 추가 스타일 */
+.ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+}
+
+.ProseMirror:focus {
+  outline: none;
+}
 
 :root {
   --background: #ffffff;

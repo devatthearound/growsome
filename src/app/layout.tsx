@@ -15,6 +15,7 @@ import { CoupangApiProvider } from './contexts/CoupangApiContext';
 import { EmailProvider } from './contexts/EmailContext';
 import Script from 'next/script';
 import ClarityAnalytics from '../components/common/ClarityAnalytics';
+import KakaoChannelChat from './components/chat/KakaoChannelChat';
 import '../lib/fontawesome';
 
 // export const metadata: Metadata = {
@@ -99,6 +100,7 @@ export default function RootLayout({
                 <LayoutContent>
                   {children}
                 </LayoutContent>
+                <KakaoChannelChat />
               </EmailProvider>
             </CoupangApiProvider>
           </AuthProvider>

@@ -38,6 +38,9 @@ const Hero = () => {
           <JoinDescription>
           AI와 함께 온라인 SW사업을 시작하고, 성장시키고, 수익을 창출하기 위한 팁, 전략 및 리소스를 알아보세요.
           </JoinDescription>
+          <WriteButton href="/write">
+            새 글 작성하기
+          </WriteButton>
         </JoinColumn>
         <JoinColumn>
           <JoinForm>
@@ -286,6 +289,26 @@ const SubscribeButton = styled.div`
   &:hover {
     transform: translateY(-2px);
     opacity: 0.9;
+  }
+`;
+
+const WriteButton = styled.a`
+  display: inline-block;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-size: 1rem;
+  border-radius: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  margin-top: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
   }
 `;
 

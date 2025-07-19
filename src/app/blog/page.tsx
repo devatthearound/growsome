@@ -169,10 +169,14 @@ const FilterContainer = styled.div`
   }
 `;
 
-const CategoryButton = styled(motion.button)<{ $active?: boolean }>`
-  background: ${props => props.$active ? growsomeTheme.color.Black800 : growsomeTheme.color.White};
-  color: ${props => props.$active ? growsomeTheme.color.White : growsomeTheme.color.Gray600};
-  border: 1px solid ${props => props.$active ? growsomeTheme.color.Black800 : growsomeTheme.color.Gray300};
+interface CategoryButtonProps {
+  $active?: boolean;
+}
+
+const CategoryButton = styled(motion.button)<CategoryButtonProps>`
+  background: ${(props: CategoryButtonProps) => props.$active ? growsomeTheme.color.Black800 : growsomeTheme.color.White};
+  color: ${(props: CategoryButtonProps) => props.$active ? growsomeTheme.color.White : growsomeTheme.color.Gray600};
+  border: 1px solid ${(props: CategoryButtonProps) => props.$active ? growsomeTheme.color.Black800 : growsomeTheme.color.Gray300};
   padding: ${growsomeTheme.spacing.sm} ${growsomeTheme.spacing.md};
   border-radius: ${growsomeTheme.radius.radius1};
   font-size: ${growsomeTheme.fontSize.TextXS};
@@ -313,10 +317,15 @@ const LoadingCard = styled.div`
   border: none;
 `;
 
-const LoadingSkeleton = styled.div<{ width?: string; height?: string }>`
+interface LoadingSkeletonProps {
+  width?: string;
+  height?: string;
+}
+
+const LoadingSkeleton = styled.div<LoadingSkeletonProps>`
   background: ${growsomeTheme.color.Gray100};
-  width: ${props => props.width || '100%'};
-  height: ${props => props.height || '20px'};
+  width: ${(props: LoadingSkeletonProps) => props.width || '100%'};
+  height: ${(props: LoadingSkeletonProps) => props.height || '20px'};
   border-radius: ${growsomeTheme.radius.radius1};
   position: relative;
   overflow: hidden;

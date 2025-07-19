@@ -1,153 +1,112 @@
-import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
-import { prisma } from '@/lib/prisma';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+import { NextRequest, NextResponse } from 'next/server'
+import { getAuthTokens, verifyToken, refreshTokens, setAuthCookies } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('=== /api/auth/check 호출됨 ===');
+    console.log('인증 상태 확인 시작...')
     
-    // 쿠키에서 토큰 가져오기
-    const token = request.cookies.get('auth-token')?.value;
-    const allCookies = request.cookies.getAll();
+    // 1. 쿠키에서 토큰 가져오기
+    const { accessToken, refreshToken } = await getAuthTokens()
     
-    console.log('요청 쿠키들:', allCookies.map(c => ({ name: c.name, hasValue: !!c.value })));
+    console.log('토큰 상태:', {
+      hasAccessToken: !!accessToken,
+      hasRefreshToken: !!refreshToken
+    })
 
-    if (!token) {
-      console.log('auth-token 쿠키가 없습니다.');
-      return NextResponse.json(
-        { 
-          isLoggedIn: false, 
-          message: '토큰이 없습니다.' 
-        },
-        { status: 401 }
-      );
-    }
-    
-    console.log('토큰 길이:', token.length);
-
-    // 토큰 검증
-    let decoded;
-    try {
-      console.log('JWT 토큰 검증 중...');
-      decoded = jwt.verify(token, JWT_SECRET) as any;
-      console.log('토큰 검증 성공:', { userId: decoded.userId, email: decoded.email });
-    } catch (jwtError: any) {
-      console.log('토큰 검증 실패:', {
-        name: jwtError.name,
-        message: jwtError.message
-      });
-      
-      // 만료된 토큰인 경우 쿠키 삭제
-      const response = NextResponse.json(
-        { 
-          isLoggedIn: false, 
-          message: '토큰이 유효하지 않습니다.' 
-        },
-        { status: 401 }
-      );
-      
-      response.cookies.delete('auth-token');
-      response.cookies.delete('remember-me');
-      
-      return response;
+    // 2. 토큰이 없는 경우
+    if (!accessToken && !refreshToken) {
+      console.log('토큰이 없음 - 미인증 상태')
+      return NextResponse.json({
+        isLoggedIn: false,
+        message: '인증되지 않음 - 토큰 없음',
+        user: null
+      }, { status: 401 })
     }
 
-    // 사용자 정보 조회
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: {
-        id: true,
-        email: true,
-        username: true,
-        companyName: true,
-        position: true,
-        phoneNumber: true,
-        avatar: true,
-        status: true,
+    let userId: string | null = null
+    let userEmail: string | null = null
+    let isTokenRefreshed = false
+    let newAccessToken: string | undefined
+    let newRefreshToken: string | undefined
+
+    // 3. 액세스 토큰 검증
+    if (accessToken) {
+      try {
+        console.log('액세스 토큰 검증 중...')
+        const payload = await verifyToken(accessToken)
+        userId = payload.userId
+        userEmail = payload.email
+        console.log('액세스 토큰 유효:', { userId, userEmail })
+      } catch (error: any) {
+        console.log('액세스 토큰 무효:', error.message)
+        // 액세스 토큰이 유효하지 않지만 리프레시 토큰으로 갱신 시도
       }
-    });
-
-    if (!user) {
-      console.log('사용자를 찾을 수 없음:', decoded.userId);
-      
-      const response = NextResponse.json(
-        { 
-          isLoggedIn: false, 
-          message: '사용자를 찾을 수 없습니다.' 
-        },
-        { status: 401 }
-      );
-      
-      response.cookies.delete('auth-token');
-      response.cookies.delete('remember-me');
-      
-      return response;
     }
 
-    // 계정 상태 확인
-    if (user.status !== 'active') {
-      console.log('비활성화된 계정:', user.email);
+    // 4. 액세스 토큰이 유효하지 않고 리프레시 토큰이 있는 경우
+    if (!userId && refreshToken) {
+      console.log('토큰 갱신 시도 중...')
+      const refreshResult = await refreshTokens(refreshToken)
       
-      const response = NextResponse.json(
-        { 
-          isLoggedIn: false, 
-          message: '비활성화된 계정입니다.' 
-        },
-        { status: 401 }
-      );
+      if (!refreshResult) {
+        console.log('토큰 갱신 실패')
+        return NextResponse.json({
+          isLoggedIn: false,
+          message: '토큰 갱신 실패 - 다시 로그인 필요',
+          user: null
+        }, { status: 401 })
+      }
       
-      response.cookies.delete('auth-token');
-      response.cookies.delete('remember-me');
-      
-      return response;
+      userId = refreshResult.userId
+      userEmail = refreshResult.email
+      newAccessToken = refreshResult.accessToken
+      newRefreshToken = refreshResult.refreshToken
+      isTokenRefreshed = true
+      console.log('토큰 갱신 성공:', { userId, userEmail })
     }
 
-    // 응답할 사용자 정보
-    const userResponse = {
-      id: user.id.toString(),
-      email: user.email,
-      username: user.username,
-      slug: createSlugFromUsername(user.username),
-      company_name: user.companyName,
-      position: user.position,
-      phone_number: user.phoneNumber,
-      profileImage: user.avatar,
+    // 5. 여전히 사용자 정보가 없으면 인증 실패
+    if (!userId || !userEmail) {
+      console.log('사용자 정보 없음 - 인증 실패')
+      return NextResponse.json({
+        isLoggedIn: false,
+        message: '인증 실패 - 사용자 정보 없음',
+        user: null
+      }, { status: 401 })
+    }
+
+    // 6. 인증 성공 - 사용자 정보 반환
+    const userData = {
+      id: userId,
+      email: userEmail,
+      username: userEmail.split('@')[0], // 이메일에서 사용자명 추출
+      slug: userEmail.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-'),
       role: 'user',
       canWriteContent: true
-    };
+    }
 
-    console.log('인증 체크 성공:', { userId: user.id, email: user.email });
+    console.log('인증 성공:', userData)
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       isLoggedIn: true,
-      user: userResponse,
-      message: '인증 성공'
-    });
+      message: '인증 성공',
+      user: userData
+    }, { status: 200 })
+
+    // 7. 토큰이 갱신된 경우 새 쿠키 설정
+    if (isTokenRefreshed && newAccessToken && newRefreshToken) {
+      console.log('새 토큰으로 쿠키 업데이트')
+      return setAuthCookies(newAccessToken, newRefreshToken, response)
+    }
+
+    return response
 
   } catch (error) {
-    console.error('인증 체크 중 오류:', error);
-    
-    const response = NextResponse.json(
-      { 
-        isLoggedIn: false, 
-        message: '서버 오류가 발생했습니다.' 
-      },
-      { status: 500 }
-    );
-    
-    return response;
-  } finally {
-    // Prisma 싱글톤을 사용하므로 연결 해제하지 않음
+    console.error('인증 확인 중 오류:', error)
+    return NextResponse.json({
+      isLoggedIn: false,
+      message: '인증 확인 중 오류 발생',
+      user: null
+    }, { status: 500 })
   }
-}
-
-// 유틸리티 함수: 사용자명에서 슬러그 생성
-function createSlugFromUsername(username: string): string {
-  return username
-    .toLowerCase()
-    .replace(/[^a-z0-9가-힣]/g, '-')
-    .replace(/-+/g, '-')
-    .replace(/^-|-$/g, '');
 }

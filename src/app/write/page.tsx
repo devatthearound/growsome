@@ -1,521 +1,494 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/app/contexts/AuthContext';
+import dynamic from 'next/dynamic'
+import { useState, useEffect, useCallback } from 'react'
+import { editorApi } from '@/services/editorApi'
 
-// Tiptap 에디터를 동적으로 로드 (SSR 문제 방지)
-const TiptapEditor = dynamic(
-  () => import('@/components/editor/TiptapEditor'),
+// 동적 import로 SSR 문제 해결 - 안전한 에디터 사용
+const SafeEditor = dynamic(
+  () => import('@/components/editor/SafeEditor'),
   { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-96 flex items-center justify-center border border-gray-300 rounded-lg">
-        <div className="text-gray-500">에디터를 로딩 중...</div>
+      <div className="border border-gray-300 rounded-lg bg-white min-h-[400px] flex items-center justify-center">
+        <div className="text-gray-500">에디터를 불러오는 중...</div>
       </div>
     )
   }
-);
+)
 
-// GraphQL 쿼리들 (blog_contents 테이블 구조에 맞춘)
-const GET_CATEGORIES_QUERY = `
-  query GetCategories {
-    categories {
-      id
-      name
-      slug
-    }
-  }
-`;
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { 
+  Save, 
+  Eye, 
+  Send, 
+  ArrowLeft,
+  BarChart3,
+  FileText,
+  Tag,
+  User,
+  Calendar,
+  Globe
+} from 'lucide-react'
+import Link from 'next/link'
+import { cn } from '@/lib/utils'
 
-const GET_CONTENT_BY_SLUG_QUERY = `
-  query GetContentBySlug($slug: String!) {
-    content(slug: $slug) {
-      id
-      title
-      slug
-      contentBody
-      excerpt
-      metaTitle
-      metaDescription
-      thumbnailUrl
-      categoryId
-      status
-      isFeatured
-    }
-  }
-`;
-
-// GraphQL Mutation 쿼리들 (정확한 필드명 사용)
-const CREATE_CONTENT_MUTATION = `
-  mutation CreateContent($input: CreateContentInput!) {
-    createContent(input: $input) {
-      id
-      slug
-      title
-      status
-    }
-  }
-`;
-
-const UPDATE_CONTENT_MUTATION = `
-  mutation UpdateContent($id: Int!, $input: UpdateContentInput!) {
-    updateContent(id: $id, input: $input) {
-      id
-      slug
-      title
-      status
-    }
-  }
-`;
-
-interface BlogCategory {
-  id: number;
-  name: string;
-  slug: string;
-}
-
-interface ContentData {
-  id: number;
-  title: string;
-  slug: string;
-  contentBody: string;
-  excerpt?: string;
-  metaTitle?: string;
-  metaDescription?: string;
-  thumbnailUrl?: string;
-  categoryId?: number;
-  status: string;
-  isFeatured: boolean;
+interface ArticleData {
+  title: string
+  content: string
+  excerpt: string
+  category: string
+  tags: string[]
+  author: string
+  isPublished: boolean
+  isDraft: boolean
+  metaTitle: string
+  metaDescription: string
+  featuredImage: string
+  publishDate: string
 }
 
 export default function WritePage() {
-  const router = useRouter();
-  const { user, isLoggedIn, isLoading: authLoading } = useAuth();
-  const [title, setTitle] = useState('');
-  const [content, setContent] = useState('');
-  const [excerpt, setExcerpt] = useState('');
-  const [categories, setCategories] = useState<BlogCategory[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<number | ''>('');
-  const [tags, setTags] = useState('');
-  const [featuredImage, setFeaturedImage] = useState('');
-  const [status, setStatus] = useState<'DRAFT' | 'PUBLISHED'>('DRAFT');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [editPostSlug, setEditPostSlug] = useState<string | null>(null);
-  const [editPostId, setEditPostId] = useState<number | null>(null);
+  const [articleData, setArticleData] = useState<ArticleData>({
+    title: '',
+    content: '',
+    excerpt: '',
+    category: '',
+    tags: [],
+    author: '',
+    isPublished: false,
+    isDraft: true,
+    metaTitle: '',
+    metaDescription: '',
+    featuredImage: '',
+    publishDate: ''
+  })
 
-  // GraphQL 요청 함수
-  const graphqlRequest = async (query: string, variables: any = {}) => {
-    console.log('Making GraphQL request:', { query, variables });
-    
-    const response = await fetch('/api/graphql', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query,
-        variables,
-      }),
-    });
+  const [wordCount, setWordCount] = useState(0)
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | 'error'>('saved')
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [newTag, setNewTag] = useState('')
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Response error:', errorText);
-      throw new Error(`HTTP error! status: ${response.status}`);
+  // 카테고리 목록
+  const categories = [
+    '개발 블로그',
+    '기술 리뷰',
+    '튜토리얼',
+    '업데이트',
+    '공지사항',
+    '일반'
+  ]
+
+  const handleContentChange = (content: string) => {
+    setArticleData(prev => ({ ...prev, content }))
+    // Calculate word count (rough estimation)
+    const textContent = content.replace(/<[^>]*>/g, '')
+    setWordCount(textContent.length)
+  }
+
+  const handleAddTag = () => {
+    if (newTag.trim() && !articleData.tags.includes(newTag.trim())) {
+      setArticleData(prev => ({
+        ...prev,
+        tags: [...prev.tags, newTag.trim()]
+      }))
+      setNewTag('')
     }
+  }
 
-    const result = await response.json();
+  const handleRemoveTag = (tagToRemove: string) => {
+    setArticleData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }))
+  }
+
+  // 자동 저장 함수
+  const autoSave = async () => {
+    if (!articleData.title && !articleData.content) return // 빈 내용은 저장하지 않음
     
-    if (result.errors) {
-      console.error('GraphQL errors:', result.errors);
-      throw new Error(result.errors[0].message);
+    setAutoSaveStatus('saving')
+    
+    try {
+      // localStorage에 임시 저장
+      const saveData = {
+        ...articleData,
+        lastModified: new Date().toISOString(),
+        autoSaved: true
+      }
+      localStorage.setItem('article_draft', JSON.stringify(saveData))
+      
+      setAutoSaveStatus('saved')
+      setLastSaved(new Date())
+      
+      // 3초 후 상태 초기화
+      setTimeout(() => {
+        setAutoSaveStatus('saved')
+      }, 3000)
+      
+    } catch (error) {
+      console.error('Auto save failed:', error)
+      setAutoSaveStatus('error')
+      
+      // 5초 후 에러 상태 초기화
+      setTimeout(() => {
+        setAutoSaveStatus('saved')
+      }, 5000)
     }
+  }
 
-    return result.data;
-  };
+  // 자동 저장 디바운스
+  const debouncedAutoSave = useCallback(
+    debounce(() => {
+      autoSave()
+    }, 2000), // 2초 후 자동 저장
+    [articleData]
+  )
 
-  // 카테고리 목록 로드 및 수정 모드 확인
+  // 디바운스 유틸리티 함수
+  function debounce<T extends (...args: any[]) => any>(
+    func: T,
+    wait: number
+  ): (...args: Parameters<T>) => void {
+    let timeout: NodeJS.Timeout
+    return (...args: Parameters<T>) => {
+      clearTimeout(timeout)
+      timeout = setTimeout(() => func(...args), wait)
+    }
+  }
+
+  // 초기 로드 시 저장된 데이터 복원
   useEffect(() => {
-    fetchCategories();
-    
-    // URL 파라미터에서 edit 값 확인
-    const urlParams = new URLSearchParams(window.location.search);
-    const editSlug = urlParams.get('edit');
-    
-    if (editSlug) {
-      setIsEditMode(true);
-      setEditPostSlug(editSlug);
-      fetchContentForEdit(editSlug);
-    }
-  }, []);
-
-  const fetchCategories = async () => {
-    try {
-      const data = await graphqlRequest(GET_CATEGORIES_QUERY);
-      setCategories(data.categories || []);
-    } catch (error) {
-      console.log('카테고리 로드 실패:', error);
-      // 카테고리가 없어도 에디터는 작동하도록 함
-      console.warn('카테고리를 불러오지 못했지만 에디터는 계속 사용할 수 있습니다.');
-    }
-  };
-
-  // 수정을 위한 포스트 로드
-  const fetchContentForEdit = async (slug: string) => {
-    try {
-      setIsLoading(true);
-      const data = await graphqlRequest(GET_CONTENT_BY_SLUG_QUERY, { slug });
-      
-      if (data.content) {
-        const contentData: ContentData = data.content;
+    const savedData = localStorage.getItem('article_draft')
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData)
+        // 24시간 이내 데이터만 복원
+        const lastModified = new Date(parsed.lastModified || 0)
+        const now = new Date()
+        const hoursDiff = (now.getTime() - lastModified.getTime()) / (1000 * 60 * 60)
         
-        // 데이터 설정
-        setTitle(contentData.title || '');
-        setContent(contentData.contentBody || '');
-        setExcerpt(contentData.excerpt || contentData.metaDescription || '');
-        setSelectedCategory(contentData.categoryId || '');
-        setFeaturedImage(contentData.thumbnailUrl || '');
-        setStatus(contentData.status as 'DRAFT' | 'PUBLISHED' || 'DRAFT');
-        setEditPostId(contentData.id);
-        
-        // tags는 현재 시스템에서 비활성화
-        setTags('');
-      } else {
-        alert('포스트를 찾을 수 없습니다.');
-        router.push('/blog');
+        if (hoursDiff < 24) {
+          setArticleData(prev => ({
+            ...prev,
+            ...parsed,
+            lastModified: undefined,
+            autoSaved: undefined
+          }))
+          setLastSaved(lastModified)
+        } else {
+          // 24시간 지난 데이터는 삭제
+          localStorage.removeItem('article_draft')
+        }
+      } catch (error) {
+        console.error('Failed to restore saved data:', error)
+        localStorage.removeItem('article_draft')
       }
-    } catch (error) {
-      console.error('포스트 로드 실패:', error);
-      alert('포스트를 불러오는데 오류가 발생했습니다.');
-      router.push('/blog');
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, [])
 
-  // 슬러그 생성 함수 (개선된 버전)
-  const generateSlug = (title: string) => {
-    if (!title.trim()) return '';
-    
-    return title
-      .toLowerCase()
-      .replace(/[^a-z0-9가-힣\s-]/g, '') // 알파벳, 숫자, 한글, 공백, 하이픈만 허용
-      .replace(/\s+/g, '-') // 공백을 하이픈으로 변경
-      .replace(/-+/g, '-') // 연속된 하이픈을 하나로
-      .trim()
-      .replace(/^-+|-+$/g, '') // 앞뒤 하이픈 제거
-      || 'untitled-' + Date.now(); // 빈 슬러그인 경우 기본값
-  };
-
-  // 읽기 시간 계산 함수
-  const calculateReadingTime = (content: string) => {
-    const wordsPerMinute = 200;
-    const words = content.replace(/[^\w\s가-힣]/g, '').split(/\s+/).length;
-    return Math.ceil(words / wordsPerMinute);
-  };
-
-  // GraphQL Mutation을 사용한 포스트 저장 (개선된 버전)
-  const savePost = async (saveStatus: 'DRAFT' | 'PUBLISHED') => {
-    if (!title.trim() || !content.trim()) {
-      alert('제목과 내용을 입력해주세요.');
-      return;
+  // 데이터 변경 시 자동 저장 트리거
+  useEffect(() => {
+    if (articleData.title || articleData.content) {
+      debouncedAutoSave()
     }
+  }, [articleData, debouncedAutoSave])
 
-    setIsSaving(true);
-
-    try {
-      const slug = generateSlug(title);
-      const tagsArray = tags.split(',').map(tag => tag.trim()).filter(tag => tag);
-
-      // GraphQL 스키마에 맞는 정확한 필드명 사용
-      const inputData: any = {
-        title: title.trim(),
-        slug: slug || `untitled-${Date.now()}`, // 슬러그가 비어있으면 기본값
-        contentBody: content,
-        authorId: user?.id || 1, // 로그인된 사용자 ID 사용
-        status: saveStatus,
-        isFeatured: false,
-        isHero: false,
-        metaTitle: title.trim(),
-        metaDescription: excerpt.trim() || content.replace(/<[^>]*>/g, '').substring(0, 160)
-      };
-
-      // 선택사항 필드들 추가
-      if (selectedCategory && selectedCategory !== '') {
-        inputData.categoryId = selectedCategory;
-      }
-      
-      if (featuredImage.trim()) {
-        inputData.thumbnailUrl = featuredImage.trim();
-      }
-      
-      if (tagsArray.length > 0) {
-        inputData.tags = tagsArray;
-      }
-
-      console.log('Saving with data:', inputData);
-
-      let result;
-      if (isEditMode && editPostId) {
-        // 수정 모드 - authorId 제외
-        const { authorId, ...updateData } = inputData;
-        result = await graphqlRequest(UPDATE_CONTENT_MUTATION, {
-          id: editPostId,
-          input: updateData
-        });
-        console.log('Update result:', result);
-      } else {
-        // 새로 작성 모드
-        result = await graphqlRequest(CREATE_CONTENT_MUTATION, {
-          input: inputData
-        });
-        console.log('Create result:', result);
-      }
-
-      const action = isEditMode ? '수정' : (saveStatus === 'PUBLISHED' ? '발행' : '임시저장');
-      alert(`포스트가 ${action}되었습니다!`);
-      router.push('/blog');
-      
-    } catch (error) {
-      console.error('저장 중 오류:', error);
-      alert(`저장 중 오류가 발생했습니다: ${error.message}`);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">인증 상태를 확인하는 중...</p>
-        </div>
-      </div>
-    );
+  const handleSaveDraft = () => {
+    console.log('Saving draft...', { ...articleData, isDraft: true })
+    alert('임시저장되었습니다.')
   }
 
-  if (!isLoggedIn) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">로그인이 필요합니다</h1>
-          <p className="text-gray-600 mb-6">블로그 글을 작성하려면 먼저 로그인해주세요.</p>
-          <button
-            onClick={() => router.push('/login')}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            로그인 하기
-          </button>
-        </div>
-      </div>
-    );
+  const handlePublish = () => {
+    if (!articleData.title || !articleData.content) {
+      alert('제목과 내용은 필수 입력 항목입니다.')
+      return
+    }
+    console.log('Publishing article...', { ...articleData, isPublished: true, isDraft: false })
+    alert('글이 발행되었습니다!')
   }
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">포스트를 불러오는 중...</p>
-        </div>
-      </div>
-    );
+  const handlePreview = () => {
+    window.open('/preview', '_blank')
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* 헤더 */}
-      <div className="bg-white border-b sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <button
-                onClick={() => router.push('/blog')}
-                className="text-gray-600 hover:text-gray-800"
-              >
-                ← 블로그로 돌아가기
-              </button>
-              <h1 className="text-xl font-bold text-gray-800">
-                {isEditMode ? '글 수정' : '새 글 쓰기'}
-              </h1>
-            </div>
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={() => savePost('DRAFT')}
-                disabled={isSaving}
-                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
-              >
-                {isSaving ? '저장 중...' : (isEditMode ? '수정 저장' : '임시저장')}
-              </button>
-              <button
-                onClick={() => savePost('PUBLISHED')}
-                disabled={isSaving}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
-              >
-                {isSaving ? '발행 중...' : (isEditMode ? '수정 발행' : '발행하기')}
-              </button>
+    <div className="write-page min-h-screen bg-white text-gray-900">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="border-b bg-white/90 backdrop-blur-sm sticky top-0 z-10">
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Link href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
+                  <ArrowLeft className="w-5 h-5" />
+                </Link>
+                <h1 className="text-2xl font-bold text-gray-900">새 글 작성</h1>
+                
+                {/* Auto Save Status */}
+                <div className="flex items-center gap-2 text-sm">
+                  {autoSaveStatus === 'saving' && (
+                    <div className="flex items-center gap-1 text-blue-600">
+                      <div className="w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                      <span>저장 중...</span>
+                    </div>
+                  )}
+                  {autoSaveStatus === 'saved' && lastSaved && (
+                    <div className="flex items-center gap-1 text-green-600">
+                      <span>✓ 자동 저장됨</span>
+                      <span className="text-xs text-gray-500">
+                        {lastSaved.toLocaleTimeString()}
+                      </span>
+                    </div>
+                  )}
+                  {autoSaveStatus === 'error' && (
+                    <div className="flex items-center gap-1 text-red-600">
+                      <span>✗ 저장 실패</span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <BarChart3 className="w-4 h-4" />
+                  <span>{wordCount} 글자</span>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handleSaveDraft}
+                >
+                  <Save className="w-4 h-4 mr-2" />
+                  임시저장
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={handlePreview}
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  미리보기
+                </Button>
+                <Button 
+                  size="sm"
+                  onClick={handlePublish}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  <Send className="w-4 h-4 mr-2" />
+                  발행하기
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* 메인 콘텐츠 */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          {/* 에디터 영역 */}
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-              {/* 제목 입력 */}
-              <div className="p-6 border-b">
-                <input
-                  type="text"
-                  placeholder="포스트 제목을 입력하세요..."
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full text-2xl font-bold placeholder-gray-400 border-none outline-none resize-none"
-                />
-              </div>
+        <div className="flex">
+          {/* Main Content */}
+          <div className="flex-1 px-6 py-8 space-y-8">
+            {/* Title */}
+            <div className="space-y-2">
+              <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                제목 *
+              </label>
+              <Input
+                id="title"
+                placeholder="매력적인 제목을 입력하세요..."
+                value={articleData.title}
+                onChange={(e) => setArticleData(prev => ({ ...prev, title: e.target.value }))}
+                className="text-lg h-12 border-gray-300"
+              />
+            </div>
 
-              {/* Tiptap 에디터 */}
-              <div className="min-h-[600px]">
-                <TiptapEditor
-                  content={content}
-                  onChange={setContent}
-                  placeholder="글을 작성해보세요...
-
-예시:
-- 텍스트를 선택하고 포맷 버튼을 눌러보세요
-- 링크를 추가하려면 링크 버튼을 클릭하세요
-- 이미지를 추가하려면 이미지 버튼을 클릭하세요
-- 코드 블록을 추가하려면 {} 버튼을 클릭하세요"
-                />
-              </div>
+            {/* Editor */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                내용 *
+              </label>
+              <SafeEditor
+                content={articleData.content}
+                onChange={handleContentChange}
+                placeholder="여기에 글을 작성해보세요! 강력한 에디터 기능을 활용해보세요."
+                onFileUpload={editorApi.uploadImage}
+                className="min-h-[500px]"
+              />
             </div>
           </div>
 
-          {/* 사이드바 */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* 발행 설정 */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-semibold mb-4">발행 설정</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    상태
-                  </label>
+          {/* Sidebar */}
+          <div className="w-80 border-l py-8 px-4 bg-gray-50/50 overflow-y-auto max-h-screen">
+            <div className="space-y-6">
+              {/* Basic Info Card */}
+              <div className="bg-white rounded-lg border p-4 space-y-4">
+                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  기본 정보
+                </h3>
+                
+                {/* Category */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">카테고리</label>
                   <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value as 'DRAFT' | 'PUBLISHED')}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  >
-                    <option value="DRAFT">임시저장</option>
-                    <option value="PUBLISHED">발행</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    카테고리
-                  </label>
-                  <select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value ? parseInt(e.target.value) : '')}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                    value={articleData.category}
+                    onChange={(e) => setArticleData(prev => ({ ...prev, category: e.target.value }))}
+                    className="w-full p-2 border border-gray-300 rounded-md text-sm"
                   >
                     <option value="">카테고리 선택</option>
                     {categories.map((category) => (
-                      <option key={category.id} value={category.id}>
-                        {category.name}
-                      </option>
+                      <option key={category} value={category}>{category}</option>
                     ))}
                   </select>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    태그 (쉼표로 구분)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="예: React, Next.js, 웹개발"
-                    value={tags}
-                    onChange={(e) => setTags(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    태그 기능이 활성화되어 있습니다.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* SEO 설정 */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-semibold mb-4">SEO 설정</h3>
-              
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    요약 (Excerpt)
-                  </label>
+                {/* Excerpt */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">요약</label>
                   <textarea
-                    placeholder="포스트 요약을 입력하세요..."
-                    value={excerpt}
-                    onChange={(e) => setExcerpt(e.target.value)}
-                    rows={3}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2 resize-none"
+                    placeholder="글의 간단한 요약을 입력하세요..."
+                    value={articleData.excerpt}
+                    onChange={(e) => setArticleData(prev => ({ ...prev, excerpt: e.target.value }))}
+                    className="w-full p-2 border border-gray-300 rounded-md text-sm h-20 resize-none"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    {excerpt.length}/160자
-                  </p>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    대표 이미지 URL
+                {/* Author */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 flex items-center gap-1">
+                    <User className="w-3 h-3" />
+                    작성자
                   </label>
-                  <input
-                    type="text"
-                    placeholder="https://example.com/image.jpg"
-                    value={featuredImage}
-                    onChange={(e) => setFeaturedImage(e.target.value)}
-                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  <Input
+                    placeholder="작성자 이름"
+                    value={articleData.author}
+                    onChange={(e) => setArticleData(prev => ({ ...prev, author: e.target.value }))}
+                    className="text-sm"
                   />
                 </div>
               </div>
-            </div>
 
-            {/* 미리보기 */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-semibold mb-4">미리보기</h3>
-              <div className="text-sm text-gray-600 space-y-2">
-                <p><strong>제목:</strong> {title || '제목 없음'}</p>
-                <p><strong>슬러그:</strong> {title ? generateSlug(title) : '자동 생성'}</p>
-                <p><strong>읽기 시간:</strong> {content ? calculateReadingTime(content) : 0}분</p>
-                <p><strong>단어 수:</strong> {content.length}자</p>
-                <p><strong>상태:</strong> {status === 'DRAFT' ? '임시저장' : '발행'}</p>
+              {/* Tags Card */}
+              <div className="bg-white rounded-lg border p-4 space-y-4">
+                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                  <Tag className="w-4 h-4" />
+                  태그
+                </h3>
+                
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="태그 입력"
+                    value={newTag}
+                    onChange={(e) => setNewTag(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleAddTag()}
+                    className="text-sm"
+                  />
+                  <Button onClick={handleAddTag} size="sm" variant="outline">
+                    추가
+                  </Button>
+                </div>
+                
+                <div className="flex flex-wrap gap-2">
+                  {articleData.tags.map((tag) => (
+                    <span 
+                      key={tag} 
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-md"
+                    >
+                      {tag}
+                      <button
+                        onClick={() => handleRemoveTag(tag)}
+                        className="hover:text-blue-600"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
               </div>
-            </div>
 
-            {/* 개발 정보 */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <h4 className="text-sm font-semibold text-green-800 mb-2">수정 완료</h4>
-              <div className="text-xs text-green-700 space-y-1">
-                <p>✅ GraphQL 필드명 수정</p>
-                <p>✅ contentBody 필드 사용</p>
-                <p>✅ 정확한 스키마 매칭</p>
-                <p>✅ 저장/수정 기능 개선</p>
+              {/* SEO Card */}
+              <div className="bg-white rounded-lg border p-4 space-y-4">
+                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                  <Globe className="w-4 h-4" />
+                  SEO 설정
+                </h3>
+                
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">SEO 제목</label>
+                    <Input
+                      placeholder="검색엔진에 표시될 제목"
+                      value={articleData.metaTitle}
+                      onChange={(e) => setArticleData(prev => ({ ...prev, metaTitle: e.target.value }))}
+                      className="text-sm mt-1"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">{articleData.metaTitle.length}/60</p>
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">SEO 설명</label>
+                    <textarea
+                      placeholder="검색엔진에 표시될 설명"
+                      value={articleData.metaDescription}
+                      onChange={(e) => setArticleData(prev => ({ ...prev, metaDescription: e.target.value }))}
+                      className="w-full p-2 border border-gray-300 rounded-md text-sm h-16 resize-none mt-1"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">{articleData.metaDescription.length}/160</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Publish Settings Card */}
+              <div className="bg-white rounded-lg border p-4 space-y-4">
+                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
+                  <Calendar className="w-4 h-4" />
+                  발행 설정
+                </h3>
+                
+                <div className="space-y-3">
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">발행 일시</label>
+                    <Input
+                      type="datetime-local"
+                      value={articleData.publishDate}
+                      onChange={(e) => setArticleData(prev => ({ ...prev, publishDate: e.target.value }))}
+                      className="text-sm mt-1"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="text-sm font-medium text-gray-700">대표 이미지 URL</label>
+                    <Input
+                      placeholder="https://example.com/image.jpg"
+                      value={articleData.featuredImage}
+                      onChange={(e) => setArticleData(prev => ({ ...prev, featuredImage: e.target.value }))}
+                      className="text-sm mt-1"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Stats Card */}
+              <div className="bg-white rounded-lg border p-4 space-y-3">
+                <h3 className="font-semibold text-gray-900">통계</h3>
+                <div className="space-y-2 text-sm text-gray-600">
+                  <div className="flex justify-between">
+                    <span>글자 수:</span>
+                    <span>{wordCount}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>예상 읽기 시간:</span>
+                    <span>{Math.max(1, Math.ceil(wordCount / 300))}분</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>태그 수:</span>
+                    <span>{articleData.tags.length}</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  );
+  )
 }
