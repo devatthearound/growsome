@@ -45,4 +45,4 @@ docs/
 .eslintrc*
 .prettierrc*
 jest.config.*
-tsconfig.json
+# tsconfig.json

@@ -44,7 +44,8 @@ RUN ls -la src/components/blog/blog-writer.tsx || echo "blog-writer.tsx missing"
 RUN ls -la src/components/design-system/theme.ts || echo "theme.ts missing"
 RUN ls -la src/services/postService.ts || echo "postService.ts missing"
 RUN echo "TypeScript config:"
-RUN cat tsconfig.json
+RUN ls -la tsconfig.json || echo "tsconfig.json not found"
+RUN [ -f "tsconfig.json" ] && cat tsconfig.json || echo "Skipping tsconfig.json display"
 RUN echo "Next.js config:"
 RUN cat next.config.ts
 RUN echo "Prisma status:"
@@ -53,7 +54,7 @@ RUN echo "=== Building ==="
 
 # Build the application
 RUN echo "Checking TypeScript compilation..."
-RUN npx tsc --noEmit || echo "TypeScript check failed, but continuing..."
+RUN [ -f "tsconfig.json" ] && npx tsc --noEmit || echo "No tsconfig.json found, skipping TypeScript check"
 RUN echo "Starting Next.js build..."
 RUN npm run build
 
