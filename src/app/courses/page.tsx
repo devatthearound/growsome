@@ -172,47 +172,66 @@ const CoursesPage = () => {
         {/* 강의 목록 */}
         <Sidebar>
           <SidebarTitle>강의 목록</SidebarTitle>
-          <CourseList>
-            {courses.map((course, index) => {
-              const progress = userProgress[course.id];
-              const isCompleted = progress?.isCompleted || false;
-              const canAccess = course.isPublic || true; // TODO: 실제 구매 여부 확인
+          <CourseTable>
+            <CourseTableHeader>
+              <CourseTableRow>
+                <CourseTableHeaderCell>순번</CourseTableHeaderCell>
+                <CourseTableHeaderCell>강의명</CourseTableHeaderCell>
+                <CourseTableHeaderCell>시간</CourseTableHeaderCell>
+                <CourseTableHeaderCell>상태</CourseTableHeaderCell>
+              </CourseTableRow>
+            </CourseTableHeader>
+            <CourseTableBody>
+              {courses.map((course, index) => {
+                const progress = userProgress[course.id];
+                const isCompleted = progress?.isCompleted || false;
+                const canAccess = index === 0 || course.isPublic; // 첫 번째 강의(OT)만 접근 가능
 
-              return (
-                <CourseItem
-                  key={course.id}
-                  isSelected={selectedCourse?.id === course.id}
-                  isCompleted={isCompleted}
-                  onClick={() => canAccess && handleCourseSelect(course)}
-                  disabled={!canAccess}
-                >
-                  <CourseItemHeader>
-                    <CourseNumber>{index + 1}</CourseNumber>
-                    <StatusIcon>
-                      {!canAccess ? (
-                        <Lock size={16} />
-                      ) : isCompleted ? (
-                        <CheckCircle size={16} color="#10B981" />
-                      ) : (
-                        <PlayCircle size={16} />
-                      )}
-                    </StatusIcon>
-                  </CourseItemHeader>
-                  
-                  <CourseItemContent>
-                    <CourseItemTitle>{course.title}</CourseItemTitle>
-                    <CourseItemMeta>
+                return (
+                  <CourseTableRow
+                    key={course.id}
+                    isSelected={selectedCourse?.id === course.id}
+                    isCompleted={isCompleted}
+                    onClick={() => canAccess && handleCourseSelect(course)}
+                    disabled={!canAccess}
+                  >
+                    <CourseTableCell>
+                      <CourseNumber>{index + 1}</CourseNumber>
+                    </CourseTableCell>
+                    
+                    <CourseTableCell>
+                      <CourseContent>
+                        <CourseItemTitle canAccess={canAccess}>
+                          {course.title}
+                          {!canAccess && <LockIcon><Lock size={14} /></LockIcon>}
+                        </CourseItemTitle>
+                        <CourseLevel>{course.level}</CourseLevel>
+                      </CourseContent>
+                    </CourseTableCell>
+                    
+                    <CourseTableCell>
                       <Duration>
                         <Clock size={12} />
                         {formatDuration(course.duration)}
                       </Duration>
-                      <Level>{course.level}</Level>
-                    </CourseItemMeta>
-                  </CourseItemContent>
-                </CourseItem>
-              );
-            })}
-          </CourseList>
+                    </CourseTableCell>
+                    
+                    <CourseTableCell>
+                      <StatusIcon>
+                        {!canAccess ? (
+                          <Lock size={16} color="#94a3b8" />
+                        ) : isCompleted ? (
+                          <CheckCircle size={16} color="#10B981" />
+                        ) : (
+                          <PlayCircle size={16} color="#3b82f6" />
+                        )}
+                      </StatusIcon>
+                    </CourseTableCell>
+                  </CourseTableRow>
+                );
+              })}
+            </CourseTableBody>
+          </CourseTable>
         </Sidebar>
 
         {/* 영상 플레이어 */}
@@ -367,15 +386,21 @@ const SidebarTitle = styled.h2`
   margin: 0;
 `;
 
-const CourseList = styled.div`
-  padding: 0;
+const CourseTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
 `;
 
-const CourseItem = styled.div.withConfig({
+const CourseTableHeader = styled.thead`
+  background: #f8fafc;
+  border-bottom: 2px solid #e2e8f0;
+`;
+
+const CourseTableBody = styled.tbody``;
+
+const CourseTableRow = styled.tr.withConfig({
   shouldForwardProp: (prop) => !['isSelected', 'isCompleted', 'disabled'].includes(prop),
 })<{ isSelected: boolean; isCompleted: boolean; disabled: boolean }>`
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #f1f5f9;
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   background: ${props => {
     if (props.disabled) return '#f8fafc';
@@ -384,6 +409,7 @@ const CourseItem = styled.div.withConfig({
   }};
   opacity: ${props => props.disabled ? 0.6 : 1};
   transition: all 0.2s ease;
+  border-bottom: 1px solid #f1f5f9;
 
   &:hover {
     background: ${props => {
@@ -394,11 +420,65 @@ const CourseItem = styled.div.withConfig({
   }
 `;
 
-const CourseItemHeader = styled.div`
+const CourseTableHeaderCell = styled.th`
+  padding: 1rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  
+  &:first-child {
+    width: 60px;
+  }
+  
+  &:nth-child(3) {
+    width: 80px;
+  }
+  
+  &:last-child {
+    width: 60px;
+    text-align: center;
+  }
+`;
+
+const CourseTableCell = styled.td`
+  padding: 1rem;
+  vertical-align: middle;
+  
+  &:last-child {
+    text-align: center;
+  }
+`;
+
+const CourseContent = styled.div`
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 0.25rem;
+`;
+
+const CourseItemTitle = styled.h3.withConfig({
+  shouldForwardProp: (prop) => prop !== 'canAccess',
+})<{ canAccess: boolean }>`
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: ${props => props.canAccess ? '#1a202c' : '#9ca3af'};
+  margin: 0;
+  line-height: 1.3;
+  display: flex;
   align-items: center;
-  margin-bottom: 0.5rem;
+  gap: 0.5rem;
+`;
+
+const CourseLevel = styled.span`
+  font-size: 0.75rem;
+  color: #3b82f6;
+  font-weight: 500;
+`;
+
+const LockIcon = styled.span`
+  color: #94a3b8;
 `;
 
 const CourseNumber = styled.span`
@@ -410,22 +490,7 @@ const CourseNumber = styled.span`
 const StatusIcon = styled.div`
   display: flex;
   align-items: center;
-`;
-
-const CourseItemContent = styled.div``;
-
-const CourseItemTitle = styled.h3`
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #1a202c;
-  margin: 0 0 0.25rem 0;
-  line-height: 1.3;
-`;
-
-const CourseItemMeta = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
+  justify-content: center;
 `;
 
 const Duration = styled.span`
@@ -434,12 +499,6 @@ const Duration = styled.span`
   gap: 0.25rem;
   font-size: 0.75rem;
   color: #64748b;
-`;
-
-const Level = styled.span`
-  font-size: 0.75rem;
-  color: #3b82f6;
-  font-weight: 500;
 `;
 
 const VideoSection = styled.div`

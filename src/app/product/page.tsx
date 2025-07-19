@@ -7,6 +7,7 @@ import { faCheck, faRocket, faClock, faUsers, faLightbulb, faChartLine, faCommen
 import { motion } from 'framer-motion';
 import { Check, X, TrendingUp, CheckCircle, Clock, AlertTriangle, ArrowRight, Smile, Frown, HelpCircle, Wallet, Users, FileCheck, Rocket } from 'lucide-react';
 import Link from 'next/link';
+import CoursePreviewTable from '@/components/CoursePreviewTable';
 
 // Global style to remove underline from all links
 const GlobalStyle = createGlobalStyle`
@@ -1302,7 +1303,7 @@ const Hook = () => {
   );
 };
 
-// 강의 미리보기 섹션
+// 강의 미리보기 섹션 - 테이블 형태로 데이타 변경
 const CoursePreviewSection = styled.section`
   padding: 120px 0;
   background: linear-gradient(135deg, #F7F9FC 0%, #FFFFFF 100%);
@@ -1330,138 +1331,127 @@ const CoursePreviewSubtitle = styled.p`
   line-height: 1.6;
 `;
 
-const CourseGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 32px;
-  margin-bottom: 60px;
-  
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const CourseCard = styled(motion.div).withConfig({
-  shouldForwardProp: (prop) => !['whileHover', 'transition'].includes(prop)
-})`
+// 테이블 스타일 컴포넌트들
+const CourseTable = styled.div`
   background: white;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-  }
+  margin-bottom: 60px;
 `;
 
-const CourseVideoContainer = styled.div`
-  position: relative;
-  width: 100%;
-  height: 200px;
-  background: #f0f0f0;
-  overflow: hidden;
-`;
-
-const CourseThumbnail = styled.img`
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-`;
-
-const PlayButton = styled.div`
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 60px;
-  height: 60px;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 50%;
-  display: flex;
+const CourseTableHeader = styled.div`
+  background: #f8fafc;
+  padding: 20px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  display: grid;
+  grid-template-columns: 60px 1fr 100px 120px 80px;
+  gap: 20px;
   align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
+  font-weight: 600;
+  color: ${colors.text.secondary};
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   
-  &:hover {
-    background: rgba(0, 0, 0, 0.9);
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-  
-  svg {
-    color: white;
-    font-size: 20px;
-    margin-left: 3px;
+  @media (max-width: 768px) {
+    grid-template-columns: 40px 1fr 80px;
+    gap: 12px;
+    
+    > span:nth-child(3),
+    > span:nth-child(4) {
+      display: none;
+    }
   }
 `;
 
-const CourseContent = styled.div`
-  padding: 24px;
+const CourseTableRow = styled.div<{ $isPublic?: boolean }>`
+  padding: 20px 24px;
+  border-bottom: 1px solid #f1f5f9;
+  display: grid;
+  grid-template-columns: 60px 1fr 100px 120px 80px;
+  gap: 20px;
+  align-items: center;
+  transition: all 0.2s ease;
+  cursor: ${props => props.$isPublic ? 'pointer' : 'default'};
+  opacity: ${props => props.$isPublic ? 1 : 0.6};
+  
+  &:hover {
+    background: ${props => props.$isPublic ? '#f8fafc' : 'transparent'};
+  }
+  
+  &:last-child {
+    border-bottom: none;
+  }
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 40px 1fr 80px;
+    gap: 12px;
+    
+    > div:nth-child(3),
+    > div:nth-child(4) {
+      display: none;
+    }
+  }
+`;
+
+const CourseNumber = styled.div`
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: ${colors.text.secondary};
+  text-align: center;
+`;
+
+const CourseInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 `;
 
 const CourseTitle = styled.h3`
-  font-size: 1.3rem;
-  font-weight: 700;
+  font-size: 1.1rem;
+  font-weight: 600;
   color: ${colors.text.primary};
-  margin-bottom: 12px;
+  margin: 0;
   line-height: 1.4;
 `;
 
 const CourseDescription = styled.p`
-  font-size: 1rem;
-  color: ${colors.text.secondary};
-  line-height: 1.5;
-  margin-bottom: 16px;
-`;
-
-const CourseMeta = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-`;
-
-const CourseDuration = styled.span`
   font-size: 0.9rem;
   color: ${colors.text.secondary};
-  background: ${colors.gradient.hero};
+  margin: 0;
+  line-height: 1.4;
+`;
+
+const CourseDuration = styled.div`
+  font-size: 0.9rem;
+  color: ${colors.text.secondary};
+  display: flex;
+  align-items: center;
+  gap: 6px;
+`;
+
+const CourseLevel = styled.div`
+  font-size: 0.9rem;
+  font-weight: 600;
   padding: 4px 12px;
   border-radius: 20px;
-`;
-
-const CourseLevel = styled.span`
-  font-size: 0.9rem;
+  background: rgba(92, 89, 232, 0.1);
   color: ${colors.accent};
-  font-weight: 600;
+  text-align: center;
 `;
 
-const PreviewBadge = styled.div`
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: ${colors.accent};
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-`;
-
-const LockedBadge = styled.div`
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
+const CourseStatus = styled.div<{ $isPublic?: boolean }>`
   display: flex;
   align-items: center;
-  gap: 4px;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: ${props => props.$isPublic ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)'};
+  color: ${props => props.$isPublic ? '#10B981' : '#6B7280'};
 `;
 
 const CoursePreviewCTA = styled.div`
@@ -2169,7 +2159,7 @@ const ProductLanding = () => {
       <Hero />
       <PainPoints />
       <Hook />
-      <CoursePreview />
+      <CoursePreviewTable />
       <WhyGrowsome />
       <Timeline />
       <PostPurchase />

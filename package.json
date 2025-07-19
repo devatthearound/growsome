@@ -32,7 +32,17 @@
     "db:add-black-spoon": "node scripts/add-black-spoon-course.js",
     "db:seed-comprehensive": "tsx scripts/seed-comprehensive-courses.ts",
     "course-utils": "tsx scripts/course-management-utils.ts",
-    "debug-courses": "node scripts/debug-courses-api.js"
+    "debug-courses": "node scripts/debug-courses-api.js",
+    "add-course-link": "node scripts/add-course-link.js",
+    "batch-course-links": "node scripts/batch-add-course-links.js",
+    "fetch-vimeo-titles": "node scripts/fetch-vimeo-titles.js",
+    "manual-course-mapping": "node scripts/manual-course-mapping.js",
+    "accurate-course-mapping": "node scripts/accurate-course-mapping.js",
+    "set-first-only": "node scripts/set-first-course-only.js",
+    "fix-course-titles": "node scripts/fix-course-titles.js",
+    "debug-and-fix": "node scripts/debug-and-fix-titles.js",
+    "complete-setup": "node scripts/complete-course-setup.js",
+    "complete-setup-fixed": "node scripts/complete-course-setup-fixed.js"
   },
   "dependencies": {
     "@apollo/server": "^4.11.1",
