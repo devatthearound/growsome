@@ -9,13 +9,15 @@ WORKDIR /usr/src/app
 COPY package.json package-lock.json ./ 
 
 # Dependancy 설치 (새로운 lock 파일 수정 또는 생성 방지)
-RUN npm install --frozen-lockfile 
+RUN npm ci --ignore-scripts 
 
 # 2단계: next.js 빌드 단계
 FROM --platform=linux/amd64 node:18-alpine AS builder
 
 # Docker를 build할때 개발 모드 구분용 환경 변수를 명시함
 ARG ENV_MODE
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # 명령어를 실행할 디렉터리 지정
 WORKDIR /usr/src/app
@@ -32,6 +34,9 @@ RUN npm run build
 
 # 3단계:  next.js 실행 단계
 FROM --platform=linux/amd64 node:18-alpine AS runner
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
 
 # 명령어를 실행할 디렉터리 지정
 WORKDIR /usr/src/app

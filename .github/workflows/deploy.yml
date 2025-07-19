@@ -1,6 +1,6 @@
 
 # github/workflows/deploy.yml
-name: Deploy Coupas
+name: Deploy Growsome
 
 on:
  push:
@@ -15,18 +15,24 @@ env:
 jobs:
  deploy:
    runs-on: ubuntu-latest
+   timeout-minutes: 30
    steps:
-   - uses: actions/checkout@v2
+   - name: Checkout code
+     uses: actions/checkout@v4
+     
    - name: Configure AWS credentials
-     uses: aws-actions/configure-aws-credentials@v1
+     uses: aws-actions/configure-aws-credentials@v4
      with:
        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
        aws-region: ${{ env.AWS_REGION }}
+       mask-aws-account-id: true
    
    - name: Login to Amazon ECR
      id: login-ecr
-     uses: aws-actions/amazon-ecr-login@v1
+     uses: aws-actions/amazon-ecr-login@v2
+     with:
+       mask-password: true
 
    - name: Create env file
      run: |
@@ -36,9 +42,22 @@ jobs:
      env:
        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
        IMAGE_TAG: growsome-landing-latest
+       NODE_ENV: production
+       DOCKER_BUILDKIT: 1
      run: |
-       docker build --platform=linux/amd64 -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+       echo "Building Docker image..."
+       docker build \
+         --platform=linux/amd64 \
+         --progress=plain \
+         --build-arg NODE_ENV=production \
+         -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+         . || { echo "Docker build failed"; exit 1; }
+       
+       echo "Pushing to ECR..."
+       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG || { echo "Docker push failed"; exit 1; }
+       
+       echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+       echo "Docker build and push completed successfully"
        
    - name: Force new deployment  
      run: |

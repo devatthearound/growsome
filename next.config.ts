@@ -23,6 +23,7 @@ const nextConfig: NextConfig = {
     return config;
   },
   // output: 'standalone', // 개발 환경에서는 주석 처리
+  output: process.env.NODE_ENV === 'production' ? 'standalone' : undefined,
   compiler: {
     styledComponents: true
   },
