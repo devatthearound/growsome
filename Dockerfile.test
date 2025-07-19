@@ -1,0 +1,35 @@
+# Simple test build to identify issues
+FROM --platform=linux/amd64 node:18-alpine
+
+WORKDIR /app
+
+# Install basic dependencies
+RUN apk add --no-cache libc6-compat openssl
+
+# Copy package files
+COPY package.json package-lock.json ./
+COPY prisma ./prisma/
+
+# Install dependencies
+RUN npm ci
+
+# Generate Prisma client
+RUN npx prisma generate
+
+# Copy source code
+COPY . .
+
+# Create env file
+RUN touch .env.production
+
+# Set environment
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV NODE_OPTIONS="--max-old-space-size=4096"
+
+# Try to build
+RUN npm run build
+
+# Simple server for testing
+EXPOSE 3000
+CMD ["npm", "start"]

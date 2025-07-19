@@ -34,6 +34,28 @@ jobs:
      with:
        mask-password: true
 
+   - name: Debug - Check Node.js environment
+     run: |
+       echo "Node.js version:"
+       node --version
+       echo "npm version:"
+       npm --version
+       echo "Environment variables:"
+       env | grep -E "NODE|NPM" || echo "No Node/NPM env vars"
+       echo "Checking package.json scripts:"
+       cat package.json | grep -A 10 -B 2 '"scripts"'
+       
+   - name: Debug - Check files
+     run: |
+       echo "Checking important files..."
+       ls -la
+       echo "Checking package.json:"
+       head -20 package.json
+       echo "Checking if .env.production exists:"
+       ls -la .env.production || echo ".env.production not found"
+       echo "Checking Prisma schema:"
+       ls -la prisma/ || echo "Prisma directory not found"
+       
    - name: Set up Docker Buildx
      uses: docker/setup-buildx-action@v3
      
@@ -48,22 +70,39 @@ jobs:
        NODE_ENV: production
        DOCKER_BUILDKIT: 1
      run: |
-       echo "Building Docker image with improved caching..."
+       echo "Starting Docker build process..."
+       echo "ECR Registry: $ECR_REGISTRY"
+       echo "Repository: $ECR_REPOSITORY"
+       echo "Image Tag: $IMAGE_TAG"
+       
+       echo "Building Docker image..."
        docker buildx build \
          --platform=linux/amd64 \
          --progress=plain \
          --build-arg NODE_ENV=production \
-         --cache-from=type=gha \
-         --cache-to=type=gha,mode=max \
+         --no-cache \
          -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
          --load \
-         . || { echo "Docker build failed"; exit 1; }
+         . 2>&1 | tee build.log
        
+       if [ ${PIPESTATUS[0]} -ne 0 ]; then
+         echo "❌ Docker build failed!"
+         echo "Last 50 lines of build log:"
+         tail -50 build.log
+         exit 1
+       fi
+       
+       echo "✅ Docker build successful!"
        echo "Pushing to ECR..."
-       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG || { echo "Docker push failed"; exit 1; }
+       docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
        
+       if [ $? -ne 0 ]; then
+         echo "❌ Docker push failed!"
+         exit 1
+       fi
+       
+       echo "✅ Docker push successful!"
        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
-       echo "Docker build and push completed successfully"
        
    - name: Force new deployment  
      run: |
