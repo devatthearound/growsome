@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import styled, { ThemeProvider, keyframes } from 'styled-components';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { growsomeTheme } from '@/components/design-system/theme';
@@ -13,7 +13,27 @@ interface Recommendation {
   features: string[];
 }
 
-const DiagnosisResult = () => {
+// Loading 컴포넌트
+const Loading = () => (
+  <LoadingContainer>
+    <div style={{ textAlign: 'center', padding: '2rem' }}>
+      <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔄</div>
+      <div>로딩 중...</div>
+    </div>
+  </LoadingContainer>
+);
+
+const LoadingContainer = styled.div`
+  min-height: 100vh;
+  background: linear-gradient(135deg, ${growsomeTheme.color.Green50} 0%, ${growsomeTheme.color.Primary50} 100%);
+  padding: ${growsomeTheme.spacing.xl} 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+// useSearchParams를 사용하는 컴포넌트를 분리
+const DiagnosisResultContent = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [recommendation, setRecommendation] = useState<Recommendation | null>(null);
@@ -48,197 +68,206 @@ const DiagnosisResult = () => {
   };
 
   return (
-    <ThemeProvider theme={growsomeTheme}>
-      <ResultContainer>
-        <Container>
-          <ResultWrapper>
-            {/* Success Header */}
-            <SuccessHeader>
-              <SuccessIcon>🎉</SuccessIcon>
-              <Title>진단 완료!</Title>
-              <Subtitle>
-                설문에 참여해주셔서 감사합니다.<br/>
-                맞춤형 10배 성장 전략을 준비해드리겠습니다.
-              </Subtitle>
-            </SuccessHeader>
+    <ResultContainer>
+      <Container>
+        <ResultWrapper>
+          {/* Success Header */}
+          <SuccessHeader>
+            <SuccessIcon>🎉</SuccessIcon>
+            <Title>진단 완료!</Title>
+            <Subtitle>
+              설문에 참여해주셔서 감사합니다.<br/>
+              맞춤형 10배 성장 전략을 준비해드리겠습니다.
+            </Subtitle>
+          </SuccessHeader>
 
-            {/* Next Steps */}
-            <NextStepsSection>
-              <SectionTitle>📋 다음 단계</SectionTitle>
+          {/* Next Steps */}
+          <NextStepsSection>
+            <SectionTitle>📋 다음 단계</SectionTitle>
 
-              <StepsGrid>
-                <StepCard>
-                  <StepNumber>1</StepNumber>
-                  <StepTitle>진단 분석</StepTitle>
-                  <StepDescription>
-                    전문가가 귀하의 설문 내용을 바탕으로 맞춤형 성장 전략을 분석합니다.
-                  </StepDescription>
-                </StepCard>
+            <StepsGrid>
+              <StepCard>
+                <StepNumber>1</StepNumber>
+                <StepTitle>진단 분석</StepTitle>
+                <StepDescription>
+                  전문가가 귀하의 설문 내용을 바탕으로 맞춤형 성장 전략을 분석합니다.
+                </StepDescription>
+              </StepCard>
 
-                <StepCard>
-                  <StepNumber>2</StepNumber>
-                  <StepTitle>개별 연락</StepTitle>
-                  <StepDescription>
-                    24시간 내 담당자가 진단 결과와 함께 개별 상담을 위해 연락드립니다.
-                  </StepDescription>
-                </StepCard>
+              <StepCard>
+                <StepNumber>2</StepNumber>
+                <StepTitle>개별 연락</StepTitle>
+                <StepDescription>
+                  24시간 내 담당자가 진단 결과와 함께 개별 상담을 위해 연락드립니다.
+                </StepDescription>
+              </StepCard>
 
-                <StepCard>
-                  <StepNumber>3</StepNumber>
-                  <StepTitle>맞춤 제안</StepTitle>
-                  <StepDescription>
-                    귀하의 비즈니스에 최적화된 AI 개발, 데이터 운영, 브랜딩 솔루션을 제안합니다.
-                  </StepDescription>
-                </StepCard>
-              </StepsGrid>
-            </NextStepsSection>
+              <StepCard>
+                <StepNumber>3</StepNumber>
+                <StepTitle>맞춤 제안</StepTitle>
+                <StepDescription>
+                  귀하의 비즈니스에 최적화된 AI 개발, 데이터 운영, 브랜딩 솔루션을 제안합니다.
+                </StepDescription>
+              </StepCard>
+            </StepsGrid>
+          </NextStepsSection>
 
-            {/* Personalized Recommendation */}
-            {recommendation && (
-              <RecommendationSection>
-                <SectionTitle>🎁 귀하만을 위한 맞춤형 추천</SectionTitle>
+          {/* Personalized Recommendation */}
+          {recommendation && (
+            <RecommendationSection>
+              <SectionTitle>🎁 귀하만을 위한 맞춤형 추천</SectionTitle>
+              
+              <RecommendationCard>
+                <RecommendationHeader>
+                  <RecommendationTitle>{recommendation.primary}</RecommendationTitle>
+                  <RecommendationPrice>{recommendation.price}</RecommendationPrice>
+                </RecommendationHeader>
                 
-                <RecommendationCard>
-                  <RecommendationHeader>
-                    <RecommendationTitle>{recommendation.primary}</RecommendationTitle>
-                    <RecommendationPrice>{recommendation.price}</RecommendationPrice>
-                  </RecommendationHeader>
-                  
-                  <RecommendationDetails>
-                    <RecommendationDescription>
-                      {recommendation.description}
-                    </RecommendationDescription>
-                    <RecommendationTimeline>
-                      예상 기간: {recommendation.timeline}
-                    </RecommendationTimeline>
-                  </RecommendationDetails>
-                  
-                  <FeaturesList>
-                    <FeaturesTitle>주요 기능:</FeaturesTitle>
-                    {recommendation.features.map((feature, index) => (
-                      <FeatureItem key={index}>
-                        ✓ {feature}
-                      </FeatureItem>
-                    ))}
-                  </FeaturesList>
-                  
-                  <RecommendationCTA>
-                    <CTAButton primary onClick={handleSubscription}>
-                      🚀 이 패키지 선택하기
-                    </CTAButton>
-                  </RecommendationCTA>
-                </RecommendationCard>
-              </RecommendationSection>
-            )}
+                <RecommendationDetails>
+                  <RecommendationDescription>
+                    {recommendation.description}
+                  </RecommendationDescription>
+                  <RecommendationTimeline>
+                    예상 기간: {recommendation.timeline}
+                  </RecommendationTimeline>
+                </RecommendationDetails>
+                
+                <FeaturesList>
+                  <FeaturesTitle>주요 기능:</FeaturesTitle>
+                  {recommendation.features.map((feature, index) => (
+                    <FeatureItem key={index}>
+                      ✓ {feature}
+                    </FeatureItem>
+                  ))}
+                </FeaturesList>
+                
+                <RecommendationCTA>
+                  <CTAButton primary onClick={handleSubscription}>
+                    🚀 이 패키지 선택하기
+                  </CTAButton>
+                </RecommendationCTA>
+              </RecommendationCard>
+            </RecommendationSection>
+          )}
 
-            {/* Expected Benefits */}
-            <BenefitsSection>
-              <SectionTitle>🚀 기대 효과</SectionTitle>
+          {/* Expected Benefits */}
+          <BenefitsSection>
+            <SectionTitle>🚀 기대 효과</SectionTitle>
 
-              <BenefitsGrid>
-                <BenefitCard>
-                  <BenefitIcon>📈</BenefitIcon>
-                  <div>
-                    <BenefitTitle style={{color: growsomeTheme.color.Green600}}>
-                      매출 10배 성장
-                    </BenefitTitle>
-                    <BenefitDescription>
-                      AI 자동화와 데이터 기반 최적화로 기존 대비 10배 매출 증대
-                    </BenefitDescription>
-                  </div>
-                </BenefitCard>
-
-                <BenefitCard>
-                  <BenefitIcon>⚡</BenefitIcon>
-                  <div>
-                    <BenefitTitle style={{color: growsomeTheme.color.Blue600}}>
-                      운영 효율 극대화
-                    </BenefitTitle>
-                    <BenefitDescription>
-                      1인이 10명 규모 업무를 처리할 수 있는 완전 자동화 시스템
-                    </BenefitDescription>
-                  </div>
-                </BenefitCard>
-
-                <BenefitCard>
-                  <BenefitIcon>🎯</BenefitIcon>
-                  <div>
-                    <BenefitTitle style={{color: growsomeTheme.color.Primary600}}>
-                      브랜드 차별화
-                    </BenefitTitle>
-                    <BenefitDescription>
-                      경쟁사 대비 독보적인 브랜드 포지셔닝과 고객 경험 제공
-                    </BenefitDescription>
-                  </div>
-                </BenefitCard>
-
-                <BenefitCard>
-                  <BenefitIcon>💰</BenefitIcon>
-                  <div>
-                    <BenefitTitle style={{color: growsomeTheme.color.Orange600}}>
-                      비용 75% 절감
-                    </BenefitTitle>
-                    <BenefitDescription>
-                      기존 개발 비용 대비 75% 절감하면서 더 나은 결과 달성
-                    </BenefitDescription>
-                  </div>
-                </BenefitCard>
-              </BenefitsGrid>
-            </BenefitsSection>
-
-            {/* Urgent Message */}
-            <UrgentCard>
-              <UrgentIcon>⏰</UrgentIcon>
-              <UrgentTitle>한정 특가 진행 중!</UrgentTitle>
-              <UrgentDescription>
-                설문 참여자 한정으로 최대 55% 할인가로 제공합니다.<br/>
-                이 기회를 놓치지 마세요!
-              </UrgentDescription>
-              <DiscountBadge>최대 55% 할인</DiscountBadge>
-            </UrgentCard>
-
-            {/* CTA Buttons */}
-            <CTAButtons>
-              <CTAButton primary onClick={handleConsultation}>
-                💬 즉시 상담 받기 (카카오톡)
-              </CTAButton>
-              <CTAButton onClick={handleSubscription}>
-                📦 패키지 둘러보기
-              </CTAButton>
-            </CTAButtons>
-
-            {/* Additional Info */}
-            <InfoSection>
-              <InfoCard>
-                <InfoIcon>🔒</InfoIcon>
+            <BenefitsGrid>
+              <BenefitCard>
+                <BenefitIcon>📈</BenefitIcon>
                 <div>
-                  <InfoTitle>개인정보 보호</InfoTitle>
-                  <InfoDescription>
-                    귀하의 정보는 진단 및 상담 목적으로만 사용되며, 별도 동의 없이 마케팅에 활용되지 않습니다.
-                  </InfoDescription>
+                  <BenefitTitle style={{color: growsomeTheme.color.Green600}}>
+                    매출 10배 성장
+                  </BenefitTitle>
+                  <BenefitDescription>
+                    AI 자동화와 데이터 기반 최적화로 기존 대비 10배 매출 증대
+                  </BenefitDescription>
                 </div>
-              </InfoCard>
+              </BenefitCard>
 
-              <InfoCard>
-                <InfoIcon>📞</InfoIcon>
+              <BenefitCard>
+                <BenefitIcon>⚡</BenefitIcon>
                 <div>
-                  <InfoTitle>빠른 응답 보장</InfoTitle>
-                  <InfoDescription>
-                    설문 제출 후 24시간 내 담당자가 직접 연락드려 맞춤형 상담을 진행합니다.
-                  </InfoDescription>
+                  <BenefitTitle style={{color: growsomeTheme.color.Blue600}}>
+                    운영 효율 극대화
+                  </BenefitTitle>
+                  <BenefitDescription>
+                    1인이 10명 규모 업무를 처리할 수 있는 완전 자동화 시스템
+                  </BenefitDescription>
                 </div>
-              </InfoCard>
-            </InfoSection>
+              </BenefitCard>
 
-            {/* Back Button */}
-            <BackSection>
-              <BackButton onClick={handleBackToHome}>
-                🏠 홈으로 돌아가기
-              </BackButton>
-            </BackSection>
-          </ResultWrapper>
-        </Container>
-      </ResultContainer>
+              <BenefitCard>
+                <BenefitIcon>🎯</BenefitIcon>
+                <div>
+                  <BenefitTitle style={{color: growsomeTheme.color.Primary600}}>
+                    브랜드 차별화
+                  </BenefitTitle>
+                  <BenefitDescription>
+                    경쟁사 대비 독보적인 브랜드 포지셔닝과 고객 경험 제공
+                  </BenefitDescription>
+                </div>
+              </BenefitCard>
+
+              <BenefitCard>
+                <BenefitIcon>💰</BenefitIcon>
+                <div>
+                  <BenefitTitle style={{color: growsomeTheme.color.Orange600}}>
+                    비용 75% 절감
+                  </BenefitTitle>
+                  <BenefitDescription>
+                    기존 개발 비용 대비 75% 절감하면서 더 나은 결과 달성
+                  </BenefitDescription>
+                </div>
+              </BenefitCard>
+            </BenefitsGrid>
+          </BenefitsSection>
+
+          {/* Urgent Message */}
+          <UrgentCard>
+            <UrgentIcon>⏰</UrgentIcon>
+            <UrgentTitle>한정 특가 진행 중!</UrgentTitle>
+            <UrgentDescription>
+              설문 참여자 한정으로 최대 55% 할인가로 제공합니다.<br/>
+              이 기회를 놓치지 마세요!
+            </UrgentDescription>
+            <DiscountBadge>최대 55% 할인</DiscountBadge>
+          </UrgentCard>
+
+          {/* CTA Buttons */}
+          <CTAButtons>
+            <CTAButton primary onClick={handleConsultation}>
+              💬 즉시 상담 받기 (카카오톡)
+            </CTAButton>
+            <CTAButton onClick={handleSubscription}>
+              📦 패키지 둘러보기
+            </CTAButton>
+          </CTAButtons>
+
+          {/* Additional Info */}
+          <InfoSection>
+            <InfoCard>
+              <InfoIcon>🔒</InfoIcon>
+              <div>
+                <InfoTitle>개인정보 보호</InfoTitle>
+                <InfoDescription>
+                  귀하의 정보는 진단 및 상담 목적으로만 사용되며, 별도 동의 없이 마케팅에 활용되지 않습니다.
+                </InfoDescription>
+              </div>
+            </InfoCard>
+
+            <InfoCard>
+              <InfoIcon>📞</InfoIcon>
+              <div>
+                <InfoTitle>빠른 응답 보장</InfoTitle>
+                <InfoDescription>
+                  설문 제출 후 24시간 내 담당자가 직접 연락드려 맞춤형 상담을 진행합니다.
+                </InfoDescription>
+              </div>
+            </InfoCard>
+          </InfoSection>
+
+          {/* Back Button */}
+          <BackSection>
+            <BackButton onClick={handleBackToHome}>
+              🏠 홈으로 돌아가기
+            </BackButton>
+          </BackSection>
+        </ResultWrapper>
+      </Container>
+    </ResultContainer>
+  );
+};
+
+// 메인 컴포넌트 (Suspense로 감싸진 컴포넌트)
+const DiagnosisResult = () => {
+  return (
+    <ThemeProvider theme={growsomeTheme}>
+      <Suspense fallback={<Loading />}>
+        <DiagnosisResultContent />
+      </Suspense>
     </ThemeProvider>
   );
 };

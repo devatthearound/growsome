@@ -94,11 +94,11 @@ const CourseTableRow = styled.div<{ $isPublic?: boolean }>`
   gap: 20px;
   align-items: center;
   transition: all 0.2s ease;
-  cursor: ${props => props.$isPublic ? 'pointer' : 'default'};
-  opacity: ${props => props.$isPublic ? 1 : 0.6};
+  cursor: ${props => props.$isPublic ? 'pointer' : 'pointer'};
+  opacity: ${props => props.$isPublic ? 1 : 0.8};
   
   &:hover {
-    background: ${props => props.$isPublic ? '#f8fafc' : 'transparent'};
+    background: #f8fafc;
   }
   
   &:last-child {
@@ -219,6 +219,7 @@ interface Course {
   duration: number;
   level: string;
   isPublic: boolean;
+  isPremium?: boolean;
   vimeoUrl?: string;
 }
 
@@ -255,7 +256,8 @@ const CoursePreviewTable: React.FC = () => {
       description: "AI를 활용한 체계적인 사업계획서 작성 방법론을 배웁니다.",
       duration: 1800,
       level: "초급",
-      isPublic: true
+      isPublic: true,
+      isPremium: false
     },
     {
       id: 2,
@@ -263,7 +265,8 @@ const CoursePreviewTable: React.FC = () => {
       description: "정부지원금을 활용한 창업 성공 전략을 다룹니다.",
       duration: 2100,
       level: "초급",
-      isPublic: false
+      isPublic: false,
+      isPremium: true
     },
     {
       id: 3,
@@ -271,7 +274,8 @@ const CoursePreviewTable: React.FC = () => {
       description: "정부지원사업 정보를 찾는 방법과 전략을 알아봅시다.",
       duration: 1800,
       level: "초급",
-      isPublic: false
+      isPublic: false,
+      isPremium: true
     },
     {
       id: 4,
@@ -279,7 +283,8 @@ const CoursePreviewTable: React.FC = () => {
       description: "심사에 통과하는 사업계획서 작성의 핵심 비밀을 배웁니다.",
       duration: 2400,
       level: "중급",
-      isPublic: false
+      isPublic: false,
+      isPremium: true
     },
     {
       id: 5,
@@ -287,7 +292,8 @@ const CoursePreviewTable: React.FC = () => {
       description: "읽기 쉽고 매력적인 사업계획서 작성 방법을 익힙니다.",
       duration: 2100,
       level: "중급",
-      isPublic: false
+      isPublic: false,
+      isPremium: true
     },
     {
       id: 6,
@@ -295,7 +301,8 @@ const CoursePreviewTable: React.FC = () => {
       description: "AI 도구를 활용한 비전 시각화 방법을 학습합니다.",
       duration: 1500,
       level: "중급",
-      isPublic: false
+      isPublic: false,
+      isPremium: true
     },
     {
       id: 7,
@@ -303,7 +310,8 @@ const CoursePreviewTable: React.FC = () => {
       description: "자신에게 맞는 정부지원사업을 선별하는 전략을 다룹니다.",
       duration: 2700,
       level: "고급",
-      isPublic: false
+      isPublic: false,
+      isPremium: true
     },
     {
       id: 8,
@@ -311,7 +319,8 @@ const CoursePreviewTable: React.FC = () => {
       description: "효과적인 팜플렛 제작과 활용 전략을 배웁니다.",
       duration: 2400,
       level: "고급",
-      isPublic: false
+      isPublic: false,
+      isPremium: true
     }
   ];
 
@@ -327,8 +336,42 @@ const CoursePreviewTable: React.FC = () => {
       console.log('미리보기 강의 재생:', course.title);
       window.open(course.vimeoUrl, '_blank');
     } else {
-      // 유료 강의는 강의 페이지로 이동
-      window.location.href = '/courses';
+      // 잠긴 강의는 로그인 상태 확인 후 처리
+      checkAuthAndRedirect(course);
+    }
+  };
+
+  const checkAuthAndRedirect = async (course: Course) => {
+    try {
+      // 로그인 상태 확인
+      const authResponse = await fetch('/api/auth/check', {
+        method: 'GET',
+        credentials: 'include'
+      });
+      
+      const authData = await authResponse.json();
+      
+      if (!authData.isLoggedIn) {
+        // 로그인되지 않은 경우 - 로그인 페이지로 이동
+        window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname);
+        return;
+      }
+      
+      // 로그인된 경우 - 사용자 권한에 따라 처리
+      // 현재는 모든 프리미엄 강의에 대해 신청 설문으로 이동
+      // 추후 구독/결제 시스템이 구현되면 해당 로직으로 변경
+      if (course.isPremium !== false) {
+        // 프리미엄 강의인 경우 신청 설문으로 이동
+        window.location.href = '/inquiry?type=course&courseId=' + course.id + '&title=' + encodeURIComponent(course.title);
+      } else {
+        // 일반 강의인 경우 강의 페이지로 이동 (현재는 courses 페이지로)
+        window.location.href = '/courses';
+      }
+      
+    } catch (error) {
+      console.error('권한 확인 중 오류:', error);
+      // 오류 발생 시 신청 설문으로 이동
+      window.location.href = '/inquiry?type=course&courseId=' + course.id + '&title=' + encodeURIComponent(course.title);
     }
   };
 
