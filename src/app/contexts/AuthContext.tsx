@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface User {
   id: string;
@@ -33,13 +34,36 @@ const AuthContext = createContext<AuthContextType>({
   refreshAuth: async () => {},
 });
 
+// 인증이 필요하지 않은 공개 페이지들
+const PUBLIC_PAGES = [
+  '/diagnosis',
+  '/services',
+  '/courses',
+  '/',
+  '/blog',
+  '/login',
+  '/signup'
+];
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const pathname = usePathname();
+
+  // 현재 페이지가 공개 페이지인지 확인
+  const isPublicPage = PUBLIC_PAGES.some(page => 
+    pathname === page || pathname.startsWith(page + '/')
+  );
 
   useEffect(() => {
+    // 공개 페이지인 경우 인증 체크를 건너뛰고 로딩만 false로 설정
+    if (isPublicPage) {
+      setIsLoading(false);
+      return;
+    }
+    
     checkAuthStatus();
-  }, []);
+  }, [isPublicPage]);
 
   const checkAuthStatus = async () => {
     try {

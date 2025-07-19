@@ -36,7 +36,6 @@ const TypeformSurvey = () => {
       id: 'businessStage' as keyof SurveyData,
       type: 'choice',
       question: '현재 비즈니스 단계는?',
-      emoji: '🎯',
       description: '현재 상황을 정확히 파악해보겠습니다',
       options: [
         { value: 'idea', label: '아이디어만 있음 (예비창업)' },
@@ -49,7 +48,6 @@ const TypeformSurvey = () => {
       id: 'mainConcern' as keyof SurveyData,
       type: 'choice',
       question: '현재 가장 큰 고민은?',
-      emoji: '💭',
       description: '핵심 문제점을 파악해보겠습니다',
       options: [
         { value: 'idea_to_service', label: '아이디어를 실제 서비스로 만들고 싶다' },
@@ -62,7 +60,6 @@ const TypeformSurvey = () => {
       id: 'currentWebsite' as keyof SurveyData,
       type: 'choice',
       question: '현재 웹사이트/앱 상황은?',
-      emoji: '🤖',
       description: 'AI 개발 관련 요구사항을 확인해보겠습니다',
       options: [
         { value: 'none', label: '없음 (처음 만들 예정)' },
@@ -75,7 +72,6 @@ const TypeformSurvey = () => {
       id: 'desiredTimeline' as keyof SurveyData,
       type: 'choice',
       question: '원하는 완성 시기는?',
-      emoji: '⏰',
       description: '프로젝트 일정을 계획해보겠습니다',
       options: [
         { value: '2weeks', label: '2주 내 (초급속)' },
@@ -88,7 +84,6 @@ const TypeformSurvey = () => {
       id: 'budgetRange' as keyof SurveyData,
       type: 'choice',
       question: '예상 투자 규모는?',
-      emoji: '💰',
       description: '적정 예산 범위를 확인해보겠습니다',
       options: [
         { value: 'under_1000', label: '1,000만원 미만' },
@@ -98,6 +93,53 @@ const TypeformSurvey = () => {
       ]
     },
     {
+      id: 'dataCollection' as keyof SurveyData,
+      type: 'choice',
+      question: '현재 데이터 수집 현황은?',
+      description: '데이터 분석 요구사항을 파악해보겠습니다',
+      options: [
+        { value: 'none', label: '전혀 안함' },
+        { value: 'basic_ga', label: 'GA 정도만 설치' },
+        { value: 'basic_tools', label: '기본적인 분석 도구 사용' },
+        { value: 'advanced', label: '고도화된 분석 시스템 운영' }
+      ]
+    },
+    {
+      id: 'desiredData' as keyof SurveyData,
+      type: 'choice',
+      question: '가장 알고 싶은 데이터는?',
+      description: '데이터 활용 방향을 파악해보겠습니다',
+      options: [
+        { value: 'traffic_source', label: '고객이 어디서 오는지' },
+        { value: 'content_preference', label: '어떤 콘텐츠를 좋아하는지' },
+        { value: 'purchase_timing', label: '언제 구매 결정하는지' },
+        { value: 'competitive_position', label: '경쟁사 대비 우리 위치' }
+      ]
+    },
+    {
+      id: 'brandingSituation' as keyof SurveyData,
+      type: 'choice',
+      question: '현재 브랜딩 상황은?',
+      description: '브랜딩 관련 요구사항을 확인해보겠습니다',
+      options: [
+        { value: 'no_logo', label: '로고도 없음' },
+        { value: 'inconsistent', label: '로고는 있지만 일관성 없음' },
+        { value: 'no_differentiation', label: '브랜드는 있지만 차별화 안됨' },
+        { value: 'digital_expansion', label: '브랜딩은 괜찮지만 디지털 확장 필요' }
+      ]
+    },
+    {
+      id: 'brandDirection' as keyof SurveyData,
+      type: 'choice',
+      question: '가장 원하는 브랜드 방향은?',
+      description: '브랜드 아이덴티티 방향성을 설정해보겠습니다',
+      options: [
+        { value: 'professional', label: '신뢰감 있는 전문 브랜드' },
+        { value: 'friendly', label: '친근하고 접근하기 쉬운 브랜드' },
+        { value: 'innovative', label: '혁신적이고 트렌디한 브랜드' },
+        { value: 'premium', label: '프리미엄 럭셔리 브랜드' }
+      ]
+    },
       id: 'dataCollection' as keyof SurveyData,
       type: 'choice',
       question: '현재 데이터 수집 현황은?',
@@ -549,6 +591,97 @@ const InputContainer = styled.div`
   flex-direction: column;
   gap: ${growsomeTheme.spacing.xl};
   align-items: center;
+`;
+
+const InputField = styled.input`
+  width: 100%;
+  max-width: 500px;
+  font-size: ${growsomeTheme.fontSize.TextXL};
+  padding: ${growsomeTheme.spacing.xl};
+  border: none;
+  border-bottom: 3px solid ${growsomeTheme.color.Gray300};
+  background: transparent;
+  outline: none;
+  transition: border-color 0.2s ease;
+  text-align: center;
+  
+  &:focus {
+    border-bottom-color: ${growsomeTheme.color.Primary500};
+  }
+  
+  &::placeholder {
+    color: ${growsomeTheme.color.Gray400};
+  }
+`;
+
+const InputHint = styled.div`
+  text-align: center;
+`;
+
+const KeyboardKey = styled.kbd`
+  background: ${growsomeTheme.color.Gray100};
+  padding: ${growsomeTheme.spacing.xs} ${growsomeTheme.spacing.sm};
+  border-radius: ${growsomeTheme.radius.radius1};
+  border: 1px solid ${growsomeTheme.color.Gray300};
+  font-size: ${growsomeTheme.fontSize.TextXS};
+  font-family: monospace;
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
+const NavigationContainer = styled.div`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  padding: ${growsomeTheme.spacing.xl};
+  background: ${growsomeTheme.color.White};
+  border-top: 1px solid ${growsomeTheme.color.Gray200};
+  z-index: 40;
+`;
+
+const BackButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: ${growsomeTheme.spacing.sm};
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: ${growsomeTheme.spacing.sm};
+  border-radius: ${growsomeTheme.radius.radius1};
+  transition: background 0.2s ease;
+  
+  &:hover {
+    background: ${growsomeTheme.color.Gray100};
+  }
+`;
+
+const BackIcon = styled.div`
+  font-size: 1.2rem;
+  color: ${growsomeTheme.color.Black600};
+`;
+
+const ProgressText = styled.div`
+  text-align: right;
+`;
+
+const LoadingOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
 `;
 
 const InputField = styled.input`
