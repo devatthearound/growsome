@@ -56,6 +56,30 @@ jobs:
        echo "Checking Prisma schema:"
        ls -la prisma/ || echo "Prisma directory not found"
        
+   - name: Debug - Test local build first
+     run: |
+       echo "Testing if we can build locally first..."
+       echo "Node version: $(node --version)"
+       echo "NPM version: $(npm --version)"
+       
+       echo "Installing dependencies..."
+       npm ci
+       
+       echo "Generating Prisma client..."
+       npx prisma generate
+       
+       echo "Attempting local build..."
+       NODE_ENV=production npm run build || {
+         echo "❌ Local build failed!"
+         echo "Checking for specific errors..."
+         npm run build 2>&1 | head -50
+         exit 1
+       }
+       
+       echo "✅ Local build successful!"
+       echo "Cleaning up for Docker build..."
+       rm -rf .next node_modules
+       
    - name: Set up Docker Buildx
      uses: docker/setup-buildx-action@v3
      
