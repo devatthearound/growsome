@@ -45,6 +45,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       setIsLoading(true);
       
+      console.log('인증 상태 확인 시작...');
+      
       // 인증 상태 확인 API 호출
       const response = await fetch('/api/auth/check', {
         method: 'GET',
@@ -54,8 +56,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       });
 
+      console.log('인증 API 응답:', {
+        status: response.status,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries())
+      });
+
       if (response.ok) {
         const data = await response.json();
+        console.log('인증 데이터:', data);
+        
         if (data.isLoggedIn && data.user) {
           // 사용자 데이터 변환 (DB 필드명 → 인터페이스 필드명)
           const transformedUser: User = {
@@ -71,21 +81,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             canWriteContent: data.user.canWriteContent || true
           };
           
+          console.log('사용자 로그인 성공:', transformedUser.email);
           setUser(transformedUser);
         } else {
+          console.log('사용자 데이터 없음');
           setUser(null);
         }
       } else {
         // 인증 실패
+        const errorData = await response.text();
+        console.log('인증 실패:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorData
+        });
+        
         setUser(null);
         
-        // 401 또는 403인 경우 토큰 갱신 시도
+        // 401인 경우 토큰 갱신 시도
         if (response.status === 401) {
+          console.log('토큰 갱신 시도...');
           await attemptTokenRefresh();
         }
       }
     } catch (error) {
-      console.error('Auth check failed:', error);
+      console.error('인증 체크 중 오류:', error);
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -94,6 +114,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const attemptTokenRefresh = async () => {
     try {
+      console.log('토큰 갱신 API 호출...');
+      
       const refreshResponse = await fetch('/api/auth/refresh', {
         method: 'POST',
         credentials: 'include',
@@ -102,15 +124,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       });
 
+      console.log('토큰 갱신 응답:', {
+        status: refreshResponse.status,
+        ok: refreshResponse.ok
+      });
+
       if (refreshResponse.ok) {
         const data = await refreshResponse.json();
+        console.log('토큰 갱신 데이터:', data);
+        
         if (data.success) {
+          console.log('토큰 갱신 성공, 인증 상태 재확인...');
           // 토큰 갱신 성공 시 인증 상태 다시 확인
           await checkAuthStatus();
         }
+      } else {
+        const errorData = await refreshResponse.text();
+        console.log('토큰 갱신 실패:', {
+          status: refreshResponse.status,
+          body: errorData
+        });
       }
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      console.error('토큰 갱신 중 오류:', error);
     }
   };
 

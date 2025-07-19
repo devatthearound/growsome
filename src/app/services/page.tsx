@@ -17,7 +17,7 @@ const Services = () => {
   };
 
   const handleFreeDiagnosisClick = () => {
-    window.open('https://pf.kakao.com/_Lpaln/chat', '_blank');
+    router.push('/diagnosis');
   };
 
   const problems = [

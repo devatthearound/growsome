@@ -33,6 +33,11 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
     setIsMounted(true);
   }, []);
 
+  // courses 페이지에서는 헤더를 숨김
+  if (currentPath === '/courses') {
+    return null;
+  }
+
 
   // 중앙 집중식 네비게이션 링크 관리
   const navigationLinks: NavItem[] = [

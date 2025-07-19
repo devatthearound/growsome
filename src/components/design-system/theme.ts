@@ -14,19 +14,30 @@ export const growsomeTheme = {
     Primary700: "#362fb8",
     Primary400: "#6659e7",
     Primary300: "#8b82ea",
+    Primary200: "#b1abf0",
+    Primary100: "#d8d5f6",
+    Primary50: "#F0F0FF",
+    Primary25: "#F8F8FF",
+    
     Green600: "#05cc01",
     Green700: "#049901",
     Green400: "#39ff34",
     Green300: "#6cff67",
+    Green200: "#C6F6D5",
+    Green100: "#d9f7d9",
+    Green50: "#F0FFF0",
+    
     Gray100: "#e8ebf0",
     Gray200: "#d1d7e1",
     Gray300: "#b9c1d2",
     Gray400: "#a1abc3",
     Gray500: "#8a94b4",
     Gray600: "#7383a5",
+    
     Black700: "#0a0f3a",
     Black600: "#0c1140",
     Black500: "#0e1346",
+    
     White: "#FFFFFF",
     
     // Status colors
@@ -34,16 +45,32 @@ export const growsomeTheme = {
     Red400: "#F56565",
     Red300: "#FC8181",
     Red200: "#FEB2B2",
+    Red100: "#FECACA",
     Red50: "#FEF2F2",
+    Red600: "#E53E3E",
+    
     Yellow500: "#E46A11",
     Yellow400: "#ED8936",
     Yellow300: "#F6AD55",
+    Yellow200: "#FAD089",
+    Yellow100: "#FDE5B8",
+    Yellow50: "#FFFBF0",
     
-    // Additional color variants
-    Primary50: "#F0F0FF",
-    Primary100: "#E0E0FF",
-    Green50: "#F0FFF0",
-    Green200: "#C6F6D5",
+    Blue500: "#3182CE",
+    Blue600: "#2B77CB",
+    Blue400: "#4299E1",
+    Blue300: "#63B3ED",
+    Blue200: "#90CDF4",
+    Blue100: "#BEE3F8",
+    Blue50: "#EBF8FF",
+    
+    Orange500: "#FF6B35",
+    Orange600: "#E55A2B",
+    Orange400: "#FF8A5B",
+    Orange300: "#FFA981",
+    Orange200: "#FFC8A7",
+    Orange100: "#FFE7CD",
+    Orange50: "#FFF6F0",
   },
   fontSize: {
     TextXS: "1.0rem",

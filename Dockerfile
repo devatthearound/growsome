@@ -13,11 +13,17 @@ COPY prisma ./prisma/
 # Install dependencies
 RUN npm ci
 
-# Generate Prisma client
-RUN npx prisma generate
-
 # Copy source code
 COPY . .
+
+# Debug: Check if .env.production exists and its contents
+RUN echo "=== Environment Debug ==="
+RUN ls -la .env* || echo "No .env files found"
+RUN if [ -f .env.production ]; then echo ".env.production exists"; cat .env.production | head -5; else echo ".env.production not found"; fi
+RUN echo "DATABASE_URL from env: $DATABASE_URL"
+
+# Generate Prisma client
+RUN npx prisma generate
 
 # Create environment file
 RUN touch .env.production

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 import { PrismaClient } from '@prisma/client';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
@@ -61,14 +62,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 비밀번호 확인
+    // 비밀번호 확인 (bcrypt 사용)
     console.log('비밀번호 확인 중...');
     let isValidPassword = false;
     
     if (user.password) {
-      // 평문 비밀번호 비교
-      isValidPassword = password === user.password;
-      console.log('비밀번호 검증 결과:', isValidPassword);
+      try {
+        isValidPassword = await bcrypt.compare(password, user.password);
+        console.log('bcrypt 비밀번호 검증 결과:', isValidPassword);
+      } catch (bcryptError) {
+        console.log('bcrypt 비교 실패, 평문 비교 시도...');
+        // 기존 평문 비밀번호와의 호환성을 위해
+        isValidPassword = password === user.password;
+      }
     } else {
       console.log('사용자에게 비밀번호가 설정되어 있지 않음');
     }

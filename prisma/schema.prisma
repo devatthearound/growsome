@@ -22,6 +22,7 @@ model User {
   blog_comments blog_comments[]
   blog_contents blog_contents[]
   blog_likes    blog_likes[]
+  courseProgress UserCourseProgress[] // 강의 진도
 
   @@map("users")
 }
@@ -115,6 +116,154 @@ model blog_tags {
   name              String              @unique @db.VarChar(255)
   slug              String              @unique @db.VarChar(255)
   blog_content_tags blog_content_tags[]
+}
+
+// 10배 성장 진단 설문 데이터
+model SurveyResponse {
+  id               Int      @id @default(autoincrement())
+  
+  // 1단계: 비즈니스 현황
+  businessStage    String   @map("business_stage") @db.VarChar(50)
+  mainConcern      String   @map("main_concern") @db.VarChar(50)
+  
+  // 2단계: AI 개발 니즈
+  currentWebsite   String   @map("current_website") @db.VarChar(50)
+  desiredTimeline  String   @map("desired_timeline") @db.VarChar(50)
+  budgetRange      String   @map("budget_range") @db.VarChar(50)
+  
+  // 3단계: 데이터 운영 니즈
+  dataCollection   String   @map("data_collection") @db.VarChar(50)
+  desiredData      String   @map("desired_data") @db.VarChar(50)
+  
+  // 4단계: 브랜드 구축 니즈
+  brandingSituation String  @map("branding_situation") @db.VarChar(50)
+  brandDirection   String   @map("brand_direction") @db.VarChar(50)
+  
+  // 연락처 정보
+  name             String   @db.VarChar(100)
+  phone            String   @db.VarChar(20)
+  email            String   @db.VarChar(255)
+  company          String?  @db.VarChar(200)
+  
+  // 메타 정보
+  ipAddress        String?  @map("ip_address") @db.VarChar(45)
+  userAgent        String?  @map("user_agent") @db.Text
+  referrer         String?  @db.VarChar(500)
+  
+  // 상태 정보
+  status           String   @default("pending") @db.VarChar(20) // pending, contacted, converted
+  isProcessed      Boolean  @default(false) @map("is_processed")
+  contactedAt      DateTime? @map("contacted_at") @db.Timestamptz(6)
+  notes            String?  @db.Text
+  
+  // 타임스탬프
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  @@map("survey_responses")
+  @@index([email], map: "idx_survey_responses_email")
+  @@index([phone], map: "idx_survey_responses_phone")
+  @@index([status], map: "idx_survey_responses_status")
+  @@index([createdAt], map: "idx_survey_responses_created")
+  @@index([isProcessed], map: "idx_survey_responses_processed")
+}
+
+// 강의 카테고리 모델
+model CourseCategory {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  slug        String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  color       String?  @db.VarChar(7) // HEX 컬러 코드
+  sortOrder   Int      @default(0) @map("sort_order")
+  isVisible   Boolean  @default(true) @map("is_visible")
+  
+  // 관계
+  courses     Course[]
+  
+  // 타임스탬프
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  @@map("course_categories")
+  @@index([slug], map: "idx_course_categories_slug")
+  @@index([isVisible], map: "idx_course_categories_visible")
+  @@index([sortOrder], map: "idx_course_categories_sort")
+}
+
+// 강의 모델
+model Course {
+  id              Int             @id @default(autoincrement())
+  title           String          @db.VarChar(255)
+  slug            String          @unique @db.VarChar(255)
+  description     String?         @db.Text
+  shortDescription String?        @map("short_description") @db.VarChar(500)
+  
+  // Vimeo 관련 정보
+  vimeoId         String          @map("vimeo_id") @db.VarChar(50)
+  vimeoUrl        String          @map("vimeo_url") @db.VarChar(500)
+  thumbnailUrl    String?         @map("thumbnail_url") @db.VarChar(500)
+  duration        Int?            @db.Integer // 초 단위
+  
+  // 강의 정보
+  categoryId      Int             @map("category_id")
+  level           String          @default("beginner") @db.VarChar(20) // beginner, intermediate, advanced
+  tags            String[]        @db.VarChar(50) // 태그 배열
+  
+  // 접근 제어
+  isPublic        Boolean         @default(false) @map("is_public") // 미리보기 가능 여부
+  isPremium       Boolean         @default(true) @map("is_premium") // 유료 강의 여부
+  isVisible       Boolean         @default(true) @map("is_visible")
+  
+  // 정렬 및 메타데이터
+  sortOrder       Int             @default(0) @map("sort_order")
+  viewCount       Int             @default(0) @map("view_count")
+  likeCount       Int             @default(0) @map("like_count")
+  
+  // 관계
+  category        CourseCategory  @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  userProgress    UserCourseProgress[] // 사용자 진도
+  
+  // 타임스탬프
+  createdAt       DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime        @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  publishedAt     DateTime?       @map("published_at") @db.Timestamptz(6)
+  
+  @@map("courses")
+  @@index([slug], map: "idx_courses_slug")
+  @@index([categoryId], map: "idx_courses_category")
+  @@index([isVisible], map: "idx_courses_visible")
+  @@index([isPremium], map: "idx_courses_premium")
+  @@index([isPublic], map: "idx_courses_public")
+  @@index([sortOrder], map: "idx_courses_sort")
+  @@index([publishedAt], map: "idx_courses_published")
+}
+
+// 사용자 강의 진도 추적
+model UserCourseProgress {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @map("user_id")
+  courseId   Int      @map("course_id")
+  
+  // 진도 정보
+  isCompleted Boolean @default(false) @map("is_completed")
+  watchTime   Int     @default(0) @map("watch_time") // 시청한 시간(초)
+  lastPosition Int    @default(0) @map("last_position") // 마지막 시청 위치(초)
+  
+  // 관계
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  course     Course  @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  
+  // 타임스탬프
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  completedAt DateTime? @map("completed_at") @db.Timestamptz(6)
+  
+  @@unique([userId, courseId]) // 사용자별 강의별 하나의 진도만
+  @@map("user_course_progress")
+  @@index([userId], map: "idx_user_course_progress_user")
+  @@index([courseId], map: "idx_user_course_progress_course")
+  @@index([isCompleted], map: "idx_user_course_progress_completed")
 }
 
 

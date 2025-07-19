@@ -1,18 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('=== /api/auth/check 호출됨 ===');
+    
     // 쿠키에서 토큰 가져오기
     const token = request.cookies.get('auth-token')?.value;
+    const allCookies = request.cookies.getAll();
+    
+    console.log('요청 쿠키들:', allCookies.map(c => ({ name: c.name, hasValue: !!c.value })));
 
     if (!token) {
-      console.log('토큰이 없습니다.');
+      console.log('auth-token 쿠키가 없습니다.');
       return NextResponse.json(
         { 
           isLoggedIn: false, 
@@ -21,13 +24,20 @@ export async function GET(request: NextRequest) {
         { status: 401 }
       );
     }
+    
+    console.log('토큰 길이:', token.length);
 
     // 토큰 검증
     let decoded;
     try {
+      console.log('JWT 토큰 검증 중...');
       decoded = jwt.verify(token, JWT_SECRET) as any;
-    } catch (jwtError) {
-      console.log('토큰 검증 실패:', jwtError);
+      console.log('토큰 검증 성공:', { userId: decoded.userId, email: decoded.email });
+    } catch (jwtError: any) {
+      console.log('토큰 검증 실패:', {
+        name: jwtError.name,
+        message: jwtError.message
+      });
       
       // 만료된 토큰인 경우 쿠키 삭제
       const response = NextResponse.json(
@@ -129,7 +139,7 @@ export async function GET(request: NextRequest) {
     
     return response;
   } finally {
-    await prisma.$disconnect();
+    // Prisma 싱글톤을 사용하므로 연결 해제하지 않음
   }
 }
 

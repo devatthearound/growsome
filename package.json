@@ -27,7 +27,12 @@
     "db:fix-status": "node scripts/fix-status-field.js",
     "db:reset-and-seed": "npm run db:reset && npm run db:seed",
     "db:fresh": "npm run db:push -- --force-reset && npm run db:seed",
-    "db:blog-fresh": "npm run db:push -- --force-reset && npm run db:seed-blog"
+    "db:blog-fresh": "npm run db:push -- --force-reset && npm run db:seed-blog",
+    "db:seed-courses": "tsx scripts/seed-courses.ts",
+    "db:add-black-spoon": "node scripts/add-black-spoon-course.js",
+    "db:seed-comprehensive": "tsx scripts/seed-comprehensive-courses.ts",
+    "course-utils": "tsx scripts/course-management-utils.ts",
+    "debug-courses": "node scripts/debug-courses-api.js"
   },
   "dependencies": {
     "@apollo/server": "^4.11.1",

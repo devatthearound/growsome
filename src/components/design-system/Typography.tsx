@@ -78,6 +78,13 @@ export const Typography = {
   `,
   
   // Text Typography (Body text)
+  TextXL600: styled.p<{color?: string}>`
+    font-size: ${growsomeTheme.fontSize.TextXL};
+    font-weight: ${growsomeTheme.fontWeight.SemiBold};
+    line-height: ${growsomeTheme.lineHeight.relaxed};
+    color: ${props => props.color || growsomeTheme.color.Black700};
+    margin: 0;
+  `,
   TextXL500: styled.p<{color?: string}>`
     font-size: ${growsomeTheme.fontSize.TextXL};
     font-weight: ${growsomeTheme.fontWeight.Medium};

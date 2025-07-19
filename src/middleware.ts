@@ -4,8 +4,8 @@ import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose'; // jose는 Edge Runtime과 호환됨
 
 // 토큰 이름 상수
-const ACCESS_TOKEN_NAME = 'coupas_access_token';
-const REFRESH_TOKEN_NAME = 'coupas_refresh_token';
+const ACCESS_TOKEN_NAME = 'auth-token';
+const REFRESH_TOKEN_NAME = 'remember-me';
 
 // JWT 시크릿 키
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
@@ -96,11 +96,11 @@ function redirectToLogin(request: NextRequest) {
 // 미들웨어를 적용할 경로 설정
 export const config = {
   matcher: [
-    // 로그인 페이지 제외하고, 특정 경로만 보호
-    '/payment/:path*',
+    // 인증이 필요한 경로만 보호
     '/mypage/:path*',
+    '/admin/:path*',
     '/dashboard/:path*',
-    '/settings/:path*',
-    // 다른 보호가 필요한 경로들...
+    // API 경로와 홈페이지는 보호하지 않음
+    // '/api/:path*', '/courses', '/' 등은 제외
   ]
 };

@@ -3,7 +3,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import styled, { keyframes, createGlobalStyle } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheck, faRocket, faClock, faUsers, faLightbulb, faChartLine, faComments, faFileAlt } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faRocket, faClock, faUsers, faLightbulb, faChartLine, faComments, faFileAlt, faPlay, faLock } from '@fortawesome/free-solid-svg-icons';
 import { motion } from 'framer-motion';
 import { Check, X, TrendingUp, CheckCircle, Clock, AlertTriangle, ArrowRight, Smile, Frown, HelpCircle, Wallet, Users, FileCheck, Rocket } from 'lucide-react';
 import Link from 'next/link';
@@ -545,7 +545,7 @@ const Hero = () => (
       >
         사업전략 전문가와 AI가 함께하는<br />2주 완성 사업계획서 + MVP 패키지
       </Subtitle>
-      <Link href="/purchase" passHref>
+      <Link href="/courses" passHref>
         <HeroButton
           as="button"
           initial={{ opacity: 0, y: 20 }}
@@ -1302,6 +1302,339 @@ const Hook = () => {
   );
 };
 
+// 강의 미리보기 섹션
+const CoursePreviewSection = styled.section`
+  padding: 120px 0;
+  background: linear-gradient(135deg, #F7F9FC 0%, #FFFFFF 100%);
+`;
+
+const CoursePreviewContainer = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+`;
+
+const CoursePreviewTitle = styled.h2`
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 20px;
+  color: ${colors.text.primary};
+`;
+
+const CoursePreviewSubtitle = styled.p`
+  font-size: 1.2rem;
+  text-align: center;
+  color: ${colors.text.secondary};
+  margin-bottom: 60px;
+  line-height: 1.6;
+`;
+
+const CourseGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 32px;
+  margin-bottom: 60px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const CourseCard = styled(motion.div).withConfig({
+  shouldForwardProp: (prop) => !['whileHover', 'transition'].includes(prop)
+})`
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  }
+`;
+
+const CourseVideoContainer = styled.div`
+  position: relative;
+  width: 100%;
+  height: 200px;
+  background: #f0f0f0;
+  overflow: hidden;
+`;
+
+const CourseThumbnail = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+`;
+
+const PlayButton = styled.div`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 60px;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.9);
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  
+  svg {
+    color: white;
+    font-size: 20px;
+    margin-left: 3px;
+  }
+`;
+
+const CourseContent = styled.div`
+  padding: 24px;
+`;
+
+const CourseTitle = styled.h3`
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: ${colors.text.primary};
+  margin-bottom: 12px;
+  line-height: 1.4;
+`;
+
+const CourseDescription = styled.p`
+  font-size: 1rem;
+  color: ${colors.text.secondary};
+  line-height: 1.5;
+  margin-bottom: 16px;
+`;
+
+const CourseMeta = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+`;
+
+const CourseDuration = styled.span`
+  font-size: 0.9rem;
+  color: ${colors.text.secondary};
+  background: ${colors.gradient.hero};
+  padding: 4px 12px;
+  border-radius: 20px;
+`;
+
+const CourseLevel = styled.span`
+  font-size: 0.9rem;
+  color: ${colors.accent};
+  font-weight: 600;
+`;
+
+const PreviewBadge = styled.div`
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: ${colors.accent};
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+`;
+
+const LockedBadge = styled.div`
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+`;
+
+const CoursePreviewCTA = styled.div`
+  text-align: center;
+  margin-top: 40px;
+`;
+
+const CoursePreview = () => {
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch('/api/courses?preview=true');
+        const data = await response.json();
+        
+        if (data.success) {
+          setCourses(data.courses);
+        } else {
+          console.error('강의 데이터 로드 실패:', data.error);
+        }
+      } catch (error) {
+        console.error('강의 데이터 로드 오류:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  // 로딩 중이거나 강의가 없을 때 샘플 데이터 사용
+  const previewCourses = courses.length > 0 ? courses : [
+    {
+      id: 1,
+      title: "1강. 혁신적인 사업계획서 작성법",
+      description: "AI를 활용한 체계적인 사업계획서 작성 방법론을 배웁니다.",
+      duration: 234, // 초 단위
+      level: "초급",
+      thumbnailUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=200&fit=crop",
+      isPublic: true
+    },
+    {
+      id: 2,
+      title: "2강. 시장 분석과 경쟁사 분석",
+      description: "효과적인 시장 조사 방법과 경쟁사 분석 프레임워크를 학습합니다.",
+      duration: 279,
+      level: "초급",
+      thumbnailUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=200&fit=crop",
+      isPublic: false
+    },
+    {
+      id: 3,
+      title: "3강. 재무 계획 수립하기",
+      description: "사업의 재무 모델링과 수익성 분석 방법을 익힙니다.",
+      duration: 361,
+      level: "중급",
+      thumbnailUrl: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=200&fit=crop",
+      isPublic: false
+    },
+    {
+      id: 4,
+      title: "4강. MVP 설계와 검증",
+      description: "최소기능제품(MVP) 설계 및 시장 검증 전략을 다룹니다.",
+      duration: 307,
+      level: "중급",
+      thumbnailUrl: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&h=200&fit=crop",
+      isPublic: false
+    }
+  ];
+
+  const formatDuration = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  };
+
+  const handleCourseClick = (course: any) => {
+    if (course.isPublic && course.vimeoUrl) {
+      // 미리보기 가능한 강의는 바로 재생
+      console.log('미리보기 강의 재생:', course.title);
+      // TODO: 모달로 Vimeo 플레이어 열기
+      window.open(course.vimeoUrl, '_blank');
+    } else {
+      // 유료 강의는 강의 페이지로 이동
+      window.location.href = '/courses';
+    }
+  };
+
+  if (loading) {
+    return (
+      <CoursePreviewSection>
+        <CoursePreviewContainer>
+          <CoursePreviewTitle>
+            💎 강의 미리보기
+          </CoursePreviewTitle>
+          <CoursePreviewSubtitle>
+            강의 데이터를 로드하고 있습니다...
+          </CoursePreviewSubtitle>
+        </CoursePreviewContainer>
+      </CoursePreviewSection>
+    );
+  }
+
+  return (
+    <CoursePreviewSection>
+      <CoursePreviewContainer>
+        <CoursePreviewTitle>
+          💎 강의 미리보기
+        </CoursePreviewTitle>
+        <CoursePreviewSubtitle>
+          실제 강의 내용을 미리 확인해보세요.<br/>
+          첫 번째 강의는 무료로 시청할 수 있습니다.
+        </CoursePreviewSubtitle>
+        
+        <CourseGrid>
+          {previewCourses.map((course) => (
+            <CourseCard
+              key={course.id}
+              whileHover={{ scale: 1.02 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => handleCourseClick(course)}
+            >
+              <CourseVideoContainer>
+                <CourseThumbnail 
+                  src={course.thumbnailUrl} 
+                  alt={course.title}
+                />
+                <PlayButton>
+                  <FontAwesomeIcon icon={faPlay} />
+                </PlayButton>
+                {course.isPublic ? (
+                  <PreviewBadge>무료 미리보기</PreviewBadge>
+                ) : (
+                  <LockedBadge>
+                    <FontAwesomeIcon icon={faLock} />
+                    프리미엄
+                  </LockedBadge>
+                )}
+              </CourseVideoContainer>
+              
+              <CourseContent>
+                <CourseTitle>{course.title}</CourseTitle>
+                <CourseDescription>{course.description || course.shortDescription}</CourseDescription>
+                <CourseMeta>
+                  <CourseDuration>{formatDuration(course.duration || 0)}</CourseDuration>
+                  <CourseLevel>{course.level}</CourseLevel>
+                </CourseMeta>
+              </CourseContent>
+            </CourseCard>
+          ))}
+        </CourseGrid>
+        
+        <CoursePreviewCTA>
+          <Link href="/courses" passHref>
+            <HeroButton
+              as="button"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              onClick={() => {}}
+            >
+              전체 강의 패키지 시작하기
+              <ArrowRight size={20} />
+            </HeroButton>
+          </Link>
+        </CoursePreviewCTA>
+      </CoursePreviewContainer>
+    </CoursePreviewSection>
+  );
+};
+
 const CouponSection = styled.section`
   padding: 80px 24px;
   background: linear-gradient(135deg, #EEF2FF 0%,rgb(247, 245, 255) 50%,rgb(255, 255, 255) 100%);
@@ -1783,7 +2116,7 @@ const FinalCTA = () => (
       이제 실행만 남았다!<br />
       고민하는 순간, 가격이 오릅니다.
     </FinalCTATitle>
-    <Link href="/purchase" passHref>
+    <Link href="/courses" passHref>
       <FinalCTAButton
         as="button"
         initial={{ opacity: 0, y: 20 }}
@@ -1836,6 +2169,7 @@ const ProductLanding = () => {
       <Hero />
       <PainPoints />
       <Hook />
+      <CoursePreview />
       <WhyGrowsome />
       <Timeline />
       <PostPurchase />

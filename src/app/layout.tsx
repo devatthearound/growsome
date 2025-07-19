@@ -6,6 +6,7 @@ import BottomNav from './components/layout/BottomNav';
 import SubscribePopup from './components/common/SubscribePopup';
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import "./globals.css";
 import styled, { createGlobalStyle } from 'styled-components';
 import StyledComponentsRegistry from '../lib/registry';
@@ -34,6 +35,32 @@ const GlobalStyle = createGlobalStyle`
     overflow-x: hidden;
   }
 `;
+
+// 레이아웃 내용을 처리하는 컴포넌트
+function LayoutContent({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isCoursesPage = pathname === '/courses';
+
+  if (isCoursesPage) {
+    // courses 페이지는 헤더/푸터 없이 전체 화면
+    return (
+      <CoursesContainer>
+        {children}
+      </CoursesContainer>
+    );
+  }
+
+  // 일반 페이지는 기본 레이아웃
+  return (
+    <AppContainer>
+      <Header />
+      <Main>
+        {children}
+      </Main>
+      <Footer />
+    </AppContainer>
+  );
+}
 
 export default function RootLayout({
   children,
@@ -69,13 +96,9 @@ export default function RootLayout({
           <AuthProvider>
             <CoupangApiProvider>
               <EmailProvider>
-                <AppContainer>
-                  <Header />
-                  <Main>
-                    {children}
-                  </Main>
-                  <Footer />
-                </AppContainer>
+                <LayoutContent>
+                  {children}
+                </LayoutContent>
               </EmailProvider>
             </CoupangApiProvider>
           </AuthProvider>
@@ -101,4 +124,10 @@ const Main = styled.main`
   @media (min-width: 769px) {
     padding-bottom: 0;
   }
+`;
+
+const CoursesContainer = styled.div`
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 `;
