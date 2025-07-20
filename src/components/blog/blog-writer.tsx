@@ -47,6 +47,8 @@ interface BlogWriterProps {
 }
 
 const BlogWriter = ({ contentId, mode = 'create' }: BlogWriterProps) => {
+  console.log('🔍 BlogWriter 초기화:', { contentId, mode })
+  
   const router = useRouter()
   const [title, setTitle] = useState('')
   const [slug, setSlug] = useState('')
@@ -59,29 +61,56 @@ const BlogWriter = ({ contentId, mode = 'create' }: BlogWriterProps) => {
   const [metaDescription, setMetaDescription] = useState('')
   const [isFeatured, setIsFeatured] = useState(false)
   const [autoSlugEnabled, setAutoSlugEnabled] = useState(true)
+  const [dataLoaded, setDataLoaded] = useState(false)
 
   // Hooks
   const { createContent, loading: createLoading, error: createError } = useCreateContent()
   const { updateContent, loading: updateLoading, error: updateError } = useUpdateContent()
   const { categories, loading: categoriesLoading } = useBlogCategories(true)
-  const { content: existingContent, loading: contentLoading } = useBlogContent(contentId)
+  const { content: existingContent, loading: contentLoading, error: contentError } = useBlogContent(contentId)
+
+  console.log('📊 Hook 상태:', {
+    mode,
+    contentId,
+    contentLoading,
+    contentError,
+    existingContent: !!existingContent,
+    dataLoaded
+  })
 
   // Edit 모드인 경우 기존 컨텐츠 로드
   useEffect(() => {
-    if (mode === 'edit' && existingContent) {
-      setTitle(existingContent.title)
-      setSlug(existingContent.slug)
-      setContent(existingContent.contentBody)
+    console.log('📥 useEffect 트리거:', {
+      mode,
+      contentId,
+      existingContent: !!existingContent,
+      contentLoading,
+      dataLoaded
+    })
+    
+    if (mode === 'edit' && existingContent && !contentLoading && !dataLoaded) {
+      console.log('✅ 기존 컨텐츠 로딩:', existingContent)
+      
+      setTitle(existingContent.title || '')
+      setSlug(existingContent.slug || '')
+      setContent(existingContent.contentBody || '')
       setExcerpt(existingContent.excerpt || '')
-      setCategoryId(existingContent.categoryId)
-      setStatus(existingContent.status)
+      setCategoryId(existingContent.categoryId || undefined)
+      setStatus(existingContent.status || 'DRAFT')
       setThumbnailUrl(existingContent.thumbnailUrl || '')
       setMetaTitle(existingContent.metaTitle || '')
       setMetaDescription(existingContent.metaDescription || '')
-      setIsFeatured(existingContent.isFeatured)
+      setIsFeatured(existingContent.isFeatured || false)
       setAutoSlugEnabled(false) // 수정 모드에서는 자동 slug 생성 비활성화
+      setDataLoaded(true)
+      
+      console.log('🎯 상태 업데이트 완료:', {
+        title: existingContent.title,
+        content: existingContent.contentBody?.slice(0, 100) + '...',
+        categoryId: existingContent.categoryId
+      })
     }
-  }, [mode, existingContent])
+  }, [mode, existingContent, contentLoading, dataLoaded])
 
   // 제목에서 자동으로 slug 생성
   const generateSlug = (title: string): string => {
@@ -167,43 +196,81 @@ const BlogWriter = ({ contentId, mode = 'create' }: BlogWriterProps) => {
     }
   }
 
-  const loading = createLoading || updateLoading || categoriesLoading || contentLoading
-  const error = createError || updateError
+  const loading = createLoading || updateLoading || categoriesLoading || (mode === 'edit' && contentLoading)
+  const error = createError || updateError || contentError
 
   if (mode === 'edit' && contentLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">컨텐츠를 불러오는 중...</p>
+          <p className="mt-4 text-gray-600">컨텐츠를 불러오는 중... (ID: {contentId})</p>
         </div>
       </div>
     )
   }
 
+  if (mode === 'edit' && contentError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-500 text-6xl mb-4">❌</div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">컨텐츠 로드 실패</h1>
+          <p className="text-gray-600 mb-4">ID: {contentId}</p>
+          <p className="text-red-600 mb-6">{contentError}</p>
+          <button
+            onClick={() => router.push('/blog')}
+            className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            블로그 목록으로 돌아가기
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  console.log('🎨 현재 상태:', {
+    title: title.slice(0, 50) + '...',
+    content: content.slice(0, 100) + '...',
+    dataLoaded
+  })
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto py-8 px-4">
+      <div className="max-w-none mx-auto py-8 px-4">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            {mode === 'create' ? '새 블로그 포스트 작성' : '블로그 포스트 수정'}
-          </h1>
-          <p className="text-gray-600">
-            {mode === 'create' ? '새로운 블로그 포스트를 작성해보세요.' : '기존 블로그 포스트를 수정해보세요.'}
-          </p>
+          <div className="max-w-7xl mx-auto">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              {mode === 'create' ? '새 블로그 포스트 작성' : `블로그 포스트 수정 (ID: ${contentId})`}
+            </h1>
+            <p className="text-gray-600">
+              {mode === 'create' ? '새로운 블로그 포스트를 작성해보세요.' : '기존 블로그 포스트를 수정해보세요.'}
+            </p>
+            {mode === 'edit' && (
+              <div className="mt-2 text-sm text-gray-500">
+                로딩 상태: {contentLoading ? '로딩 중' : '완료'} | 
+                데이터 존재: {existingContent ? '있음' : '없음'} | 
+                폼 로드됨: {dataLoaded ? '예' : '아니오'}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Error Display */}
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-600">{error}</p>
+          <div className="mb-6">
+            <div className="max-w-7xl mx-auto">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-red-600">{error}</p>
+              </div>
+            </div>
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+        <div className="max-w-7xl mx-auto flex gap-8">
+          {/* Main Content - 반응형 너비 */}
+          <div className="flex-1 max-w-4xl space-y-6">
             {/* Title */}
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
@@ -254,14 +321,19 @@ const BlogWriter = ({ contentId, mode = 'create' }: BlogWriterProps) => {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 내용 *
               </label>
-              <TiptapEditor
-                content={content}
-                onChange={setContent}
-                placeholder="블로그 포스트 내용을 작성하세요..."
-                className="min-h-[500px]"
-                onFileUpload={uploadFile}
-                onOpenGraphFetch={fetchOpenGraph}
-              />
+              <div className="w-full">
+                <TiptapEditor
+                  content={content}
+                  onChange={setContent}
+                  placeholder="블로그 포스트 내용을 작성하세요..."
+                  className="min-h-[500px]"
+                  onFileUpload={uploadFile}
+                  onOpenGraphFetch={fetchOpenGraph}
+                />
+              </div>
+              <p className="mt-2 text-sm text-gray-500">
+                현재 콘텐츠 길이: {content.length} 글자
+              </p>
             </div>
 
             {/* Excerpt */}
@@ -283,8 +355,8 @@ const BlogWriter = ({ contentId, mode = 'create' }: BlogWriterProps) => {
             </div>
           </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
+          {/* Sidebar - 고정 너비 */}
+          <div className="flex-shrink-0 w-80 space-y-6">
             {/* Actions */}
             <div className="bg-white p-6 rounded-lg shadow">
               <h3 className="text-lg font-semibold mb-4">발행</h3>
@@ -363,24 +435,83 @@ const BlogWriter = ({ contentId, mode = 'create' }: BlogWriterProps) => {
             <div className="bg-white p-6 rounded-lg shadow">
               <h3 className="text-lg font-semibold mb-4">대표 이미지</h3>
               
-              <input
-                type="url"
-                value={thumbnailUrl}
-                onChange={(e) => setThumbnailUrl(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="https://example.com/image.jpg"
-              />
+              {/* 파일 업로드 */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  이미지 파일 업로드
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (file) {
+                      try {
+                        const url = await uploadFile(file)
+                        setThumbnailUrl(url)
+                      } catch (error) {
+                        alert('이미지 업로드에 실패했습니다.')
+                      }
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  JPG, PNG, GIF 파일을 지원합니다
+                </p>
+              </div>
               
+              {/* URL 직접 입력 */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  또는 이미지 URL 직접 입력
+                </label>
+                <input
+                  type="url"
+                  value={thumbnailUrl}
+                  onChange={(e) => setThumbnailUrl(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://example.com/image.jpg"
+                />
+              </div>
+              
+              {/* 이미지 미리보기 */}
               {thumbnailUrl && (
                 <div className="mt-3">
-                  <img
-                    src={thumbnailUrl}
-                    alt="미리보기"
-                    className="w-full h-32 object-cover rounded-md"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none'
-                    }}
-                  />
+                  <p className="text-sm font-medium text-gray-700 mb-2">미리보기</p>
+                  <div className="relative">
+                    <img
+                      src={thumbnailUrl}
+                      alt="미리보기"
+                      className="w-full h-32 object-cover rounded-md"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none'
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setThumbnailUrl('')}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                      title="이미지 제거"
+                    >
+                      ×
+                    </button>
+                  </div>
+                </div>
+              )}
+              
+              {/* 이미지가 없을 때 기본 이미지 안내 */}
+              {!thumbnailUrl && (
+                <div className="mt-3 p-4 bg-gray-50 rounded-md">
+                  <p className="text-sm text-gray-600 mb-2">
+                    이미지를 설정하지 않으면 카테고리에 맞는 기본 이미지가 자동으로 생성됩니다.
+                  </p>
+                  <div className="flex items-center space-x-2 text-xs text-gray-500">
+                    <div className="w-16 h-10 bg-gray-200 rounded flex items-center justify-center">
+                      📷
+                    </div>
+                    <span>자동 생성 이미지 예시</span>
+                  </div>
                 </div>
               )}
             </div>

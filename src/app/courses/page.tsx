@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { PlayCircle, CheckCircle, Lock, Clock, ArrowLeft } from 'lucide-react';
+import { PlayCircle, CheckCircle, Lock, Clock, ArrowLeft, X, Star, Zap } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface Course {
@@ -31,6 +31,9 @@ const CoursesPage = () => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [userProgress, setUserProgress] = useState<{[key: number]: CourseProgress}>({});
   const [loading, setLoading] = useState(true);
+  const [videoWatchTime, setVideoWatchTime] = useState<{[key: number]: number}>({});
+  const [showCTA, setShowCTA] = useState(false);
+  const [hasWatchedPreview, setHasWatchedPreview] = useState(false);
 
   useEffect(() => {
     fetchCourses();
@@ -93,6 +96,35 @@ const CoursesPage = () => {
 
   const handleCourseSelect = (course: Course) => {
     setSelectedCourse(course);
+  };
+
+  const handleVideoProgress = (courseId: number, currentTime: number, duration: number) => {
+    setVideoWatchTime(prev => ({ ...prev, [courseId]: currentTime }));
+    
+    // 맛보기 영상(첫 번째 강의)을 80% 이상 시청했을 때 CTA 노출
+    if (courseId === 1 && currentTime / duration >= 0.8 && !hasWatchedPreview) {
+      setHasWatchedPreview(true);
+      setShowCTA(true);
+    }
+  };
+
+  const handleCTAClose = () => {
+    setShowCTA(false);
+  };
+
+  const handleCTAAction = (action: string) => {
+    // CTA 클릭 추적
+    console.log('CTA Action:', action);
+    
+    if (action === 'purchase') {
+      // 구매 페이지로 이동
+      window.open('/pricing', '_blank');
+    } else if (action === 'contact') {
+      // 상담 문의 페이지로 이동
+      window.open('/contact', '_blank');
+    }
+    
+    setShowCTA(false);
   };
 
   const handleVideoComplete = async (courseId: number) => {
@@ -278,6 +310,17 @@ const CoursesPage = () => {
                     강의 완료 표시
                   </CompleteButton>
                 )}
+                
+                {/* CTA 테스트 버튼 */}
+                <CompleteButton 
+                  onClick={() => {
+                    setHasWatchedPreview(true);
+                    setShowCTA(true);
+                  }}
+                  style={{ marginLeft: '10px', backgroundColor: '#f59e0b' }}
+                >
+                  CTA 테스트 (맛보기 완료)
+                </CompleteButton>
               </VideoInfo>
             </>
           ) : (
@@ -288,6 +331,64 @@ const CoursesPage = () => {
           )}
         </VideoSection>
       </MainContent>
+      
+      {/* CTA 모달 */}
+      {showCTA && (
+        <CTAOverlay>
+          <CTAModal>
+            <CTAHeader>
+              <CTACloseButton onClick={handleCTAClose}>
+                <X size={20} />
+              </CTACloseButton>
+            </CTAHeader>
+            
+            <CTAContent>
+              <CTAIcon>
+                <Zap size={48} color="#f59e0b" />
+              </CTAIcon>
+              
+              <CTATitle>축하합니다! 맛보기 영상을 완주하셨네요!</CTATitle>
+              
+              <CTADescription>
+                이제 전체 강의를 통해 AI 사업계획서 작성의 모든 노하우를 배워보세요.
+                <strong>전문가 수준의 노하우</strong>를 단시간에 습득할 수 있습니다.
+              </CTADescription>
+              
+              <CTAFeatures>
+                <CTAFeature>
+                  <Star size={16} color="#10b981" />
+                  <span>전체 20강의 무제한 시청</span>
+                </CTAFeature>
+                <CTAFeature>
+                  <Star size={16} color="#10b981" />
+                  <span>AI 도구 활용 템플릿 제공</span>
+                </CTAFeature>
+                <CTAFeature>
+                  <Star size={16} color="#10b981" />
+                  <span>1:1 맞춤 컨설팅 서비스</span>
+                </CTAFeature>
+              </CTAFeatures>
+              
+              <CTAButtons>
+                <CTAPrimaryButton onClick={() => handleCTAAction('purchase')}>
+                  전체 강의 수강하기
+                  <CTAPrice>월 39,000원</CTAPrice>
+                </CTAPrimaryButton>
+                
+                <CTASecondaryButton onClick={() => handleCTAAction('contact')}>
+                  무료 상담 문의하기
+                </CTASecondaryButton>
+              </CTAButtons>
+              
+              <CTAFooter>
+                <CTADisclaimer>
+                  현재 <strong>300명 한정</strong> 얼리버드 할인 진행중! (정가: 99,000원)
+                </CTADisclaimer>
+              </CTAFooter>
+            </CTAContent>
+          </CTAModal>
+        </CTAOverlay>
+      )}
     </Container>
   );
 };
@@ -608,6 +709,190 @@ const LoadingMessage = styled.div`
   height: 100vh;
   font-size: 1.125rem;
   color: #64748b;
+`;
+
+// CTA 모달 스타일링
+const CTAOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.3s ease;
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+`;
+
+const CTAModal = styled.div`
+  background: white;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.3s ease;
+  
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+`;
+
+const CTAHeader = styled.div`
+  padding: 1rem 1.5rem 0;
+  display: flex;
+  justify-content: flex-end;
+`;
+
+const CTACloseButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #64748b;
+  padding: 0.5rem;
+  border-radius: 50%;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #f1f5f9;
+    color: #334155;
+  }
+`;
+
+const CTAContent = styled.div`
+  padding: 0 2rem 2rem;
+  text-align: center;
+`;
+
+const CTAIcon = styled.div`
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+`;
+
+const CTATitle = styled.h2`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+`;
+
+const CTADescription = styled.p`
+  font-size: 1rem;
+  color: #4a5568;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  
+  strong {
+    color: #2d3748;
+    font-weight: 600;
+  }
+`;
+
+const CTAFeatures = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  text-align: left;
+`;
+
+const CTAFeature = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: #374151;
+  
+  span {
+    flex: 1;
+  }
+`;
+
+const CTAButtons = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+`;
+
+const CTAPrimaryButton = styled.button`
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const CTAPrice = styled.div`
+  font-size: 0.875rem;
+  font-weight: 500;
+  opacity: 0.9;
+  margin-top: 0.25rem;
+`;
+
+const CTASecondaryButton = styled.button`
+  background: transparent;
+  color: #374151;
+  border: 2px solid #e5e7eb;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    border-color: #d1d5db;
+    background: #f9fafb;
+  }
+`;
+
+const CTAFooter = styled.div`
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+`;
+
+const CTADisclaimer = styled.p`
+  font-size: 0.75rem;
+  color: #6b7280;
+  line-height: 1.4;
+  
+  strong {
+    color: #dc2626;
+    font-weight: 600;
+  }
 `;
 
 export default CoursesPage;

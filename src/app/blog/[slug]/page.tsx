@@ -1,17 +1,39 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Heart, Bell, BellRing, MessageCircle, Eye, Trash2, Edit3, ThumbsUp, Flag } from 'lucide-react'
+import { Heart, Bell, BellRing, MessageCircle, Eye, Trash2, Edit3, ThumbsUp, Flag, Edit } from 'lucide-react'
 import { blogAPI, BlogContent, BlogComment } from '../../../lib/graphql-client'
 import SubscriptionModal from '../../../components/SubscriptionModal'
 import ReportModal from '../../../components/ReportModal'
+import { useAuth } from '../../../hooks/useAuth'
+
+// 카테고리별 기본 이미지 생성 함수
+const getDefaultImageUrl = (categoryName?: string, title?: string, width = 400, height = 240) => {
+  // 카테고리에 따른 시드값 생성
+  const categorySeeds = {
+    'AI 기술': 'tech',
+    '사업성장': 'business', 
+    '디지털 마케팅': 'marketing',
+    '스타트업 인사이트': 'startup',
+    '데이터 분석': 'data',
+    '자동화': 'automation',
+    '트렌드': 'trend'
+  }
+  
+  const seed = categorySeeds[categoryName as keyof typeof categorySeeds] || 'business'
+  const titleHash = title ? title.split('').reduce((a, b) => a + b.charCodeAt(0), 0) : 0
+  
+  return `https://picsum.photos/seed/${seed}${titleHash}/${width}/${height}`
+}
 
 export default function BlogDetailPage() {
   const params = useParams()
+  const router = useRouter()
   const slug = params.slug as string
+  const { user, isLoading: authLoading, isLoggedIn } = useAuth()
   
   const [content, setContent] = useState<BlogContent | null>(null)
   const [relatedPosts, setRelatedPosts] = useState<BlogContent[]>([])
@@ -77,6 +99,36 @@ export default function BlogDetailPage() {
       console.error('관련 글 로드 실패:', err)
       // 관련 글 로드 실패시 빈 배열 설정
       setRelatedPosts([])
+    }
+  }
+
+  const handleEdit = () => {
+    if (content) {
+      router.push(`/blog/edit/${content.id}`)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!content || !user?.isAdmin) return
+    
+    if (window.confirm('정말로 이 글을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      try {
+        const response = await fetch(`/api/admin/blog/${content.id}`, {
+          method: 'DELETE',
+          credentials: 'include'
+        })
+        
+        if (response.ok) {
+          alert('글이 삭제되었습니다.')
+          router.push('/blog')
+        } else {
+          const error = await response.json()
+          alert(error.message || '삭제에 실패했습니다.')
+        }
+      } catch (error) {
+        console.error('삭제 실패:', error)
+        alert('삭제 중 오류가 발생했습니다.')
+      }
     }
   }
 
@@ -174,8 +226,8 @@ export default function BlogDetailPage() {
         body: newComment,
         createdAt: new Date().toISOString(),
         user: {
-          username: '그로우썸',
-          avatar: '/profile_growsome.png'
+          username: user?.username || '그로우썸',
+          avatar: user?.avatar || '/profile_growsome.png'
         },
         replies: [],
         likeCount: 0,
@@ -265,13 +317,35 @@ export default function BlogDetailPage() {
       <article className="max-w-4xl mx-auto px-4 py-8">
         {/* Header */}
         <header className="mb-8">
-          <div className="mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <Link 
               href={`/blog?category=${content.category?.slug}`}
               className="inline-flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium hover:bg-blue-200 transition-colors"
             >
               {content.category?.name}
             </Link>
+            
+            {/* 관리자 편집 버튼 */}
+            {!authLoading && user?.isAdmin && (
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={handleEdit}
+                  className="flex items-center space-x-1 bg-green-100 text-green-700 px-3 py-1 rounded-lg hover:bg-green-200 transition-colors text-sm"
+                  title="글 편집"
+                >
+                  <Edit className="w-4 h-4" />
+                  <span>편집</span>
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="flex items-center space-x-1 bg-red-100 text-red-700 px-3 py-1 rounded-lg hover:bg-red-200 transition-colors text-sm"
+                  title="글 삭제"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  <span>삭제</span>
+                </button>
+              </div>
+            )}
           </div>
           
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 leading-tight">
@@ -298,6 +372,11 @@ export default function BlogDetailPage() {
                 <div className="font-semibold text-gray-900">
                   그로우썸
                 </div>
+                {user?.isAdmin && (
+                  <div className="text-xs text-green-600 font-medium">
+                    관리자로 로그인됨
+                  </div>
+                )}
               </div>
             </div>
             
@@ -320,20 +399,18 @@ export default function BlogDetailPage() {
         </header>
 
         {/* Featured Image */}
-        {content.thumbnailUrl && (
-          <div className="mb-8">
-            <div className="relative h-96 rounded-lg overflow-hidden">
-              <Image
-                src={content.thumbnailUrl}
-                alt={content.title}
-                fill
-                sizes="(max-width: 768px) 100vw, 100vw"
-                priority
-                className="object-cover"
-              />
-            </div>
+        <div className="mb-8">
+          <div className="relative h-96 rounded-lg overflow-hidden">
+            <Image
+              src={content.thumbnailUrl || getDefaultImageUrl(content.category?.name, content.title, 800, 400)}
+              alt={content.title}
+              fill
+              sizes="(max-width: 768px) 100vw, 100vw"
+              priority
+              className="object-cover"
+            />
           </div>
-        )}
+        </div>
 
         {/* Content */}
         <div className="prose prose-lg max-w-none mb-12">
@@ -411,25 +488,37 @@ export default function BlogDetailPage() {
             댓글 {content.commentCount}개
           </h3>
           
-          {/* Comment Form */}
-          <div className="bg-gray-50 rounded-lg p-6 mb-8">
-            <textarea
-              value={newComment}
-              onChange={(e) => setNewComment(e.target.value)}
-              placeholder="댓글을 작성해주세요..."
-              rows={4}
-              className="w-full p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <div className="flex justify-end mt-4">
-              <button 
-                onClick={handleCommentSubmit}
-                disabled={!newComment.trim()}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-              >
-                댓글 작성
-              </button>
+          {/* Comment Form - 로그인한 사용자만 */}
+          {isLoggedIn ? (
+            <div className="bg-gray-50 rounded-lg p-6 mb-8">
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="댓글을 작성해주세요..."
+                rows={4}
+                className="w-full p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+              <div className="flex justify-end mt-4">
+                <button 
+                  onClick={handleCommentSubmit}
+                  disabled={!newComment.trim()}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                  댓글 작성
+                </button>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="bg-gray-50 rounded-lg p-6 mb-8 text-center">
+              <p className="text-gray-600 mb-4">댓글을 작성하려면 로그인이 필요합니다.</p>
+              <Link 
+                href="/login"
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                로그인하기
+              </Link>
+            </div>
+          )}
 
           {/* Comments List */}
           {(content.comments && content.comments.length > 0) || localComments.length > 0 ? (
@@ -463,22 +552,24 @@ export default function BlogDetailPage() {
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() => handleCommentEdit(comment.id, comment.body)}
-                            className="text-gray-500 hover:text-blue-600 transition-colors p-1"
-                            title="댓글 수정"
-                          >
-                            <Edit3 className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleCommentDelete(comment.id)}
-                            className="text-red-500 hover:text-red-700 transition-colors p-1"
-                            title="댓글 삭제"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                        {user?.isAdmin && (
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() => handleCommentEdit(comment.id, comment.body)}
+                              className="text-gray-500 hover:text-blue-600 transition-colors p-1"
+                              title="댓글 수정"
+                            >
+                              <Edit3 className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleCommentDelete(comment.id)}
+                              className="text-red-500 hover:text-red-700 transition-colors p-1"
+                              title="댓글 삭제"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
                       </div>
                       
                       {/* 댓글 내용 또는 수정 폼 */}
@@ -528,15 +619,17 @@ export default function BlogDetailPage() {
                               </button>
                             </div>
                             
-                            {/* 신고 버튼 - 자신의 댓글이 아닌 경우만 표시 */}
-                            <button
-                              onClick={() => handleCommentReport(comment.id)}
-                              className="flex items-center space-x-1 text-sm text-gray-400 hover:text-red-500 transition-colors"
-                              title="댓글 신고"
-                            >
-                              <Flag className="w-4 h-4" />
-                              <span>신고</span>
-                            </button>
+                            {/* 신고 버튼 - 관리자가 아닌 경우만 표시 */}
+                            {!user?.isAdmin && (
+                              <button
+                                onClick={() => handleCommentReport(comment.id)}
+                                className="flex items-center space-x-1 text-sm text-gray-400 hover:text-red-500 transition-colors"
+                                title="댓글 신고"
+                              >
+                                <Flag className="w-4 h-4" />
+                                <span>신고</span>
+                              </button>
+                            )}
                           </div>
                         </>
                       )}
@@ -563,13 +656,24 @@ export default function BlogDetailPage() {
                       </div>
                     )}
                     <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <span className="font-semibold text-gray-900">
-                          {comment.user?.username || '익명'}
-                        </span>
-                        <span className="text-sm text-gray-500">
-                          {formatDate(comment.createdAt)}
-                        </span>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center space-x-2">
+                          <span className="font-semibold text-gray-900">
+                            {comment.user?.username || '익명'}
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            {formatDate(comment.createdAt)}
+                          </span>
+                        </div>
+                        {user?.isAdmin && (
+                          <button
+                            onClick={() => handleCommentDelete(comment.id.toString())}
+                            className="text-red-500 hover:text-red-700 transition-colors p-1"
+                            title="댓글 삭제"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        )}
                       </div>
                       <p className="text-gray-700 leading-relaxed">
                         {comment.body}
@@ -582,14 +686,16 @@ export default function BlogDetailPage() {
                         </div>
                         
                         {/* 신고 버튼 */}
-                        <button
-                          onClick={() => handleCommentReport(comment.id.toString())}
-                          className="flex items-center space-x-1 text-sm text-gray-400 hover:text-red-500 transition-colors"
-                          title="댓글 신고"
-                        >
-                          <Flag className="w-4 h-4" />
-                          <span>신고</span>
-                        </button>
+                        {!user?.isAdmin && (
+                          <button
+                            onClick={() => handleCommentReport(comment.id.toString())}
+                            className="flex items-center space-x-1 text-sm text-gray-400 hover:text-red-500 transition-colors"
+                            title="댓글 신고"
+                          >
+                            <Flag className="w-4 h-4" />
+                            <span>신고</span>
+                          </button>
+                        )}
                       </div>
                       
                       {/* Replies */}
@@ -663,17 +769,15 @@ export default function BlogDetailPage() {
                   className="group bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden"
                 >
                   {/* 썸네일 이미지 */}
-                  {post.thumbnailUrl && (
-                    <div className="relative h-48 overflow-hidden">
-                      <Image
-                        src={post.thumbnailUrl}
-                        alt={post.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 50vw"
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  )}
+                  <div className="relative h-48 overflow-hidden">
+                    <Image
+                      src={post.thumbnailUrl || getDefaultImageUrl(post.category?.name, post.title, 400, 200)}
+                      alt={post.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
                   
                   <div className="p-6">
                     {/* 카테고리 */}

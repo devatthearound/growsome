@@ -12,6 +12,25 @@ import { ColumnBox, RowBox, Container } from '../../components/design-system/Lay
 import { GreenButton, SecondaryButton, PrimaryButton } from '../../components/design-system/Button'
 import { blogAPI, type BlogContent, type BlogCategory } from '../../lib/graphql-client'
 
+// 카테고리별 기본 이미지 생성 함수
+const getDefaultImageUrl = (categoryName?: string, title?: string, width = 400, height = 240) => {
+  // 카테고리에 따른 시드값 생성
+  const categorySeeds = {
+    'AI 기술': 'tech',
+    '사업성장': 'business', 
+    '디지털 마케팅': 'marketing',
+    '스타트업 인사이트': 'startup',
+    '데이터 분석': 'data',
+    '자동화': 'automation',
+    '트렌드': 'trend'
+  }
+  
+  const seed = categorySeeds[categoryName as keyof typeof categorySeeds] || 'business'
+  const titleHash = title ? title.split('').reduce((a, b) => a + b.charCodeAt(0), 0) : 0
+  
+  return `https://picsum.photos/seed/${seed}${titleHash}/${width}/${height}`
+}
+
 // Main Container for 1240px width
 const MainContainer = styled.div`
   width: 100%;
@@ -667,17 +686,15 @@ export default function BlogMainPage() {
                 <Link href={`/blog/${(heroContent || featuredContents[0])?.slug}`}>
                   <HeroCardContainer>
                     <HeroImageSection>
-                      {(heroContent || featuredContents[0])?.thumbnailUrl && (
-                        <HeroImageContainer>
-                          <BlogImage
-                            src={(heroContent || featuredContents[0])!.thumbnailUrl!}
-                            alt={(heroContent || featuredContents[0])!.title}
-                            fill
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                            style={{ objectFit: 'cover' }}
-                          />
-                        </HeroImageContainer>
-                      )}
+                      <HeroImageContainer>
+                        <BlogImage
+                          src={(heroContent || featuredContents[0])?.thumbnailUrl || getDefaultImageUrl((heroContent || featuredContents[0])?.category?.name, (heroContent || featuredContents[0])?.title, 600, 320)}
+                          alt={(heroContent || featuredContents[0])?.title || ''}
+                          fill
+                          sizes="(max-width: 768px) 100vw, 50vw"
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </HeroImageContainer>
                       <HeroBadge>
                         <Typography.TextS600 color={growsomeTheme.color.White}>
                           이주의 특별 추천 글
@@ -800,17 +817,15 @@ export default function BlogMainPage() {
                       animate={{ opacity: 1 }}
                       transition={{ duration: 0.4, delay: index * 0.1 }}
                     >
-                      {content.thumbnailUrl && (
-                        <BlogImageContainer>
-                          <BlogImage
-                            src={content.thumbnailUrl}
-                            alt={content.title}
-                            fill
-                            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                            style={{ objectFit: 'cover' }}
-                          />
-                        </BlogImageContainer>
-                      )}
+                      <BlogImageContainer>
+                        <BlogImage
+                          src={content.thumbnailUrl || getDefaultImageUrl(content.category?.name, content.title)}
+                          alt={content.title}
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          style={{ objectFit: 'cover' }}
+                        />
+                      </BlogImageContainer>
                       <BlogContent>
                         <BlogMeta>
                           <CategoryTag>{content.category?.name}</CategoryTag>

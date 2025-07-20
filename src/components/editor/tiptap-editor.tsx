@@ -156,6 +156,14 @@ const TiptapEditor = ({
     },
   })
 
+  // content prop이 변경될 때 에디터 내용 업데이트
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      console.log('Updating editor content:', content.slice(0, 100) + '...')
+      editor.commands.setContent(content)
+    }
+  }, [editor, content])
+
   // 파일 업로드 처리
   const handleFileUpload = useCallback(async (files: FileList) => {
     if (!onFileUpload) return

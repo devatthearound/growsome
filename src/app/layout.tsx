@@ -16,6 +16,8 @@ import { EmailProvider } from './contexts/EmailContext';
 import Script from 'next/script';
 import ClarityAnalytics from '../components/common/ClarityAnalytics';
 import KakaoChannelChat from './components/chat/KakaoChannelChat';
+import AuthErrorBoundary from '../components/error/AuthErrorBoundary';
+import NetworkStatusIndicator from '../components/common/NetworkStatusIndicator';
 import '../lib/fontawesome';
 
 // export const metadata: Metadata = {
@@ -34,6 +36,22 @@ const GlobalStyle = createGlobalStyle`
     margin: 0;
     padding: 0;
     overflow-x: hidden;
+  }
+  
+  /* 애니메이션 정의 */
+  @keyframes slide-in-right {
+    from {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  .animate-slide-in-right {
+    animation: slide-in-right 0.3s ease-out;
   }
 `;
 
@@ -97,9 +115,12 @@ export default function RootLayout({
           <AuthProvider>
             <CoupangApiProvider>
               <EmailProvider>
-                <LayoutContent>
-                  {children}
-                </LayoutContent>
+                <AuthErrorBoundary>
+                  <LayoutContent>
+                    {children}
+                  </LayoutContent>
+                  <NetworkStatusIndicator />
+                </AuthErrorBoundary>
                 <KakaoChannelChat />
               </EmailProvider>
             </CoupangApiProvider>

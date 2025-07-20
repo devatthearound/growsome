@@ -21,6 +21,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:seed-simple": "tsx prisma/seed-simple.ts",
     "db:seed-blog": "tsx scripts/seed-blog.ts",
+    "db:seed-growsome-blog": "tsx scripts/seed-growsome-blog.ts",
     "db:create-test-user": "tsx scripts/create-test-user.ts",
     "db:connect-users": "tsx scripts/connect-existing-users.ts",
     "db:check-specific-users": "tsx scripts/check-and-add-specific-users.ts",
@@ -42,7 +43,13 @@
     "fix-course-titles": "node scripts/fix-course-titles.js",
     "debug-and-fix": "node scripts/debug-and-fix-titles.js",
     "complete-setup": "node scripts/complete-course-setup.js",
-    "complete-setup-fixed": "node scripts/complete-course-setup-fixed.js"
+    "complete-setup-fixed": "node scripts/complete-course-setup-fixed.js",
+    "db:seed-all-blog-posts": "tsx scripts/seed-all-blog-posts.ts",
+    "blog:complete": "tsx scripts/seed-all-blog-posts.ts",
+    "blog:fixed": "tsx scripts/seed-blog-fixed.ts",
+    "admin:setup": "tsx scripts/add-admin-user.ts",
+    "admin:update-email": "tsx scripts/update-admin-email.ts",
+    "admin:setup-login": "tsx scripts/setup-admin-login.ts"
   },
   "dependencies": {
     "@apollo/server": "^4.11.1",
