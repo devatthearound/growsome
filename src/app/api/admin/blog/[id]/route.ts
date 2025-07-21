@@ -38,16 +38,16 @@ export async function GET(
       const blogPost = await prisma.blog_contents.findUnique({
         where: { id: blogId },
         include: {
-          category: {
+          blog_categories: {
             select: {
               id: true,
               name: true,
               slug: true
             }
           },
-          tags: {
+          blog_content_tags: {
             include: {
-              tag: {
+              blog_tags: {
                 select: {
                   id: true,
                   name: true,
@@ -81,8 +81,8 @@ export async function GET(
         published_at: blogPost.published_at,
         created_at: blogPost.created_at,
         updated_at: blogPost.updated_at,
-        category: blogPost.category,
-        tags: blogPost.tags.map(ct => ct.tag)
+        category: blogPost.blog_categories,
+        tags: blogPost.blog_content_tags.map(ct => ct.blog_tags)
       });
 
     } catch (error) {
