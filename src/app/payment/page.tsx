@@ -2,11 +2,24 @@
 
 import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { loadTossPayments, ANONYMOUS, TossPaymentsWidgets } from "@tosspayments/tosspayments-sdk";
 import { Check, CreditCard, Shield, Clock, Users, Star, ArrowLeft } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Script from 'next/script';
 
-const clientKey = process.env.NEXT_PUBLIC_TOSS_CLIENT_KEY || '';
+// 포트원 스마트로 결제 설정
+const storeId = process.env.NEXT_PUBLIC_PORTONE_STORE_ID;
+const channelKey = process.env.NEXT_PUBLIC_PORTONE_CHANNEL_KEY;
+
+if (!storeId || !channelKey) {
+  console.error('포트원 Store ID 또는 Channel Key가 설정되지 않았습니다.');
+}
+
+// 포트원 전역 변수 타입 정의
+declare global {
+  interface Window {
+    PortOne: any;
+  }
+}
 
 interface PaymentPlan {
   id: string;
@@ -69,8 +82,7 @@ export default function PaymentPage() {
     const plan = plans.find(p => p.id === productId);
     return plan || plans[1]; // 기본값은 스탠다드 솔루션
   });
-  const [widgets, setWidgets] = useState<TossPaymentsWidgets | null>(null);
-  const [ready, setReady] = useState(false);
+  const [portOneReady, setPortOneReady] = useState(false);
   const [loading, setLoading] = useState(false);
   const [couponApplied, setCouponApplied] = useState(false);
   const [userInfo, setUserInfo] = useState({
@@ -83,69 +95,64 @@ export default function PaymentPage() {
   const discountRate = Math.round(((selectedPlan.originalPrice - selectedPlan.price) / selectedPlan.originalPrice) * 100);
   const finalPrice = couponApplied ? selectedPlan.price - 5000 : selectedPlan.price;
 
+  // 포트원 초기화
   useEffect(() => {
-    async function fetchPaymentWidgets() {
-      try {
-        const tossPayments = await loadTossPayments(clientKey);
-        const widgets = tossPayments.widgets({ customerKey: ANONYMOUS });
-        setWidgets(widgets);
-      } catch (error) {
-        console.error('결제 위젯 초기화 실패:', error);
-      }
+    if (typeof window !== 'undefined' && window.PortOne) {
+      setPortOneReady(true);
     }
+  }, []);
 
-    fetchPaymentWidgets();
-  }, [clientKey]);
-
-  useEffect(() => {
-    async function renderPaymentWidgets() {
-      if (!widgets) return;
-
-      try {
-        await widgets.setAmount({
-          currency: "KRW",
-          value: finalPrice,
-        });
-
-        await Promise.all([
-          widgets.renderPaymentMethods({
-            selector: "#payment-method",
-            variantKey: "DEFAULT",
-          }),
-          widgets.renderAgreement({
-            selector: "#agreement",
-            variantKey: "AGREEMENT",
-          }),
-        ]);
-
-        setReady(true);
-      } catch (error) {
-        console.error('결제 위젯 렌더링 실패:', error);
-      }
+  // 포트원 스크립트 로드 콜백
+  const handlePortOneLoad = () => {
+    if (window.PortOne) {
+      setPortOneReady(true);
     }
-
-    renderPaymentWidgets();
-  }, [widgets, finalPrice]);
+  };
 
   const handlePayment = async () => {
-    if (!widgets || !userInfo.name || !userInfo.email || !userInfo.phone) {
+    if (!storeId || !channelKey) {
+      alert('결제 시스템이 설정되지 않았습니다. 관리자에게 문의하세요.');
+      return;
+    }
+
+    if (!portOneReady || !userInfo.name || !userInfo.email || !userInfo.phone) {
       alert('모든 정보를 입력해주세요.');
       return;
     }
 
     setLoading(true);
+    
     try {
       const orderId = `growsome_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
-      await widgets.requestPayment({
-        orderId,
+      // 포트원 결제 요청
+      const response = await window.PortOne.requestPayment({
+        storeId: storeId?.replace(/'/g, ''), // 문자열에서 따옴표 제거
+        channelKey: channelKey?.replace(/'/g, ''), // 문자열에서 따옴표 제거
+        paymentId: orderId,
         orderName: `그로우썸 ${selectedPlan.name} - AI 사업계획서 작성 완성 솔루션`,
-        successUrl: window.location.origin + "/payment/success",
-        failUrl: window.location.origin + "/payment/fail",
-        customerEmail: userInfo.email,
-        customerName: userInfo.name,
-        customerMobilePhone: userInfo.phone,
+        totalAmount: finalPrice,
+        currency: "KRW",
+        payMethod: "CARD",
+        customer: {
+          fullName: userInfo.name,
+          phoneNumber: userInfo.phone,
+          email: userInfo.email,
+        },
+        redirectUrl: window.location.origin + "/payment/success",
+        noticeUrls: [
+          window.location.origin + "/api/payments/webhook"
+        ]
       });
+      
+      if (response.code != null) {
+        // 결제 실패
+        alert(`결제에 실패했습니다: ${response.message}`);
+      } else {
+        // 결제 성공
+        alert('결제가 성공적으로 완료되었습니다!');
+        router.push(`/payment/success?paymentId=${response.paymentId}&txId=${response.txId}`);
+      }
     } catch (error) {
       console.error('결제 요청 실패:', error);
       alert('결제 중 오류가 발생했습니다. 다시 시도해주세요.');
@@ -155,7 +162,15 @@ export default function PaymentPage() {
   };
 
   return (
-    <Container>
+    <>
+      {/* 포트원(PortOne) SDK 로드 */}
+      <Script 
+        src="https://cdn.portone.io/v2/browser-sdk.js" 
+        onLoad={handlePortOneLoad}
+        strategy="beforeInteractive"
+      />
+      
+      <Container>
       <Header>
         <BackButton onClick={() => router.back()}>
           <ArrowLeft size={20} />
@@ -258,7 +273,7 @@ export default function PaymentPage() {
                 id="coupon"
                 checked={couponApplied}
                 onChange={(e) => setCouponApplied(e.target.checked)}
-                disabled={!ready}
+                disabled={!portOneReady}
               />
               <label htmlFor="coupon">
                 <span>신규 가입 쿠폰 적용 (5,000원 할인)</span>
@@ -268,17 +283,32 @@ export default function PaymentPage() {
 
           <PaymentSection>
             <SectionTitle>결제 수단</SectionTitle>
-            <PaymentWidget id="payment-method" />
+            <PaymentMethodCard>
+              <CreditCard size={24} color="#3b82f6" />
+              <div>
+                <div style={{fontWeight: '600', color: '#1e293b'}}>신용카드 결제</div>
+                <div style={{fontSize: '0.875rem', color: '#64748b'}}>포트원 스마트로 보안 결제 시스템</div>
+              </div>
+            </PaymentMethodCard>
           </PaymentSection>
 
           <AgreementSection>
             <SectionTitle>이용약관</SectionTitle>
-            <AgreementWidget id="agreement" />
+            <AgreementCard>
+              <AgreementItem>
+                <input type="checkbox" id="agreement1" required />
+                <label htmlFor="agreement1">결제 서비스 이용약관에 동의합니다 (필수)</label>
+              </AgreementItem>
+              <AgreementItem>
+                <input type="checkbox" id="agreement2" required />
+                <label htmlFor="agreement2">개인정보 수집 및 이용에 동의합니다 (필수)</label>
+              </AgreementItem>
+            </AgreementCard>
           </AgreementSection>
 
           <PaymentButton
             onClick={handlePayment}
-            disabled={!ready || loading}
+            disabled={!portOneReady || loading}
             $loading={loading}
           >
             {loading ? '결제 처리 중...' : `₩${finalPrice.toLocaleString()} 결제하기`}
@@ -305,7 +335,8 @@ export default function PaymentPage() {
           <span>24시간 지원</span>
         </TrustItem>
       </TrustSection>
-    </Container>
+        </Container>
+        </>
   );
 }
 
@@ -583,10 +614,6 @@ const PaymentSection = styled.div`
   border: 1px solid #e2e8f0;
 `;
 
-const PaymentWidget = styled.div`
-  min-height: 200px;
-`;
-
 const AgreementSection = styled.div`
   background: white;
   border-radius: 12px;
@@ -594,8 +621,44 @@ const AgreementSection = styled.div`
   border: 1px solid #e2e8f0;
 `;
 
-const AgreementWidget = styled.div`
-  min-height: 150px;
+const PaymentMethodCard = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+`;
+
+const AgreementCard = styled.div`
+  padding: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f9fafb;
+`;
+
+const AgreementItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #3b82f6;
+  }
+  
+  label {
+    font-size: 0.875rem;
+    color: #374151;
+    cursor: pointer;
+  }
 `;
 
 const PaymentButton = styled.button<{ $loading: boolean }>`

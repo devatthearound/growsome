@@ -468,8 +468,10 @@ const Services = () => {
           <FomoOverlay>
             <FomoModal>
               <FomoHeader>
-                <span style={{fontSize:'2rem'}}>⏰</span>
-                <FomoTitle>마감 임박 알림</FomoTitle>
+                <FomoTitleRow>
+                  <span style={{fontSize:'1.8rem'}}>⏰</span>
+                  <FomoTitle>마감 임박 알림</FomoTitle>
+                </FomoTitleRow>
                 <FomoClose onClick={handleCloseFomo}>×</FomoClose>
               </FomoHeader>
               <FomoList>
@@ -989,58 +991,82 @@ const PortfolioInfo = styled.div`
   flex-direction: column;
 `;
 
-// styled-components for FOMO modal
+// styled-components for FOMO modal - 브라우저 하단 고정, 딤드 없음
 const FomoOverlay = styled.div`
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(20,24,40,0.45);
+  bottom: 20px;
+  right: 20px;
   z-index: 2000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  pointer-events: none;
+  
+  @media ${growsomeTheme.device.mobile} {
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+  }
 `;
 const FomoModal = styled.div`
   background: #fff;
-  border-radius: 20px;
-  box-shadow: 0 8px 40px rgba(81,79,228,0.18);
-  max-width: 380px;
-  width: 90vw;
-  padding: 2.2rem 2rem 1.5rem 2rem;
+  border-radius: 16px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.15);
+  border: 1px solid ${growsomeTheme.color.Gray200};
+  max-width: 400px;
+  width: 380px;
+  padding: 1.5rem;
   position: relative;
-  animation: fadeInFomo 0.3s;
-  @keyframes fadeInFomo {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+  pointer-events: auto;
+  animation: slideUpFomo 0.4s ease-out;
+  
+  @media ${growsomeTheme.device.mobile} {
+    width: 100%;
+    max-width: none;
+  }
+  
+  @keyframes slideUpFomo {
+    from { 
+      opacity: 0; 
+      transform: translateY(60px) scale(0.95); 
+    }
+    to { 
+      opacity: 1; 
+      transform: translateY(0) scale(1); 
+    }
   }
 `;
 const FomoHeader = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.7rem;
-  margin-bottom: 1.2rem;
-  position: relative;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+`;
+const FomoTitleRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 `;
 const FomoTitle = styled.div`
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  color: ${growsomeTheme.color.Primary500};
+  color: ${growsomeTheme.color.Red500};
 `;
 const FomoClose = styled.button`
-  position: absolute;
-  right: 0;
-  top: 0;
   background: none;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   color: ${growsomeTheme.color.Gray400};
   cursor: pointer;
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  transition: background 0.15s;
+  padding: 0.2rem;
+  border-radius: 4px;
+  transition: all 0.15s;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
   &:hover {
     background: ${growsomeTheme.color.Gray100};
-    color: ${growsomeTheme.color.Primary500};
+    color: ${growsomeTheme.color.Red500};
   }
 `;
 const FomoList = styled.ul`
@@ -1049,13 +1075,18 @@ const FomoList = styled.ul`
   list-style: none;
 `;
 const FomoItem = styled.li`
-  font-size: 1.05rem;
+  font-size: 0.9rem;
   color: ${growsomeTheme.color.Black700};
   font-weight: 500;
-  margin-bottom: 0.7rem;
+  margin-bottom: 0.5rem;
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: flex-start;
+  gap: 0.4rem;
+  line-height: 1.4;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
 `;
 
 export default Services;
