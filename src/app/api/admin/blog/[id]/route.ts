@@ -6,10 +6,14 @@ import { checkAdminAccess } from '../../../../../utils/admin';
 
 const prisma = new PrismaClient();
 
+interface RouteParams {
+  params: Promise<{ id: string }>;
+}
+
 // GET - 블로그 글 조회 (편집용)
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   return withAuth(request, async (req, tokenPayload) => {
     try {
@@ -24,7 +28,8 @@ export async function GET(
         return NextResponse.json({ error: message }, { status: 403 });
       }
 
-      const blogId = parseInt(params.id);
+      const { id } = await params;
+      const blogId = parseInt(id);
       if (isNaN(blogId)) {
         return NextResponse.json({ error: '유효하지 않은 블로그 ID입니다.' }, { status: 400 });
       }
@@ -93,7 +98,7 @@ export async function GET(
 // PUT - 블로그 글 수정
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   return withAuth(request, async (req, tokenPayload) => {
     try {
@@ -108,7 +113,8 @@ export async function PUT(
         return NextResponse.json({ error: message }, { status: 403 });
       }
 
-      const blogId = parseInt(params.id);
+      const { id } = await params;
+      const blogId = parseInt(id);
       if (isNaN(blogId)) {
         return NextResponse.json({ error: '유효하지 않은 블로그 ID입니다.' }, { status: 400 });
       }
@@ -205,7 +211,7 @@ export async function PUT(
 // DELETE - 블로그 글 삭제
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: RouteParams
 ) {
   return withAuth(request, async (req, tokenPayload) => {
     try {
@@ -220,7 +226,8 @@ export async function DELETE(
         return NextResponse.json({ error: message }, { status: 403 });
       }
 
-      const blogId = parseInt(params.id);
+      const { id } = await params;
+      const blogId = parseInt(id);
       if (isNaN(blogId)) {
         return NextResponse.json({ error: '유효하지 않은 블로그 ID입니다.' }, { status: 400 });
       }
