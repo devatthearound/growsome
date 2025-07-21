@@ -283,11 +283,18 @@ const TypeformSurvey = () => {
     }
   };
 
+  // 이메일 유효성 검사 함수
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
   const canProceed = () => {
     const currentAnswer = answers[questions[currentQuestion].id];
     // company는 선택사항이므로 검증에서 제외
     if (questions[currentQuestion].id === 'company') {
       return true;
+    }
+    // 이메일 단계에서는 형식까지 검증
+    if (questions[currentQuestion].id === 'email') {
+      return currentAnswer && emailRegex.test(currentAnswer.toString().trim());
     }
     return currentAnswer && currentAnswer.toString().trim() !== '';
   };
@@ -374,12 +381,14 @@ const TypeformSurvey = () => {
                         if (inputError) setInputError(false); // 입력 시 에러 상태 해제
                       }}
                       autoFocus
-                      $hasError={inputError}
+                      $hasError={!!(inputError || (currentQ.id === 'email' && answers.email && !emailRegex.test(answers.email)))}
                     />
-                    {inputError && (
+                    {(inputError || (currentQ.id === 'email' && answers.email && !emailRegex.test(answers.email))) && (
                       <ErrorMessage>
                         <Typography.TextS400 color={growsomeTheme.color.Red500}>
-                          답변을 입력해주세요.
+                          {currentQ.id === 'email' && answers.email && !emailRegex.test(answers.email)
+                            ? '올바른 이메일 형식을 입력해주세요.'
+                            : '답변을 입력해주세요.'}
                         </Typography.TextS400>
                       </ErrorMessage>
                     )}
@@ -405,7 +414,7 @@ const TypeformSurvey = () => {
                         setTimeout(() => setInputError(false), 2000);
                       }
                     }}
-                    disabled={loading}
+                    disabled={!canProceed()}
                   >
                     {loading ? '제출 중...' : 
                      currentQuestion === questions.length - 1 ? '진단 완료하기 🎉' : '다음 질문'}

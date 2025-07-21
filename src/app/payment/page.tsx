@@ -20,39 +20,55 @@ interface PaymentPlan {
 
 const plans: PaymentPlan[] = [
   {
-    id: 'monthly',
-    name: '월간 플랜',
-    price: 39000,
-    originalPrice: 99000,
-    period: '월',
+    id: '4',
+    name: '베이직 솔루션',
+    price: 300000,
+    originalPrice: 500000,
+    period: '2주',
     features: [
-      '전체 20강의 평생 무제한 시청',
-      '실전 템플릿 & 체크리스트 제공',
-      '전용 커뮤니티 및 Q&A 지원',
-      '수료증 발급 (선택사항)',
-      '1:1 무료 상담 1회'
+      '40만원 상당의 강의 무료 제공',
+      '사업계획서 초안 원본 제공',
+      '대화한 챗GPTs 모두 제공',
+      '빌드업 마케팅 전자책 제공'
     ]
   },
   {
-    id: 'yearly',
-    name: '연간 플랜',
-    price: 299000,
-    originalPrice: 1188000,
-    period: '년',
+    id: '5',
+    name: '스탠다드 솔루션',
+    price: 990000,
+    originalPrice: 1500000,
+    period: '2주',
     features: [
-      '월간 플랜의 모든 혜택',
-      '추가 2개월 무료 (총 14개월)',
-      '우선 1:1 상담 지원',
-      '전용 멘토링 세션 2회',
-      '사업계획서 검토 서비스'
+      '기본 패키지의 모든 혜택 포함',
+      '러버블 목업 제작 지원',
+      '실제 개발 연계 시 30% 할인',
+      '우선순위 지원'
     ],
     popular: true
+  },
+  {
+    id: '6',
+    name: '프리미엄 솔루션',
+    price: 9900000,
+    originalPrice: 15000000,
+    period: '2주',
+    features: [
+      '스탠다드 패키지의 모든 혜택 포함',
+      '프로젝트 제작 완료까지 지원',
+      '무제한 페이지 작성'
+    ]
   }
 ];
 
 export default function PaymentPage() {
   const router = useRouter();
-  const [selectedPlan, setSelectedPlan] = useState<PaymentPlan>(plans[0]);
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+  const productId = searchParams.get('product_id') || '5'; // 기본값은 스탠다드 솔루션
+  
+  const [selectedPlan, setSelectedPlan] = useState<PaymentPlan>(() => {
+    const plan = plans.find(p => p.id === productId);
+    return plan || plans[1]; // 기본값은 스탠다드 솔루션
+  });
   const [widgets, setWidgets] = useState<TossPaymentsWidgets | null>(null);
   const [ready, setReady] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -151,34 +167,28 @@ export default function PaymentPage() {
       <Content>
         <LeftSection>
           <PlanSection>
-            <SectionTitle>플랜 선택</SectionTitle>
-            <PlanGrid>
-              {plans.map((plan) => (
-                <PlanCard
-                  key={plan.id}
-                  $selected={selectedPlan.id === plan.id}
-                  $popular={plan.popular}
-                  onClick={() => setSelectedPlan(plan)}
-                >
-                  {plan.popular && <PopularBadge>인기</PopularBadge>}
-                  <PlanName>{plan.name}</PlanName>
-                  <PlanPrice>
-                    <span className="price">₩{plan.price.toLocaleString()}</span>
-                    <span className="period">/{plan.period}</span>
-                  </PlanPrice>
-                  <OriginalPrice>₩{plan.originalPrice.toLocaleString()}</OriginalPrice>
-                  <DiscountBadge>{discountRate}% 할인</DiscountBadge>
-                  <PlanFeatures>
-                    {plan.features.map((feature, index) => (
-                      <FeatureItem key={index}>
-                        <Check size={16} color="#10B981" />
-                        {feature}
-                      </FeatureItem>
-                    ))}
-                  </PlanFeatures>
-                </PlanCard>
-              ))}
-            </PlanGrid>
+            <SectionTitle>선택한 솔루션</SectionTitle>
+            <PlanCard
+              $selected={true}
+              $popular={selectedPlan.popular}
+            >
+              {selectedPlan.popular && <PopularBadge>인기</PopularBadge>}
+              <PlanName>{selectedPlan.name}</PlanName>
+              <PlanPrice>
+                <span className="price">₩{selectedPlan.price.toLocaleString()}</span>
+                <span className="period">/{selectedPlan.period}</span>
+              </PlanPrice>
+              <OriginalPrice>₩{selectedPlan.originalPrice.toLocaleString()}</OriginalPrice>
+              <DiscountBadge>{discountRate}% 할인</DiscountBadge>
+              <PlanFeatures>
+                {selectedPlan.features.map((feature, index) => (
+                  <FeatureItem key={index}>
+                    <Check size={16} color="#10B981" />
+                    {feature}
+                  </FeatureItem>
+                ))}
+              </PlanFeatures>
+            </PlanCard>
           </PlanSection>
 
           <UserInfoSection>
@@ -380,32 +390,21 @@ const SectionTitle = styled.h2`
   margin: 0 0 1rem 0;
 `;
 
-const PlanGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
-`;
-
 const PlanCard = styled.div<{ $selected: boolean; $popular?: boolean }>`
   background: white;
   border: 2px solid ${props => props.$selected ? '#3b82f6' : '#e2e8f0'};
   border-radius: 12px;
   padding: 1.5rem;
-  cursor: pointer;
   transition: all 0.2s ease;
   position: relative;
-  
-  &:hover {
-    border-color: ${props => props.$selected ? '#3b82f6' : '#cbd5e1'};
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  }
   
   ${props => props.$popular && `
     border-color: #f59e0b;
     background: linear-gradient(135deg, #fff7ed, #ffffff);
   `}
 `;
+
+
 
 const PopularBadge = styled.div`
   position: absolute;

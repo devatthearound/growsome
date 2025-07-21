@@ -40,7 +40,7 @@ const Footer = () => {
         
         <BottomSection>
           <CopyrightText>
-            © 2025 디어라운드 주식회사. All rights reserved.
+            © 2025 그로우썸. All rights reserved.
           </CopyrightText>
           <LegalLinks>
             <LegalLink href="/terms-of-service">이용약관</LegalLink>

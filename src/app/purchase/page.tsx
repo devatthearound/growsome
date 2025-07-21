@@ -352,7 +352,7 @@ const PurchasePage = () => {
                     <Price>99만원 <span>/ 2주</span></Price>
                     <MonthlyPrice>월 82,500원 (12개월 할부시)</MonthlyPrice>
                     <PackageDescription>
-                      10페이지 내외 사업계획서 초안과 커서AI 목업이 필요한 기업에 적합
+                      10페이지 내외 사업계획서 초안과 러버블 목업 제작 지원이 필요한 기업에 적합
                     </PackageDescription>
                   </PackageHeader>
                   <FeatureList>
@@ -362,7 +362,7 @@ const PurchasePage = () => {
                     </Feature>
                     <Feature>
                       <FontAwesomeIcon icon={faCheck} />
-                      넥스트(NexT)기반 개발 파일 원본 제공
+                      러버블 목업 제작 지원
                     </Feature>
                     <Feature>
                       <FontAwesomeIcon icon={faCheck} />
@@ -387,15 +387,19 @@ const PurchasePage = () => {
                     <Price>990만원 <span>/ 2주</span></Price>
                     <MonthlyPrice>월 825,000원 (12개월 할부시)</MonthlyPrice>
                     <PackageDescription>
-                      대규모 프로젝트나 특별한 요구사항이 있는 기업에 적합
+                      프로젝트 제작까지 포함된 완전한 솔루션이 필요한 기업에 적합
                     </PackageDescription>
                   </PackageHeader>
                   <FeatureList>
                     <Feature>
                       <FontAwesomeIcon icon={faCheck} />
-                      프리미엄 패키지의 모든 혜택 포함
+                      스탠다드 패키지의 모든 혜택 포함
                     </Feature>
-                     <Feature>
+                    <Feature>
+                      <FontAwesomeIcon icon={faCheck} />
+                      프로젝트 제작 완료까지 지원
+                    </Feature>
+                    <Feature>
                       <FontAwesomeIcon icon={faCheck} />
                       무제한 페이지 작성
                     </Feature>

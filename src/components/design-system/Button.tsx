@@ -4,7 +4,7 @@ import { growsomeTheme } from './theme';
 // Button Components based on TheAround Design System
 
 export interface ButtonProps {
-  $color?: 'primary' | 'green' | 'gray' | 'danger' | 'warning';
+  $color?: 'primary' | 'green' | 'gray' | 'danger' | 'warning' | 'customPurple';
   $size?: 'small' | 'medium' | 'large';
   $variant?: 'filled' | 'outline' | 'ghost' | 'text';
   $width?: string;
@@ -50,6 +50,12 @@ const getButtonColors = (color: ButtonProps['$color'], variant: ButtonProps['$va
       hover: growsomeTheme.color.Yellow400,
       active: growsomeTheme.color.Yellow500,
       light: growsomeTheme.color.Yellow300,
+    },
+    customPurple: {
+      main: growsomeTheme.color.customPurple,
+      hover: growsomeTheme.color.customPurple,
+      active: growsomeTheme.color.customPurple,
+      light: growsomeTheme.color.customPurple,
     },
   };
 

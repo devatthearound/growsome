@@ -83,6 +83,7 @@ export const growsomeTheme = {
     Orange200: "#FFC8A7",
     Orange100: "#FFE7CD",
     Orange50: "#FFF6F0",
+    customPurple: "#443fcf",
   },
   fontSize: {
     TextXS: "1.0rem",

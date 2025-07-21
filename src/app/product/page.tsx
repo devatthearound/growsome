@@ -70,7 +70,7 @@ const HeroContainer = styled.div`
   align-items: center;
   text-align: center;
   overflow: hidden;
-  background: #514fe4;
+  background: #5C59E8;
 
   @media (max-width: 768px) {
     height: 500px;
@@ -94,7 +94,7 @@ const CanvasContainer = styled.div`
   left: 0;
   width: 100%;
   height: 100%;
-  background: #514fe4;
+  background: #5C59E8;
 `;
 
 const HeroContent = styled.div`
@@ -923,9 +923,9 @@ const PriceIncreaseCircle = styled.div<{ $active?: boolean; $warning?: boolean }
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: ${props => props.$warning ? '#514fe4' : props.$active ? '#514fe4' : '#E5E7EB'};
+  background: ${props => props.$warning ? '#5C59E8' : props.$active ? '#5C59E8' : '#E5E7EB'};
   border: ${props => props.$active ? '2px solid #fff' : 'none'};
-  box-shadow: ${props => props.$active ? '0 0 0 2px #514fe4' : 'none'};
+  box-shadow: ${props => props.$active ? '0 0 0 2px #5C59E8' : 'none'};
   z-index: 2;
 `;
 
@@ -935,8 +935,8 @@ const PriceBox = styled(motion.div).withConfig({
   background: ${props => props.$warning ? '#FFF5F5' : props.$active ? '#efefff' : '#fff'};
   border-radius: 16px;
   padding: 24px;
-  border: 1px solid ${props => props.$warning ? '#FFCCCC' : props.$active ? '#514fe4' : '#E5E7EB'};
-  box-shadow: ${props => props.$active ? '0 4px 6px rgba(81, 79, 218, 0.1)' : '0 1px 3px rgba(0,0,0,0.1)'};
+  border: 1px solid ${props => props.$warning ? '#FFCCCC' : props.$active ? '#5C59E8' : '#E5E7EB'};
+  box-shadow: ${props => props.$active ? '0 4px 6px rgba(92, 89, 232, 0.1)' : '0 1px 3px rgba(0,0,0,0.1)'};
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -959,8 +959,8 @@ const StatusChip = styled.div`
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: rgba(81, 79, 218, 0.1);
-  color: #514fe4;
+  background: rgba(92, 89, 232, 0.1);
+  color: #5C59E8;
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 14px;
@@ -977,7 +977,7 @@ const PriceLabel = styled.div`
 const PriceAmount = styled.div<{ $active?: boolean; $completed?: boolean }>`
   font-size: ${props => props.$active ? '32px' : '24px'};
   font-weight: 700;
-  color: ${props => props.$active ? '#514fe4' : props.$completed ? '#9CA3AF' : '#666'};
+  color: ${props => props.$active ? '#5C59E8' : props.$completed ? '#9CA3AF' : '#666'};
   margin-bottom: 8px;
   
   span {

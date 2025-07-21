@@ -5,7 +5,8 @@ import styled from 'styled-components';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
-import { Menu, X, User, LogOut } from 'lucide-react';
+import { Menu, X, User, LogOut, Pencil } from 'lucide-react';
+import { GreenButton } from '@/components/design-system/Button';
 
 interface HeaderProps {
   theme?: 'light' | 'dark';
@@ -112,6 +113,7 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
           {!isLoading && (
             isLoggedIn ? (
               <>
+
                 <UserProfileGroup onClick={() => handleMenuClick('/mypage')}>
                   <User size={16} />
                   <UserName>{user?.username}</UserName>
@@ -124,6 +126,13 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
                   <LogOut size={16} />
                   로그아웃
                 </LogoutButton>
+             {user?.email === 'master@growsome.kr' && (
+                  <Link href="/blog/write" style={{ marginLeft: '1rem', display: 'flex', alignItems: 'center' }} title="새 글 작성">
+                    <GreenButton $size="medium" style={{ borderRadius: '50%', padding: '0.5rem', minWidth: 0, width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Pencil size={22} />
+                    </GreenButton>
+                  </Link>
+                )}
               </>
             ) : (
               <LoginButton 
@@ -185,6 +194,13 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
                   <LogOut size={16} />
                   로그아웃
                 </LogoutButton>
+                {isLoggedIn && user?.email === 'master@growsome.kr' && (
+                  <Link href="/blog/write" style={{ margin: '1.2rem 0', display: 'flex', alignItems: 'center', justifyContent: 'center' }} title="새 글 작성">
+                    <GreenButton $size="medium" style={{ borderRadius: '50%', padding: '0.5rem', minWidth: 0, width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Pencil size={22} />
+                    </GreenButton>
+                  </Link>
+                )}
               </>
             ) : (
               <LoginButton 
@@ -284,8 +300,9 @@ const LogoImage = styled.img`
 `;
 
 const MainNav = styled.nav`
-  @media (max-width: 768px) {
-    display: none;
+  display: none;
+  @media (min-width: 1281px) {
+    display: flex;
   }
 `;
 
@@ -332,7 +349,7 @@ const UserSection = styled.div`
   align-items: center;
   gap: 1.5rem;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1280px) {
     display: none;
   }
 `;
@@ -435,17 +452,22 @@ const MobileMenuButton = styled.button`
     background: rgba(0, 0, 0, 0.05);
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1280px) {
     display: flex;
     align-items: center;
     justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: 1rem;
+    padding: 0.5rem;
   }
 `;
 
 const MobileOverlay = styled.div`
   display: none;
   
-  @media (max-width: 768px) {
+  @media (max-width: 1280px) {
     display: block;
     position: fixed;
     top: 70px;
@@ -459,21 +481,20 @@ const MobileOverlay = styled.div`
 
 const MobileMenu = styled.div<MobileMenuProps>`
   display: none;
-  
-  @media (max-width: 768px) {
-    display: block;
+  @media (max-width: 1280px) {
+    display: ${({ $isOpen }) => ($isOpen ? 'block' : 'none')};
     position: fixed;
-    top: 70px;
+    top: 0;
     right: 0;
-    width: 320px;
-    max-width: 90vw;
-    height: calc(100vh - 70px);
-    background: white;
-    transform: translateX(${(props) => props.$isOpen ? '0' : '100%'});
-    transition: transform 0.3s ease;
+    width: 80vw;
+    max-width: 340px;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -2px 0 24px rgba(81,79,228,0.08);
+    z-index: 2001;
+    padding: 2.5rem 1.5rem 1.5rem 1.5rem;
     overflow-y: auto;
-    z-index: 1000;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
   }
 `;
 

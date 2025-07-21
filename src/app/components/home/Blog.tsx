@@ -5,8 +5,28 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Eye, Heart } from 'lucide-react';
 import { blogAPI } from '@/lib/graphql-client';
 import type { BlogContent } from '@/lib/graphql-client';
+
+// 카테고리별 기본 이미지 생성 함수
+const getDefaultImageUrl = (categoryName?: string, title?: string, width = 400, height = 240) => {
+  // 카테고리에 따른 시드값 생성
+  const categorySeeds = {
+    'AI 기술': 'tech',
+    '사업성장': 'business', 
+    '디지털 마케팅': 'marketing',
+    '스타트업 인사이트': 'startup',
+    '데이터 분석': 'data',
+    '자동화': 'automation',
+    '트렌드': 'trend'
+  }
+  
+  const seed = categorySeeds[categoryName as keyof typeof categorySeeds] || 'business'
+  const titleHash = title ? title.split('').reduce((a, b) => a + b.charCodeAt(0), 0) : 0
+  
+  return `https://picsum.photos/seed/${seed}${titleHash}/${width}/${height}`
+}
 
 export default function BlogSection() {
   const [featuredPosts, setFeaturedPosts] = useState<BlogContent[]>([]);
@@ -67,23 +87,25 @@ export default function BlogSection() {
   if (loading) {
     return (
       <Container>
-        <Header>
-          <h1>최신 블로그</h1>
-          <p>Growsome의 인사이트와 노하우를 만나보세요</p>
-        </Header>
-        <BlogGrid>
-          {[...Array(3)].map((_, i) => (
-            <SkeletonCard key={i}>
-              <SkeletonImage />
-              <SkeletonContent>
-                <SkeletonTag />
-                <SkeletonTitle />
-                <SkeletonDescription />
-                <SkeletonMeta />
-              </SkeletonContent>
-            </SkeletonCard>
-          ))}
-        </BlogGrid>
+        <ContentWrapper>
+          <Header>
+            <h1>최신 블로그</h1>
+            <p>Growsome의 인사이트와 노하우를 만나보세요</p>
+          </Header>
+          <BlogGrid>
+            {[...Array(3)].map((_, i) => (
+              <SkeletonCard key={i}>
+                <SkeletonImage />
+                <SkeletonContent>
+                  <SkeletonTag />
+                  <SkeletonTitle />
+                  <SkeletonDescription />
+                  <SkeletonMeta />
+                </SkeletonContent>
+              </SkeletonCard>
+            ))}
+          </BlogGrid>
+        </ContentWrapper>
       </Container>
     );
   }
@@ -91,122 +113,98 @@ export default function BlogSection() {
   if (error || featuredPosts.length === 0) {
     return (
       <Container>
-        <Header>
-          <h1>최신 블로그</h1>
-          <p>Growsome의 인사이트와 노하우를 만나보세요</p>
-        </Header>
-        <EmptyState>
-          <EmptyIcon>📝</EmptyIcon>
-          <EmptyText>
-            {error || '아직 게시된 블로그 글이 없습니다.'}
-          </EmptyText>
-          <ViewAllButton as={Link} href="/blog">
-            블로그 둘러보기
-          </ViewAllButton>
-        </EmptyState>
+        <ContentWrapper>
+          <Header>
+            <h1>최신 블로그</h1>
+            <p>Growsome의 인사이트와 노하우를 만나보세요</p>
+          </Header>
+          <EmptyState>
+            <EmptyIcon>📝</EmptyIcon>
+            <EmptyText>
+              {error || '아직 게시된 블로그 글이 없습니다.'}
+            </EmptyText>
+            <ViewAllButton as={Link} href="/blog">
+              블로그 둘러보기
+            </ViewAllButton>
+          </EmptyState>
+        </ContentWrapper>
       </Container>
     );
   }
 
   return (
     <Container>
-      <Header>
-        <h1>최신 블로그</h1>
-        <p>Growsome의 인사이트와 노하우를 만나보세요</p>
-      </Header>
-      
-      <BlogGrid>
-        {featuredPosts.map((post, index) => (
-          <Link key={post.id} href={`/blog/${post.slug}`} style={{textDecoration: 'none', color: 'inherit'}}>
-            <BlogCard 
-              whileHover={{ y: -8 }}
-              transition={{ duration: 0.3 }}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              style={{ transitionDelay: `${index * 0.1}s` }}
-            >
-              {post.thumbnailUrl && (
-                <BlogImage>
-                  <Image
-                    src={post.thumbnailUrl}
-                    alt={post.title}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                  />
-                  {post.isFeatured && (
-                    <FeaturedBadge>
-                      ⭐ 추천
-                    </FeaturedBadge>
-                  )}
-                </BlogImage>
-              )}
-              
-              <BlogContent $hasImage={!!post.thumbnailUrl}>
-                <CategoryTag>{post.category?.name || '일반'}</CategoryTag>
-                <Title>{post.title}</Title>
-                <Description>
-                  {post.excerpt || post.contentBody.replace(/<[^>]*>/g, '').substring(0, 120) + '...'}
-                </Description>
+      <ContentWrapper>
+        <Header>
+          <h1>최신 블로그</h1>
+          <p>Growsome의 인사이트와 노하우를 만나보세요</p>
+        </Header>
+        
+        <BlogGrid>
+          {featuredPosts.map((post, index) => (
+            <Link key={post.id} href={`/blog/${post.slug}`} style={{textDecoration: 'none', color: 'inherit'}}>
+              <BlogCard 
+                whileHover={{ y: -8 }}
+                transition={{ duration: 0.3 }}
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{ transitionDelay: `${index * 0.1}s` }}
+              >
+                              <BlogImage>
+                <Image
+                  src={post.thumbnailUrl || getDefaultImageUrl(post.category?.name, post.title)}
+                  alt={post.title}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                />
+                {post.isFeatured && (
+                  <FeaturedBadge>
+                    ⭐ 추천
+                  </FeaturedBadge>
+                )}
+              </BlogImage>
                 
-                <MetaInfo>
-                  <AuthorInfo>
-                    {post.author?.avatar && (
-                      <AuthorAvatar>
-                        <Image
-                          src={post.author.avatar}
-                          alt={post.author.username}
-                          width={24}
-                          height={24}
-                          style={{ borderRadius: '50%' }}
-                        />
-                      </AuthorAvatar>
-                    )}
-                    <span>{post.author?.username || '작성자'}</span>
-                  </AuthorInfo>
+                <BlogContent $hasImage={true}>
+                  <CategoryTag>{post.category?.name || '일반'}</CategoryTag>
+                  <Title>{post.title}</Title>
+                  <Description>
+                    {post.excerpt || post.contentBody.replace(/<[^>]*>/g, '').substring(0, 120) + '...'}
+                  </Description>
                   
-                  <MetaDetails>
-                    <span>{formatDate(post.publishedAt || post.createdAt)}</span>
-                    <span>•</span>
-                    <span>{getReadingTime(post.contentBody)} 읽기</span>
-                  </MetaDetails>
+                                  <MetaInfo>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Eye size={14} color="#94a3b8" />
+                    <span style={{ fontSize: '12px', color: '#94a3b8' }}>{post.viewCount || 0}</span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <Heart size={14} color="#94a3b8" />
+                    <span style={{ fontSize: '12px', color: '#94a3b8' }}>{post.likeCount || 0}</span>
+                  </div>
                 </MetaInfo>
-                
-                <BlogStats>
-                  <StatItem>
-                    <span>👁</span>
-                    <span>{post.viewCount}</span>
-                  </StatItem>
-                  <StatItem>
-                    <span>❤️</span>
-                    <span>{post.likeCount}</span>
-                  </StatItem>
-                  <StatItem>
-                    <span>💬</span>
-                    <span>{post.commentCount}</span>
-                  </StatItem>
-                </BlogStats>
-              </BlogContent>
-            </BlogCard>
-          </Link>
-        ))}
-      </BlogGrid>
-      
-      <ViewAllButton as={Link} href="/blog">
-        모든 블로그 글 보기 →
-      </ViewAllButton>
+                </BlogContent>
+              </BlogCard>
+            </Link>
+          ))}
+        </BlogGrid>
+        
+        <ViewAllButton as={Link} href="/blog">
+          모든 블로그 글 보기 →
+        </ViewAllButton>
+      </ContentWrapper>
     </Container>
   );
 }
 
 const Container = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 150px 20px 100px 20px;
-  background-color: #F8F9FA;
+  width: 100%;
+  background-color: white;
+  padding: 150px 0 100px 0;
+`;
 
-  @media (min-width: 700px) {
-    padding: 150px 20px;
-  }
+const ContentWrapper = styled.div`
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
 `;
 
 const Header = styled.div`
@@ -241,27 +239,26 @@ const BlogGrid = styled.div`
 
 const BlogCard = styled(motion.div)`
   background: white;
-  border-radius: 20px;
+  border-radius: 0;
   overflow: hidden;
   cursor: pointer;
-  border: 1px solid #eaeaea;
-  transition: all 0.3s ease;
+  border: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   text-decoration: none;
   color: inherit;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-
+  
   &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-    border-color: #514FE4;
+    transform: none;
+    box-shadow: none;
   }
 `;
 
 const BlogImage = styled.div`
   position: relative;
   width: 100%;
-  height: 200px;
+  height: 240px;
   overflow: hidden;
+  background: #f8f9fa;
 
   img {
     transition: transform 0.3s ease;
@@ -286,105 +283,59 @@ const FeaturedBadge = styled.div`
 `;
 
 const BlogContent = styled.div<{ $hasImage: boolean }>`
-  padding: ${props => props.$hasImage ? '25px' : '30px'};
+  padding: ${props => props.$hasImage ? '24px 0' : '30px'};
 `;
 
 const CategoryTag = styled.span`
-  background: linear-gradient(135deg, #514FE4, #6366F1);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  background: #f8f9fa;
+  color: #666;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
   display: inline-block;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.02em;
 `;
 
 const Title = styled.h2`
-  font-size: 1.3rem;
-  margin-bottom: 12px;
-  color: #333;
+  font-size: 1.125rem;
+  margin-bottom: 8px;
+  color: #1e293b;
   line-height: 1.4;
-  font-weight: 700;
+  font-weight: 600;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  letter-spacing: -0.01em;
 
   ${BlogCard}:hover & {
-    color: #514FE4;
+    color: #1e293b;
   }
 `;
 
 const Description = styled.p`
-  font-size: 0.95rem;
-  color: #666;
+  font-size: 0.875rem;
+  color: #64748b;
   line-height: 1.6;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  letter-spacing: 0.01em;
 `;
 
 const MetaInfo = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: 15px;
-  flex-wrap: wrap;
-  gap: 10px;
+  gap: 16px;
+  margin-top: 16px;
 `;
 
-const AuthorInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.9rem;
-  color: #555;
-  font-weight: 500;
-`;
 
-const AuthorAvatar = styled.div`
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-`;
-
-const MetaDetails = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.85rem;
-  color: #888;
-
-  span:nth-child(2) {
-    color: #ddd;
-  }
-`;
-
-const BlogStats = styled.div`
-  display: flex;
-  gap: 15px;
-  padding-top: 15px;
-  border-top: 1px solid #f0f0f0;
-`;
-
-const StatItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.85rem;
-  color: #888;
-
-  span:first-child {
-    font-size: 1rem;
-  }
-`;
 
 const ViewAllButton = styled(motion.div)`
   display: inline-flex;

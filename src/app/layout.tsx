@@ -16,6 +16,7 @@ import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import ClarityAnalytics from '../components/common/ClarityAnalytics';
 import AuthErrorBoundary from '../components/error/AuthErrorBoundary';
+import KakaoChatButton from './components/common/KakaoChatButton';
 
 // FontAwesome 가져오기 (에러 방지를 위해 try-catch로 감쌈)
 try {
@@ -72,6 +73,7 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
         {children}
       </Main>
       <Footer />
+      <KakaoChatButton />
     </AppContainer>
   );
 }

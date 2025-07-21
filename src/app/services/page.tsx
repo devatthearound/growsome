@@ -1,12 +1,14 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import styled, { ThemeProvider, keyframes } from 'styled-components';
 import { useRouter } from 'next/navigation';
 import { growsomeTheme } from '@/components/design-system/theme';
 import { Typography } from '@/components/design-system/Typography';
 import { ColumnBox, RowBox, Container, Section, Card } from '@/components/design-system/Layout';
 import { GreenButton, SecondaryButton, PrimaryButton } from '@/components/design-system/Button';
+import Link from 'next/link';
+import Image from 'next/image';
 
 // Custom styled component for the bright green diagnosis button
 const DiagnosisButton = styled(GreenButton)`
@@ -115,6 +117,53 @@ const Services = () => {
     "🔴 2025년 하반기 일정 조기 마감 예상"
   ];
 
+  const portfolioPreview = [
+    {
+      id: 'skykey',
+      image: '/images/projects/skykey/main_thumb_800x500.png',
+      title: '스카이키',
+      description: '급매 부동산 데이터를 제공하는 투자 지원 플랫폼',
+    },
+    {
+      id: 'withslow',
+      image: '/images/projects/withslow/main_thumb_800x500.png',
+      title: '느린걸음 플러스',
+      description: '발달장애인을 위한 비대면 교육과 중개 플랫폼',
+    },
+    {
+      id: 'cupas',
+      image: '/images/projects/cupas/main_thumb_800x500.png',
+      title: '쿠파스 자동화',
+      description: 'N잡러를 위한 쿠팡파트너스 자동화 솔루션',
+    },
+    {
+      id: 'pickup',
+      image: '/images/projects/pickup/main_thumb_800x500.png',
+      title: '픽업해',
+      description: '0% 배달수수료 픽업해',
+    },
+  ];
+
+  // FOMO 모달 팝업 구현
+  const [showFomo, setShowFomo] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (localStorage.getItem('fomoClosed')) return;
+    const onScroll = () => {
+      if (window.scrollY > 400 && !showFomo) {
+        setShowFomo(true);
+      }
+    };
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [showFomo]);
+  const handleCloseFomo = () => {
+    setShowFomo(false);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('fomoClosed', '1');
+    }
+  };
+
   return (
     <ThemeProvider theme={growsomeTheme}>
       <ServicesContainer>
@@ -172,6 +221,31 @@ const Services = () => {
           </Container>
         </HeroSection>
 
+        {/* Portfolio Section */}
+        <PortfolioSection>
+          <Typography.DisplayL600 style={{textAlign:'center', marginBottom:'2rem', fontWeight: 700, color: growsomeTheme.color.Black800}}>우리가 만든 결과물</Typography.DisplayL600>
+          <PortfolioGrid>
+            {portfolioPreview.map((item) => (
+              <Link key={item.id} href={`/portfolio/${item.id}`} style={{textDecoration: 'none'}}>
+                <PortfolioCard role="link" tabIndex={0}>
+                  <PortfolioImage>
+                    <Image src={item.image} alt={item.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" style={{objectFit:'cover', borderRadius:16}} />
+                  </PortfolioImage>
+                  <PortfolioInfo>
+                    <Typography.TextL600 style={{marginBottom:'0.5rem', color: growsomeTheme.color.Black800, fontWeight: 600}}>{item.title}</Typography.TextL600>
+                    <Typography.TextM400 style={{marginBottom:'1rem', color: growsomeTheme.color.Black600}}>{item.description}</Typography.TextM400>
+                  </PortfolioInfo>
+                </PortfolioCard>
+              </Link>
+            ))}
+          </PortfolioGrid>
+          <div style={{textAlign:'center', marginTop:'2rem'}}>
+            <Link href="/portfolio">
+              <SecondaryButton $color="customPurple" $size="medium">포트폴리오 전체보기</SecondaryButton>
+            </Link>
+          </div>
+        </PortfolioSection>
+
         {/* Problems Section */}
         <ProblemsSection>
           <Container>
@@ -188,7 +262,7 @@ const Services = () => {
                     <ProblemIcon>
                       <CrossIcon>❌</CrossIcon>
                     </ProblemIcon>
-                    <Typography.TextL400 color={growsomeTheme.color.Black800}>
+                    <Typography.TextL400 style={{color: growsomeTheme.color.Black700, fontWeight: 500}}>
                       "{problem}"
                     </Typography.TextL400>
                   </ProblemCard>
@@ -199,7 +273,7 @@ const Services = () => {
                 <WarningIcon>⏰</WarningIcon>
                 <ColumnBox $gap={1} $ai="center">
                   <Typography.TextL600 color={growsomeTheme.color.Black800} style={{textAlign: 'center'}}>
-                    ChatGPT, Claude 등 AI가 비즈니스를 바꾸고 있는데,
+                    ChatGPT, Claude 등<br />AI가 비즈니스를 바꾸고 있는데,
                   </Typography.TextL600>
                   <Typography.TextL600 color={growsomeTheme.color.Red500} style={{textAlign: 'center'}}>
                     매월 뒤처지고 있습니다
@@ -214,11 +288,9 @@ const Services = () => {
         <SolutionSection>
           <Container>
             <ColumnBox $gap={4} $ai="center">
-              <SectionBadge>
-                <span style={{fontSize: '2rem'}}>✨</span>
-                <Typography.TextL500 color={growsomeTheme.color.Primary600}>
-                  그로우썸 10배 성장 모델!
-                </Typography.TextL500>
+              <SectionBadge style={{justifyContent:'center', display:'flex', margin:'0 auto 1.5rem auto'}}>
+                <span style={{fontSize: '2.5rem'}}>✨</span>
+                <Typography.DisplayL700 style={{fontSize:'2.2rem', fontWeight:800, color: growsomeTheme.color.Black800, textAlign:'center', marginLeft:'0.5rem'}}>그로우썸 10배 성장 모델!</Typography.DisplayL700>
               </SectionBadge>
               
               <SolutionsGrid>
@@ -226,10 +298,10 @@ const Services = () => {
                   <SolutionCard key={index}>
                     <SolutionIcon>{solution.icon}</SolutionIcon>
                     <ColumnBox $gap={1}>
-                      <Typography.TextL600 color={growsomeTheme.color.Black800}>
+                      <Typography.TextL600 style={{color: growsomeTheme.color.Primary500, fontWeight: 700, marginBottom: '0.5rem'}}>
                         {solution.title}
                       </Typography.TextL600>
-                      <Typography.TextM400 color={growsomeTheme.color.Black600}>
+                      <Typography.TextM400 style={{color: growsomeTheme.color.Black600}}>
                         {solution.description}
                       </Typography.TextM400>
                     </ColumnBox>
@@ -263,121 +335,39 @@ const Services = () => {
                 {/* 예비 1인 창업가 */}
                 <TargetCard>
                   <CardHeader>
-                    <TargetIconWrapper>
-                      <TargetIcon>👤</TargetIcon>
-                    </TargetIconWrapper>
-                    <ColumnBox $gap={1}>
-                      <Typography.TextXL500 color={growsomeTheme.color.Black800}>
-                        예비 1인 창업가
-                      </Typography.TextXL500>
-                      <Typography.TextM400 color={growsomeTheme.color.Black600}>
-                        백만원 단위 투자로 시작하는 성장 엔진
-                      </Typography.TextM400>
-                    </ColumnBox>
+                    <CardIcon>👤</CardIcon>
+                    <CardTitle>예비 1인 창업가</CardTitle>
                   </CardHeader>
-                  
                   <FeaturesList>
-                    <FeatureItem>
-                      <CheckIcon>✓</CheckIcon>
-                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
-                        혼자서도 10명 규모 운영 가능한 자동화 시스템
-                      </Typography.TextM400>
-                    </FeatureItem>
-                    <FeatureItem>
-                      <CheckIcon>✓</CheckIcon>
-                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
-                        500만원으로 시작 (기존 2,000만원 대비 75% 절감)
-                      </Typography.TextM400>
-                    </FeatureItem>
-                    <FeatureItem>
-                      <CheckIcon>✓</CheckIcon>
-                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
-                        3개월 → 6주로 빠른 시장 진입
-                      </Typography.TextM400>
-                    </FeatureItem>
-                    <FeatureItem>
-                      <CheckIcon>✓</CheckIcon>
-                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
-                        24시간 AI 고객 응대 시스템
-                      </Typography.TextM400>
-                    </FeatureItem>
+                    <FeatureItem><FeatureCheck>✅</FeatureCheck>혼자서도 10명 규모 운영 가능한 자동화 시스템</FeatureItem>
+                    <FeatureItem><FeatureCheck>✅</FeatureCheck>500만원으로 시작 (최대 75% 비용 절감)</FeatureItem>
+                    <FeatureItem><FeatureCheck>✅</FeatureCheck>6주 만에 시장 진입 (최대 6배 빠름)</FeatureItem>
+                    <FeatureItem><FeatureCheck>✅</FeatureCheck>24시간 AI 자동화</FeatureItem>
                   </FeaturesList>
-                  
-                  <ROICard>
-                    <ROIIcon>🚀</ROIIcon>
-                    <ColumnBox $gap={1}>
-                      <Typography.TextL600 color={growsomeTheme.color.Green600}>
-                        투자 수익률: 2,100% (21배 수익)
-                      </Typography.TextL600>
-                      <Typography.TextS400 color={growsomeTheme.color.Black600}>
-                        * 시간 가치 + 인력 절감 + 자동화 효과 합산
-                      </Typography.TextS400>
-                    </ColumnBox>
-                  </ROICard>
-                  
-                  <DiagnosisButton $size="large" $width="100%" onClick={handleFreeDiagnosisClick}>
-                    예비 창업가 상담 신청
-                  </DiagnosisButton>
+                  <RoiHighlight>21배 투자수익률</RoiHighlight>
+                  <RoiSub>* 시간 절감 + 인력 절감 + 자동화 효과</RoiSub>
+                  <PrimaryButton $color="primary" $size="medium" style={{marginTop:'0.5rem', width:'100%'}} onClick={handleFreeDiagnosisClick}>
+                    상담 신청
+                  </PrimaryButton>
                 </TargetCard>
 
                 {/* 100억 매출 기업 */}
                 <TargetCard>
                   <CardHeader>
-                    <TargetIconWrapper>
-                      <TargetIcon>🏢</TargetIcon>
-                    </TargetIconWrapper>
-                    <ColumnBox $gap={1}>
-                      <Typography.TextXL500 color={growsomeTheme.color.Black800}>
-                        100억 매출 기업
-                      </Typography.TextXL500>
-                      <Typography.TextM400 color={growsomeTheme.color.Black600}>
-                        천만원 단위 투자로 시스템 고도화
-                      </Typography.TextM400>
-                    </ColumnBox>
+                    <CardIcon>🏢</CardIcon>
+                    <CardTitle>100억 매출 기업</CardTitle>
                   </CardHeader>
-                  
                   <FeaturesList>
-                    <FeatureItem>
-                      <CheckIcon>✓</CheckIcon>
-                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
-                        이미 고객 확보 완료, 다음 단계 확장 준비
-                      </Typography.TextM400>
-                    </FeatureItem>
-                    <FeatureItem>
-                      <CheckIcon>✓</CheckIcon>
-                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
-                        2,000만원으로 시스템 고도화 (기존 4,000만원 대비 50% 절감)
-                      </Typography.TextM400>
-                    </FeatureItem>
-                    <FeatureItem>
-                      <CheckIcon>✓</CheckIcon>
-                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
-                        빅데이터 분석 및 예측 시스템
-                      </Typography.TextM400>
-                    </FeatureItem>
-                    <FeatureItem>
-                      <CheckIcon>✓</CheckIcon>
-                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
-                        글로벌 확장 대응 시스템
-                      </Typography.TextM400>
-                    </FeatureItem>
+                    <FeatureItem><FeatureCheck>✅</FeatureCheck>이미 고객 확보, 다음 단계 확장 준비</FeatureItem>
+                    <FeatureItem><FeatureCheck>✅</FeatureCheck>2,000만원으로 고도화 (최대 50% 비용 절감)</FeatureItem>
+                    <FeatureItem><FeatureCheck>✅</FeatureCheck>빅데이터 분석/예측 시스템</FeatureItem>
+                    <FeatureItem><FeatureCheck>✅</FeatureCheck>글로벌 확장 지원</FeatureItem>
                   </FeaturesList>
-                  
-                  <ROICard>
-                    <ROIIcon>🚀</ROIIcon>
-                    <ColumnBox $gap={1}>
-                      <Typography.TextL600 color={growsomeTheme.color.Green600}>
-                        투자 수익률: 13,200% (132배 수익)
-                      </Typography.TextL600>
-                      <Typography.TextS400 color={growsomeTheme.color.Black600}>
-                        * 시장 선점 + 운영 효율화 + 매출 증대 합산
-                      </Typography.TextS400>
-                    </ColumnBox>
-                  </ROICard>
-                  
-                  <DiagnosisButton $size="large" $width="100%" onClick={handleFreeDiagnosisClick}>
-                    대기업 상담 신청
-                  </DiagnosisButton>
+                  <RoiHighlight>132배 매출 성장</RoiHighlight>
+                  <RoiSub>* 시장 선점 + 효율화 + 매출 증대</RoiSub>
+                  <PrimaryButton $color="primary" $size="medium" style={{marginTop:'0.5rem', width:'100%'}} onClick={handleFreeDiagnosisClick}>
+                    상담 신청
+                  </PrimaryButton>
                 </TargetCard>
               </TargetGrid>
             </ColumnBox>
@@ -417,7 +407,8 @@ const Services = () => {
                 ))}
               </FeaturesGrid>
 
-              <UrgencyCard>
+              {/* UrgencyCard(마감 임박 알림) 섹션 제거 */}
+              {/* <UrgencyCard>
                 <UrgencyHeader>
                   <UrgencyIcon>⏰</UrgencyIcon>
                   <Typography.TextXL500 color={growsomeTheme.color.Red500}>
@@ -435,7 +426,7 @@ const Services = () => {
                     </UrgencyItem>
                   ))}
                 </UrgencyList>
-              </UrgencyCard>
+              </UrgencyCard> */}
 
               <CTAButtons>
                 <DiagnosisButton $size="large" onClick={handleFreeDiagnosisClick}>
@@ -452,29 +443,43 @@ const Services = () => {
         {/* Final Message Section */}
         <FinalSection>
           <Container>
-            <ColumnBox $ai="center">
-              <FinalMessage>
-                <Typography.DisplayM600 color={growsomeTheme.color.Gray200} style={{textAlign: 'center', lineHeight: '1.7'}}>
-                  "단순 에이전시는 홈페이지를 만들지만,<br />
-                  스타트업 경험팀은 사업을 탄생시킵니다.<br /><br />
-                  
-                  <MessageHighlight>완성도 중심 vs 사업 성공 중심</MessageHighlight><br />
-                  <MessageHighlight>단발성 작품 vs 성장하는 생명체</MessageHighlight><br />
-                  <MessageHighlight>디자이너 감성 vs 고객 중심 데이터</MessageHighlight><br /><br />
-                  
-                  남들이 예쁜 홈페이지를 만드는 동안,<br />
-                  당신은 AI와 스타트업 경험이 결합된<br />
-                  진짜 성장 엔진을 얻으세요.<br /><br />
-                  
-                  <FinalCTA>
-                    선택은 당신의 몫입니다.<br />
-                    그로우썸은 준비되어 있습니다.
-                  </FinalCTA>
-                </Typography.DisplayM600>
-              </FinalMessage>
-            </ColumnBox>
+            <Typography.DisplayM600 style={{
+              color: '#fff',
+              textAlign: 'center',
+              lineHeight: '1.7',
+              fontWeight: 600,
+              textShadow: '0 2px 8px rgba(0,0,0,0.25)'
+            }}>
+              일반적으로 에이전시는 홈페이지를 만들지만, <br />
+              스타트업 경험팀은 사업을 탄생시킵니다. <br /><br />
+              <span style={{color: '#A5B4FC', fontWeight:700}}>완성도 중심 vs 사업 성공 중심</span><br />
+              <span style={{color: '#A5B4FC', fontWeight:700}}>단발성 작품 vs 성장하는 생명체</span><br />
+              <span style={{color: '#A5B4FC', fontWeight:700}}>디자이너 감성 vs 고객 중심 데이터</span><br /><br />
+              남들이 예쁜 홈페이지를 만드는 동안,<br />
+              당신은 AI와 스타트업 경험이 결합된<br />
+              진짜 성장 엔진을 얻으세요.<br /><br />
+              <span style={{color: '#22FF5F', fontWeight:700}}>선택은 당신의 몫입니다.<br />그로우썸은 준비되어 있습니다.</span>
+            </Typography.DisplayM600>
           </Container>
         </FinalSection>
+
+        {/* FOMO 마감 임박 모달 */}
+        {showFomo && (
+          <FomoOverlay>
+            <FomoModal>
+              <FomoHeader>
+                <span style={{fontSize:'2rem'}}>⏰</span>
+                <FomoTitle>마감 임박 알림</FomoTitle>
+                <FomoClose onClick={handleCloseFomo}>×</FomoClose>
+              </FomoHeader>
+              <FomoList>
+                <FomoItem>🔴 예비 1인 창업가: 월 5팀 → 3팀으로 축소</FomoItem>
+                <FomoItem>🔴 100억 매출 기업: 분기 3팀 → 반기 3팀으로 축소</FomoItem>
+                <FomoItem>🔴 2025년 하반기 일정 조기 마감 예상</FomoItem>
+              </FomoList>
+            </FomoModal>
+          </FomoOverlay>
+        )}
       </ServicesContainer>
     </ThemeProvider>
   );
@@ -738,9 +743,10 @@ const SectionTitleWrapper = styled.div`
 
 const TargetGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-  gap: ${growsomeTheme.spacing["3xl"]};
-  max-width: 1200px;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  column-gap: 1.5rem;
+  row-gap: 2rem;
+  max-width: 900px;
   margin: 0 auto;
   
   @media ${growsomeTheme.device.mobile} {
@@ -748,76 +754,66 @@ const TargetGrid = styled.div`
   }
 `;
 
+// TargetCard SaaS 스타일 업그레이드
 const TargetCard = styled(Card)`
-  background: ${growsomeTheme.color.White};
-  border: 1px solid ${growsomeTheme.color.Gray200};
-  padding: ${growsomeTheme.spacing.xl};
-  transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: ${growsomeTheme.shadow.Elevation2};
-  }
+  background: #fff;
+  border: 1.5px solid ${growsomeTheme.color.Gray100};
+  border-radius: 18px;
+  box-shadow: 0 4px 24px rgba(81,79,228,0.07);
+  padding: 1.5rem 1.2rem 1.2rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+  min-width: 0;
+  max-width: 420px;
+  margin: 0 auto;
 `;
-
 const CardHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: ${growsomeTheme.spacing.lg};
-  margin-bottom: ${growsomeTheme.spacing.xl};
+  gap: 1.1rem;
+  margin-bottom: 0.7rem;
 `;
-
-const TargetIconWrapper = styled.div`
-  width: 64px;
-  height: 64px;
+const CardIcon = styled.div`
+  font-size: 2.3rem;
   background: ${growsomeTheme.color.Primary50};
-  border-radius: ${growsomeTheme.radius.radius2};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+  border-radius: 50%;
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
 `;
-
-const TargetIcon = styled.div`
+const CardTitle = styled.div`
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: ${growsomeTheme.color.Black800};
+`;
+const FeaturesList = styled.ul`
+  list-style: none;
+  padding: 0; margin: 0;
+  display: flex; flex-direction: column; gap: 0.5rem;
+`;
+const FeatureItem = styled.li`
+  font-size: 1.05rem;
+  color: ${growsomeTheme.color.Black700};
+  font-weight: 500;
+  display: flex; align-items: flex-start; gap: 0.5rem;
+`;
+const FeatureCheck = styled.span`
+  color: ${growsomeTheme.color.GreenSafe500};
+  font-size: 1.1rem;
+  margin-top: 0.1rem;
+`;
+const RoiHighlight = styled.div`
   font-size: 2rem;
-  animation: ${float} 4s ease-in-out infinite;
+  font-weight: 900;
+  color: ${growsomeTheme.color.Primary500};
+  margin: 0.7rem 0 0.2rem 0;
+  letter-spacing: -1px;
 `;
-
-const FeaturesList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${growsomeTheme.spacing.lg};
-  margin-bottom: ${growsomeTheme.spacing.xl};
-`;
-
-const FeatureItem = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: ${growsomeTheme.spacing.md};
-`;
-
-const CheckIcon = styled.span`
-  color: ${growsomeTheme.color.Green500};
-  font-weight: ${growsomeTheme.fontWeight.Bold};
-  font-size: 1.2rem;
-  margin-top: 0.2rem;
-  flex-shrink: 0;
-`;
-
-const ROICard = styled.div`
-  background: ${growsomeTheme.color.Green50};
-  border: 1px solid ${growsomeTheme.color.Green200};
-  padding: ${growsomeTheme.spacing.xl};
-  border-radius: ${growsomeTheme.radius.radius2};
-  display: flex;
-  align-items: center;
-  gap: ${growsomeTheme.spacing.lg};
-  margin-bottom: ${growsomeTheme.spacing.xl};
-`;
-
-const ROIIcon = styled.div`
-  font-size: 2rem;
-  animation: ${pulse} 2s ease-in-out infinite;
+const RoiSub = styled.div`
+  font-size: 1.1rem;
+  color: ${growsomeTheme.color.Black600};
+  margin-bottom: 0.5rem;
 `;
 
 const DiagnosisSection = styled.section`
@@ -872,45 +868,46 @@ const FeatureContent = styled.div`
   flex: 1;
 `;
 
-const UrgencyCard = styled.div`
-  background: ${growsomeTheme.color.Red50};
-  border: 1px solid ${growsomeTheme.color.Red200};
-  border-radius: ${growsomeTheme.radius.radius2};
-  padding: ${growsomeTheme.spacing.xl};
-  max-width: 800px;
-  margin: 0 auto;
-`;
+// UrgencyCard(마감 임박 알림) 섹션 제거
+// const UrgencyCard = styled.div`
+//   background: ${growsomeTheme.color.Red50};
+//   border: 1px solid ${growsomeTheme.color.Red200};
+//   border-radius: ${growsomeTheme.radius.radius2};
+//   padding: ${growsomeTheme.spacing.xl};
+//   max-width: 800px;
+//   margin: 0 auto;
+// `;
 
-const UrgencyHeader = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: ${growsomeTheme.spacing.lg};
-  margin-bottom: ${growsomeTheme.spacing.xl};
-`;
+// const UrgencyHeader = styled.div`
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+//   gap: ${growsomeTheme.spacing.lg};
+//   margin-bottom: ${growsomeTheme.spacing.xl};
+// `;
 
-const UrgencyIcon = styled.div`
-  font-size: 2rem;
-  animation: ${pulse} 1s ease-in-out infinite;
-`;
+// const UrgencyIcon = styled.div`
+//   font-size: 2rem;
+//   animation: ${pulse} 1s ease-in-out infinite;
+// `;
 
-const UrgencyList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${growsomeTheme.spacing.md};
-`;
+// const UrgencyList = styled.div`
+//   display: flex;
+//   flex-direction: column;
+//   gap: ${growsomeTheme.spacing.md};
+// `;
 
-const UrgencyItem = styled.div`
-  display: flex;
-  align-items: flex-start;
-  gap: ${growsomeTheme.spacing.md};
-`;
+// const UrgencyItem = styled.div`
+//   display: flex;
+//   align-items: flex-start;
+//   gap: ${growsomeTheme.spacing.md};
+// `;
 
-const UrgencyBullet = styled.div`
-  font-size: 1rem;
-  flex-shrink: 0;
-  margin-top: 0.2rem;
-`;
+// const UrgencyBullet = styled.div`
+//   font-size: 1rem;
+//   flex-shrink: 0;
+//   margin-top: 0.2rem;
+// `;
 
 const CTAButtons = styled.div`
   text-align: center;
@@ -951,6 +948,114 @@ const MessageHighlight = styled.strong`
 const FinalCTA = styled.strong`
   color: ${growsomeTheme.color.Green400};
   text-shadow: 0 0 20px rgba(6, 255, 1, 0.5);
+`;
+
+// styled-components 정의를 export default Services 위에 위치시킴
+const PortfolioSection = styled.section`
+  background: ${growsomeTheme.color.Gray50};
+  padding: 80px 0 100px 0;
+`;
+const PortfolioGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+`;
+const PortfolioCard = styled.div`
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+  &:hover, &:focus {
+    box-shadow: 0 8px 32px rgba(68,63,207,0.15);
+    transform: translateY(-4px) scale(1.02);
+    outline: 2px solid ${growsomeTheme.color.Primary500};
+  }
+`;
+const PortfolioImage = styled.div`
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/10;
+`;
+const PortfolioInfo = styled.div`
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+`;
+
+// styled-components for FOMO modal
+const FomoOverlay = styled.div`
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(20,24,40,0.45);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+const FomoModal = styled.div`
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 8px 40px rgba(81,79,228,0.18);
+  max-width: 380px;
+  width: 90vw;
+  padding: 2.2rem 2rem 1.5rem 2rem;
+  position: relative;
+  animation: fadeInFomo 0.3s;
+  @keyframes fadeInFomo {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+`;
+const FomoHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  margin-bottom: 1.2rem;
+  position: relative;
+`;
+const FomoTitle = styled.div`
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: ${growsomeTheme.color.Primary500};
+`;
+const FomoClose = styled.button`
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: ${growsomeTheme.color.Gray400};
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  transition: background 0.15s;
+  &:hover {
+    background: ${growsomeTheme.color.Gray100};
+    color: ${growsomeTheme.color.Primary500};
+  }
+`;
+const FomoList = styled.ul`
+  margin: 0;
+  padding: 0;
+  list-style: none;
+`;
+const FomoItem = styled.li`
+  font-size: 1.05rem;
+  color: ${growsomeTheme.color.Black700};
+  font-weight: 500;
+  margin-bottom: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 `;
 
 export default Services;

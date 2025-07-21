@@ -1,9 +1,14 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import styled, { keyframes } from 'styled-components';
+import styled, { keyframes, ThemeProvider } from 'styled-components';
 import { PlayCircle, CheckCircle, Lock, Clock, ArrowLeft, X, Star, Zap, DollarSign, Users, Timer, TrendingUp, Award, Briefcase } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { growsomeTheme } from '@/components/design-system/theme';
+import { Typography } from '@/components/design-system/Typography';
+import { ColumnBox, RowBox, Section, Card } from '@/components/design-system/Layout';
+import { GreenButton, SecondaryButton, PrimaryButton } from '@/components/design-system/Button';
 
 interface Course {
   id: number;
@@ -37,6 +42,8 @@ const CoursesPage = () => {
   const [showTimerAlert, setShowTimerAlert] = useState(false);
   const [ctaTriggered, setCtaTriggered] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [lockedCourse, setLockedCourse] = useState<Course | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   
   // FOMO 데이터
@@ -150,6 +157,11 @@ const CoursesPage = () => {
     setVideoError(false);
   };
 
+  const handleLockedCourseClick = (course: Course) => {
+    setLockedCourse(course);
+    setShowPaymentModal(true);
+  };
+
   const handleVideoStart = () => {
     if (!watchStartTime) {
       setWatchStartTime(Date.now());
@@ -185,14 +197,15 @@ const CoursesPage = () => {
 
   if (loading) {
     return (
-      <Container>
+      <CoursesContainer>
         <LoadingMessage>강의를 불러오는 중...</LoadingMessage>
-      </Container>
+      </CoursesContainer>
     );
   }
 
   return (
-    <Container>
+    <ThemeProvider theme={growsomeTheme}>
+      <CoursesContainer>
       {/* 1분 알림 팝업 */}
       {showTimerAlert && (
         <TimerAlert>
@@ -208,7 +221,17 @@ const CoursesPage = () => {
           <BackButton onClick={() => router.back()}>
             <ArrowLeft size={20} />
           </BackButton>
-          <Title>AI 사업계획서 작성 완성 솔루션</Title>
+          <LogoSection>
+            <Image
+              src="/logo_growsome.png"
+              alt="그로우썸"
+              width={120}
+              height={40}
+              style={{ objectFit: 'contain' }}
+              priority
+            />
+            <Title>AI 사업계획서 작성 완성 솔루션</Title>
+          </LogoSection>
           <LiveIndicator>
             <LiveDot />
             <span>{onlineUsers}명 온라인</span>
@@ -242,14 +265,14 @@ const CoursesPage = () => {
             {courses.map((course, index) => {
               const progress = userProgress[course.id];
               const isCompleted = progress?.isCompleted || false;
-              const canAccess = index === 0 || course.isPublic;
+              const canAccess = index === 0; // 첫 번째 강의만 접근 가능
 
               return (
                 <CourseItem
                   key={course.id}
                   isSelected={selectedCourse?.id === course.id}
                   canAccess={canAccess}
-                  onClick={() => canAccess && handleCourseSelect(course)}
+                  onClick={() => canAccess ? handleCourseSelect(course) : handleLockedCourseClick(course)}
                 >
                   <CourseNumber>{index + 1}</CourseNumber>
                   <CourseContent>
@@ -268,7 +291,7 @@ const CoursesPage = () => {
                     ) : isCompleted ? (
                       <CheckCircle size={16} color="#10B981" />
                     ) : (
-                      <PlayCircle size={16} color="#3b82f6" />
+                      <PlayCircle size={16} color="#514fe4" />
                     )}
                   </CourseStatus>
                 </CourseItem>
@@ -311,7 +334,34 @@ const CoursesPage = () => {
               <VideoInfo>
                 <VideoTitle>{selectedCourse.title}</VideoTitle>
                 <VideoDescription>{selectedCourse.description}</VideoDescription>
-
+                
+                {/* 첫 번째 강의가 선택된 경우 다른 강의들을 시청하려면 결제가 필요하다는 안내 */}
+                {selectedCourse && selectedCourse.id === courses[0]?.id && (
+                  <LockedCourseCTA>
+                    <LockedCourseMessage>
+                      <Lock size={20} color="#94a3b8" />
+                      <span>나머지 {courses.length - 1}개 강의를 시청하려면 결제가 필요합니다</span>
+                    </LockedCourseMessage>
+                    <PrimaryButton $size="medium" onClick={() => handleLockedCourseClick(courses[1])}>
+                      <Zap size={16} />
+                      지금 결제하고 모든 강의 시청하기
+                    </PrimaryButton>
+                  </LockedCourseCTA>
+                )}
+                
+                {/* 잠긴 강의인 경우 결제 버튼 표시 */}
+                {selectedCourse && selectedCourse.id !== courses[0]?.id && (
+                  <LockedCourseCTA>
+                    <LockedCourseMessage>
+                      <Lock size={20} color="#94a3b8" />
+                      <span>이 강의는 프리미엄 회원만 시청할 수 있습니다</span>
+                    </LockedCourseMessage>
+                    <PrimaryButton $size="medium" onClick={() => handleLockedCourseClick(selectedCourse)}>
+                      <Zap size={16} />
+                      지금 결제하고 모든 강의 시청하기
+                    </PrimaryButton>
+                  </LockedCourseCTA>
+                )}
               </VideoInfo>
             </>
           ) : (
@@ -343,8 +393,10 @@ const CoursesPage = () => {
               </CTAIcon>
               
               <CTATitle>
-                🎉 축하합니다!<br />
-                이제 전문가 수준 노하우를 배워보세요
+                <Typography.DisplayL600>
+                  🎉 축하합니다!<br />
+                  이제 전문가 수준 노하우를 배워보세요
+                </Typography.DisplayL600>
               </CTATitle>
               
               <SavingsSection>
@@ -372,6 +424,9 @@ const CoursesPage = () => {
                   <span>총 절약 비용</span>
                   <TotalAmount>{formatCurrency(savings.total)}원</TotalAmount>
                 </TotalSavings>
+                <SavingsNote>
+                  * 스스로 학습할 경우 예상되는 비용입니다
+                </SavingsNote>
               </SavingsSection>
 
               <ValueProposition>
@@ -379,6 +434,9 @@ const CoursesPage = () => {
                 <ValueSubtitle>
                   98.2% 할인가로 <strong>2200만원 상당의 가치</strong>를 제공합니다
                 </ValueSubtitle>
+                <ValueNote>
+                  * 2200만원은 스스로 학습할 경우 예상되는 총 비용입니다
+                </ValueNote>
               </ValueProposition>
               
               <CTAFeatures>
@@ -410,17 +468,17 @@ const CoursesPage = () => {
               </SocialProof>
               
               <CTAButtons>
-                <CTAPrimaryButton onClick={() => window.open('/payment', '_blank')}>
+                <PrimaryButton $size="large" onClick={() => window.open('/payment', '_blank')}>
                   <span>지금 시작하기</span>
                   <CTAPrice>
                     <span className="original">월 99,000원</span>
                     <span className="discounted">월 39,000원</span>
                   </CTAPrice>
-                </CTAPrimaryButton>
+                </PrimaryButton>
                 
-                <CTASecondaryButton onClick={() => window.open('/consultation', '_blank')}>
+                <SecondaryButton $size="large" onClick={() => window.open('/consultation', '_blank')}>
                   1:1 무료 상담 신청 (15분)
-                </CTASecondaryButton>
+                </SecondaryButton>
               </CTAButtons>
               
               <CTAFooter>
@@ -437,12 +495,124 @@ const CoursesPage = () => {
           </CTAModal>
         </CTAOverlay>
       )}
-    </Container>
+
+      {/* 잠긴 강의 결제 모달 */}
+      {showPaymentModal && lockedCourse && (
+        <PaymentModalOverlay onClick={(e) => e.target === e.currentTarget && setShowPaymentModal(false)}>
+          <PaymentModal>
+            <PaymentModalHeader>
+              <Lock size={24} color="#94a3b8" />
+                              <Typography.DisplayM600>프리미엄 강의 잠금 해제</Typography.DisplayM600>
+              <PaymentModalCloseButton onClick={() => setShowPaymentModal(false)}>
+                <X size={20} />
+              </PaymentModalCloseButton>
+            </PaymentModalHeader>
+            
+            <PaymentModalContent>
+              <LockedCourseInfo>
+                <LockedCourseTitle>{lockedCourse.title}</LockedCourseTitle>
+                <LockedCourseDescription>{lockedCourse.description}</LockedCourseDescription>
+                <LockedCourseMeta>
+                  <span>레벨: {lockedCourse.level}</span>
+                  <span>•</span>
+                  <span>{Math.floor(lockedCourse.duration / 60)}분</span>
+                </LockedCourseMeta>
+              </LockedCourseInfo>
+
+              <SavingsSection>
+                <SavingsTitle>
+                  <DollarSign size={20} color="#10b981" />
+                  스스로 배워서 절약하는 비용
+                </SavingsTitle>
+                
+                <SavingsGrid>
+                  <SavingsItem>
+                    <SavingsLabel>전문 컨설팅 비용</SavingsLabel>
+                    <SavingsAmount>{formatCurrency(savings.consultingFee)}원</SavingsAmount>
+                  </SavingsItem>
+                  <SavingsItem>
+                    <SavingsLabel>대행업체 수수료</SavingsLabel>
+                    <SavingsAmount>{formatCurrency(savings.agencyFee)}원</SavingsAmount>
+                  </SavingsItem>
+                  <SavingsItem>
+                    <SavingsLabel>시간 기회비용</SavingsLabel>
+                    <SavingsAmount>{formatCurrency(savings.timeValue)}원</SavingsAmount>
+                  </SavingsItem>
+                </SavingsGrid>
+                
+                <TotalSavings>
+                  <span>총 절약 비용</span>
+                  <TotalAmount>{formatCurrency(savings.total)}원</TotalAmount>
+                </TotalSavings>
+                <SavingsNote>
+                  * 스스로 학습할 경우 예상되는 비용입니다
+                </SavingsNote>
+              </SavingsSection>
+
+              <ValueProposition>
+                <ValueTitle>단 39,000원으로 모든 노하우를 습득하세요</ValueTitle>
+                <ValueSubtitle>
+                  98.2% 할인가로 <strong>2200만원 상당의 가치</strong>를 제공합니다
+                </ValueSubtitle>
+                <ValueNote>
+                  * 2200만원은 스스로 학습할 경우 예상되는 총 비용입니다
+                </ValueNote>
+              </ValueProposition>
+              
+              <PaymentFeatures>
+                <PaymentFeature>
+                  <Star size={16} color="#10b981" />
+                  <span>전체 20강의 평생 무제한 시청</span>
+                </PaymentFeature>
+                <PaymentFeature>
+                  <Briefcase size={16} color="#10b981" />
+                  <span>실전 템플릿 & 체크리스트 제공</span>
+                </PaymentFeature>
+                <PaymentFeature>
+                  <Users size={16} color="#10b981" />
+                  <span>전용 커뮤니티 및 Q&A 지원</span>
+                </PaymentFeature>
+                <PaymentFeature>
+                  <Award size={16} color="#10b981" />
+                  <span>수료증 발급 (선택사항)</span>
+                </PaymentFeature>
+              </PaymentFeatures>
+
+              <PaymentButtons>
+                <PrimaryButton $size="large" onClick={() => window.open('/payment', '_blank')}>
+                  <span>지금 결제하기</span>
+                  <PaymentPrice>
+                    <span className="original">월 99,000원</span>
+                    <span className="discounted">월 39,000원</span>
+                  </PaymentPrice>
+                </PrimaryButton>
+                
+                <SecondaryButton $size="large" onClick={() => window.open('/consultation', '_blank')}>
+                  1:1 무료 상담 신청 (15분)
+                </SecondaryButton>
+              </PaymentButtons>
+              
+              <PaymentFooter>
+                <PaymentDisclaimer>
+                  ⚡ <strong>지금 결제하는 {recentSignups}번째</strong> 고객에게 
+                  <strong style={{color: '#dc2626'}}> 추가 10% 할인</strong> 적용! (자정까지)
+                </PaymentDisclaimer>
+                
+                <PaymentTestimonial>
+                  "이 강의로 3개월 만에 5억 투자 유치에 성공했습니다!" - 김○○ 대표
+                </PaymentTestimonial>
+              </PaymentFooter>
+            </PaymentModalContent>
+          </PaymentModal>
+        </PaymentModalOverlay>
+      )}
+    </CoursesContainer>
+    </ThemeProvider>
   );
 };
 
 // 스타일 컴포넌트들
-const Container = styled.div`
+const CoursesContainer = styled.div`
   min-height: 100vh;
   background: #f8fafc;
   font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -495,6 +665,21 @@ const TitleSection = styled.div`
   align-items: center;
   justify-content: space-between;
   margin-bottom: 1rem;
+`;
+
+const LogoSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  justify-content: center;
+`;
+
+const LogoText = styled.div`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #514fe4;
+  margin-right: 1rem;
 `;
 
 const BackButton = styled.button`
@@ -631,7 +816,7 @@ const CourseItem = styled.div.withConfig({
 const CourseNumber = styled.div`
   width: 32px;
   height: 32px;
-  background: #3b82f6;
+  background: #514fe4;
   color: white;
   border-radius: 50%;
   display: flex;
@@ -773,7 +958,7 @@ const CTAOverlay = styled.div`
 `;
 
 const CTAModal = styled.div`
-  background: white;
+  background: ${growsomeTheme.color.White};
   border-radius: 16px;
   width: 90%;
   max-width: 600px;
@@ -900,30 +1085,42 @@ const TotalSavings = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  background: #15803d;
-  color: white;
+  padding: 0.75rem;
+  background: #f0fdf4;
+  color: #15803d;
+  border: 1px solid #bbf7d0;
   border-radius: 8px;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 0.9rem;
 `;
 
 const TotalAmount = styled.span`
-  font-size: 1.25rem;
+  font-size: 1rem;
+  font-weight: 700;
+`;
+
+const SavingsNote = styled.div`
+  font-size: 0.75rem;
+  color: #6b7280;
+  text-align: center;
+  margin-top: 0.5rem;
+  font-style: italic;
 `;
 
 const ValueProposition = styled.div`
   margin-bottom: 2rem;
   padding: 1.5rem;
-  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  background: linear-gradient(135deg, ${growsomeTheme.color.Primary25}, ${growsomeTheme.color.Primary50});
   border-radius: 12px;
-  border: 2px solid #3b82f6;
+  border: 2px solid ${growsomeTheme.color.Primary500};
 `;
 
 const ValueTitle = styled.h3`
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1e40af;
-  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: ${growsomeTheme.color.Primary600};
+  margin-bottom: 0.75rem;
+  text-align: center;
 `;
 
 const ValueSubtitle = styled.p`
@@ -935,6 +1132,13 @@ const ValueSubtitle = styled.p`
     color: #dc2626;
     font-weight: 700;
   }
+`;
+
+const ValueNote = styled.div`
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 0.5rem;
+  font-style: italic;
 `;
 
 const CTAFeatures = styled.div`
@@ -950,10 +1154,10 @@ const CTAFeature = styled.div`
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem;
-  background: #f8fafc;
+  background: ${growsomeTheme.color.Gray50};
   border-radius: 8px;
   font-size: 0.875rem;
-  color: #374151;
+  color: ${growsomeTheme.color.Black800};
   font-weight: 500;
 `;
 
@@ -962,7 +1166,7 @@ const SocialProof = styled.div`
   justify-content: space-around;
   margin-bottom: 2rem;
   padding: 1rem;
-  background: #f8fafc;
+  background: ${growsomeTheme.color.Gray50};
   border-radius: 8px;
 `;
 
@@ -987,7 +1191,7 @@ const CTAButtons = styled.div`
 `;
 
 const CTAPrimaryButton = styled.button`
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  background: linear-gradient(135deg, #514fe4, #4338ca);
   color: white;
   border: none;
   padding: 1.25rem 2rem;
@@ -1001,7 +1205,7 @@ const CTAPrimaryButton = styled.button`
   
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 15px 30px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 15px 30px rgba(81, 79, 228, 0.4);
   }
   
   &:active {
@@ -1044,28 +1248,28 @@ const CTASecondaryButton = styled.button`
 
 const CTAFooter = styled.div`
   padding-top: 1.5rem;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid ${growsomeTheme.color.Gray200};
 `;
 
 const CTADisclaimer = styled.p`
   font-size: 0.875rem;
-  color: #6b7280;
+  color: ${growsomeTheme.color.Gray500};
   line-height: 1.5;
   margin-bottom: 1rem;
   
   strong {
-    color: #dc2626;
+    color: ${growsomeTheme.color.Red500};
     font-weight: 700;
   }
 `;
 
 const Testimonial = styled.div`
-  background: #f8fafc;
+  background: ${growsomeTheme.color.Gray50};
   padding: 1rem;
   border-radius: 8px;
-  border-left: 4px solid #3b82f6;
+  border-left: 4px solid ${growsomeTheme.color.Primary500};
   font-style: italic;
-  color: #374151;
+  color: ${growsomeTheme.color.Black800};
   font-size: 0.875rem;
 `;
 
@@ -1100,6 +1304,260 @@ const VideoErrorPlaceholder = styled.div`
       background: #2563eb;
     }
   }
+`;
+
+// 잠긴 강의 관련 스타일 컴포넌트들
+const LockedCourseCTA = styled.div`
+  margin-top: 1.5rem;
+  padding: 1.5rem;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  text-align: center;
+`;
+
+const LockedCourseMessage = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: #64748b;
+  font-weight: 500;
+`;
+
+const PaymentButton = styled.button`
+  background: linear-gradient(135deg, #514fe4, #4338ca);
+  color: white;
+  border: none;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 auto;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(81, 79, 228, 0.3);
+  }
+`;
+
+// 결제 모달 관련 스타일 컴포넌트들
+const PaymentModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+`;
+
+const PaymentModal = styled.div`
+  background: ${growsomeTheme.color.White};
+  border-radius: 20px;
+  max-width: 600px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  animation: slideIn 0.3s ease-out;
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+`;
+
+const PaymentModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid ${growsomeTheme.color.Gray200};
+  background: ${growsomeTheme.color.Gray50};
+  border-radius: 20px 20px 0 0;
+`;
+
+const PaymentModalTitle = styled.h2`
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0;
+`;
+
+const PaymentModalCloseButton = styled.button`
+  background: transparent;
+  border: none;
+  color: ${growsomeTheme.color.Gray500};
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: ${growsomeTheme.color.Gray200};
+    color: ${growsomeTheme.color.Black800};
+  }
+`;
+
+const PaymentModalContent = styled.div`
+  padding: 2rem;
+  background: ${growsomeTheme.color.White};
+`;
+
+const LockedCourseInfo = styled.div`
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: ${growsomeTheme.color.Gray50};
+  border-radius: 12px;
+  border-left: 4px solid ${growsomeTheme.color.Primary500};
+`;
+
+const LockedCourseTitle = styled.h3`
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 0.5rem 0;
+`;
+
+const LockedCourseDescription = styled.p`
+  color: #6b7280;
+  margin: 0 0 1rem 0;
+  line-height: 1.5;
+`;
+
+const LockedCourseMeta = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: #9ca3af;
+`;
+
+const PaymentFeatures = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+  text-align: left;
+`;
+
+const PaymentFeature = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: ${growsomeTheme.color.Gray50};
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: ${growsomeTheme.color.Black800};
+  font-weight: 500;
+`;
+
+const PaymentButtons = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+`;
+
+const PaymentPrimaryButton = styled.button`
+  background: linear-gradient(135deg, #514fe4, #4338ca);
+  color: white;
+  border: none;
+  padding: 1.25rem 2rem;
+  border-radius: 12px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(81, 79, 228, 0.4);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
+const PaymentPrice = styled.div`
+  margin-top: 0.5rem;
+  
+  .original {
+    text-decoration: line-through;
+    opacity: 0.7;
+    font-size: 0.875rem;
+    margin-right: 0.5rem;
+  }
+  
+  .discounted {
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+`;
+
+const PaymentSecondaryButton = styled.button`
+  background: transparent;
+  color: #374151;
+  border: 2px solid #e5e7eb;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  
+  &:hover {
+    border-color: #d1d5db;
+    background: #f9fafb;
+  }
+`;
+
+const PaymentFooter = styled.div`
+  padding-top: 1.5rem;
+  border-top: 1px solid ${growsomeTheme.color.Gray200};
+`;
+
+const PaymentDisclaimer = styled.p`
+  font-size: 0.875rem;
+  color: ${growsomeTheme.color.Gray500};
+  line-height: 1.5;
+  margin-bottom: 1rem;
+  
+  strong {
+    color: ${growsomeTheme.color.Red500};
+    font-weight: 700;
+  }
+`;
+
+const PaymentTestimonial = styled.div`
+  background: ${growsomeTheme.color.Gray50};
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid ${growsomeTheme.color.Primary500};
+  font-style: italic;
+  color: ${growsomeTheme.color.Black800};
+  font-size: 0.875rem;
 `;
 
 export default CoursesPage;

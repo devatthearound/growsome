@@ -38,9 +38,7 @@ const Hero = () => {
           <JoinDescription>
           AI와 함께 온라인 SW사업을 시작하고, 성장시키고, 수익을 창출하기 위한 팁, 전략 및 리소스를 알아보세요.
           </JoinDescription>
-          <WriteButton href="/write">
-            새 글 작성하기
-          </WriteButton>
+
         </JoinColumn>
         <JoinColumn>
           <JoinForm>
