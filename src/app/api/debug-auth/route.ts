@@ -39,10 +39,10 @@ export async function GET(request: NextRequest) {
     let tokenTest = { valid: false, decoded: null, error: null };
     if (cookies['auth-token']) {
       try {
-        const jwt = require('jsonwebtoken');
+        const jwt = await import('jsonwebtoken');
         const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
-        const decoded = jwt.verify(cookies['auth-token'], JWT_SECRET);
-        tokenTest = { valid: true, decoded, error: null };
+        const decoded = jwt.default.verify(cookies['auth-token'], JWT_SECRET);
+        tokenTest = { valid: true, decoded: decoded as any, error: null };
         console.log('JWT 토큰 유효함:', decoded);
       } catch (jwtError: any) {
         tokenTest = { valid: false, decoded: null, error: jwtError.message };

@@ -85,11 +85,9 @@ export async function GET(request: NextRequest) {
     // TODO: 실제 사용자 인증 구현
     const userId = 1;
 
-    let whereClause: any = { userId };
-    
-    if (courseId) {
-      whereClause.courseId = parseInt(courseId);
-    }
+    const whereClause: any = courseId 
+      ? { userId, courseId: parseInt(courseId) }
+      : { userId };
 
     const progressList = await prisma.userCourseProgress.findMany({
       where: whereClause,

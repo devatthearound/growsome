@@ -19,7 +19,7 @@ import AuthErrorBoundary from '../components/error/AuthErrorBoundary';
 
 // FontAwesome 가져오기 (에러 방지를 위해 try-catch로 감쌈)
 try {
-  require('../lib/fontawesome');
+  import('../lib/fontawesome');
 } catch (error) {
   console.warn('FontAwesome 로딩 실패:', error);
 }

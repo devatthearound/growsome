@@ -20,12 +20,13 @@ export async function GET() {
       `);
 
       // 데이터 개수 확인
-      let counts = { categories: 0, posts: 0, users: 0 };
+      const counts = { categories: 0, posts: 0, users: 0 };
       
       for (const table of tables.rows) {
         try {
           const countResult = await client.query(`SELECT COUNT(*) FROM ${table.table_name}`);
-          counts[table.table_name.replace('blog_', '')] = parseInt(countResult.rows[0].count);
+          const key = table.table_name.replace('blog_', '') as keyof typeof counts;
+          counts[key] = parseInt(countResult.rows[0].count);
         } catch (e) {
           // 테이블이 없으면 0으로 유지
         }
@@ -50,7 +51,7 @@ export async function GET() {
     } finally {
       client.release();
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error('데이터베이스 연결 테스트 실패:', error);
     
     return NextResponse.json({

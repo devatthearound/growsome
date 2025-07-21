@@ -146,7 +146,7 @@ export async function POST(request: NextRequest) {
     // 쿠키 설정
     return setAuthCookies(accessToken, refreshToken, response)
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Google OAuth 로그인 중 오류:', error)
     return NextResponse.json({
       success: false,

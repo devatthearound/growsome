@@ -68,7 +68,7 @@ export async function GET(
         title: blogPost.title,
         slug: blogPost.slug,
         content_body: blogPost.content_body,
-        excerpt: blogPost.excerpt,
+        excerpt: null, // excerpt 필드가 스키마에 없음
         meta_title: blogPost.meta_title,
         meta_description: blogPost.meta_description,
         category_id: blogPost.category_id,
@@ -175,10 +175,10 @@ export async function PUT(
           title: title.trim(),
           slug: slug || existingPost.slug,
           content_body: content_body.trim(),
-          excerpt: excerpt?.trim() || null,
+          // excerpt: excerpt?.trim() || null, // excerpt 필드가 스키마에 없음
           meta_title: meta_title?.trim() || null,
           meta_description: meta_description?.trim() || null,
-          category_id: category_id ? parseInt(category_id) : null,
+          category_id: category_id ? parseInt(category_id) : existingPost.category_id,
           status: status || 'DRAFT',
           is_featured: Boolean(is_featured),
           is_hero: Boolean(is_hero),

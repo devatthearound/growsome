@@ -244,7 +244,7 @@ const resolvers = {
         })
         
         return categories.map(transformCategory)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Categories resolver error:', error)
         throw new Error(`카테고리를 불러오는데 실패했습니다: ${error.message}`)
       }
@@ -261,7 +261,7 @@ const resolvers = {
         const category = await prisma.blog_categories.findFirst({ where })
         
         return category ? transformCategory(category) : null
-      } catch (error) {
+      } catch (error: any) {
         console.error('Category resolver error:', error)
         throw new Error(`카테고리를 불러오는데 실패했습니다: ${error.message}`)
       }
@@ -291,7 +291,7 @@ const resolvers = {
         })
         
         return contents.map(transformContent)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Contents resolver error:', error)
         throw new Error(`컨텐츠를 불러오는데 실패했습니다: ${error.message}`)
       }
@@ -334,7 +334,7 @@ const resolvers = {
         }
         
         return content ? transformContent(content) : null
-      } catch (error) {
+      } catch (error: any) {
         console.error('Content resolver error:', error)
         throw new Error(`컨텐츠를 불러오는데 실패했습니다: ${error.message}`)
       }
@@ -361,7 +361,7 @@ const resolvers = {
         })
         
         return contents.map(transformContent)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Featured contents resolver error:', error)
         throw new Error(`추천 컨텐츠를 불러오는데 실패했습니다: ${error.message}`)
       }
@@ -387,7 +387,7 @@ const resolvers = {
         })
         
         return content ? transformContent(content) : null
-      } catch (error) {
+      } catch (error: any) {
         console.error('Hero content resolver error:', error)
         return null
       }
@@ -405,7 +405,7 @@ const resolvers = {
         })
         
         return user ? transformUser(user) : null
-      } catch (error) {
+      } catch (error: any) {
         console.error('User resolver error:', error)
         throw new Error(`사용자를 불러오는데 실패했습니다: ${error.message}`)
       }
@@ -420,7 +420,7 @@ const resolvers = {
         })
         
         return users.map(transformUser)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Users resolver error:', error)
         throw new Error(`사용자 목록을 불러오는데 실패했습니다: ${error.message}`)
       }
@@ -434,7 +434,7 @@ const resolvers = {
         })
         
         return tags.map(transformTag)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Tags resolver error:', error)
         throw new Error(`태그를 불러오는데 실패했습니다: ${error.message}`)
       }
@@ -451,7 +451,7 @@ const resolvers = {
         const tag = await prisma.blog_tags.findFirst({ where })
         
         return tag ? transformTag(tag) : null
-      } catch (error) {
+      } catch (error: any) {
         console.error('Tag resolver error:', error)
         throw new Error(`태그를 불러오는데 실패했습니다: ${error.message}`)
       }
@@ -479,7 +479,7 @@ const resolvers = {
         })
         
         return comments.map(transformComment)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Comments resolver error:', error)
         throw new Error(`댓글을 불러오는데 실패했습니다: ${error.message}`)
       }
@@ -547,7 +547,7 @@ const resolvers = {
         })
         
         return transformContent(result)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Create content error:', error)
         throw new Error(`컨텐츠 생성에 실패했습니다: ${error.message}`)
       }
@@ -590,7 +590,7 @@ const resolvers = {
         })
         
         return transformContent(updatedContent)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Update content error:', error)
         throw new Error(`컨텐츠 수정에 실패했습니다: ${error.message}`)
       }
@@ -602,7 +602,7 @@ const resolvers = {
           where: { id }
         })
         return true
-      } catch (error) {
+      } catch (error: any) {
         console.error('Delete content error:', error)
         throw new Error(`컨텐츠 삭제에 실패했습니다: ${error.message}`)
       }
@@ -622,7 +622,7 @@ const resolvers = {
         })
         
         return transformCategory(newCategory)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Create category error:', error)
         throw new Error(`카테고리 생성에 실패했습니다: ${error.message}`)
       }
@@ -644,7 +644,7 @@ const resolvers = {
         })
         
         return transformCategory(updatedCategory)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Update category error:', error)
         throw new Error(`카테고리 수정에 실패했습니다: ${error.message}`)
       }
@@ -656,7 +656,7 @@ const resolvers = {
           where: { id }
         })
         return true
-      } catch (error) {
+      } catch (error: any) {
         console.error('Delete category error:', error)
         throw new Error(`카테고리 삭제에 실패했습니다: ${error.message}`)
       }
@@ -685,7 +685,7 @@ const resolvers = {
         })
         
         return transformComment(newComment)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Create comment error:', error)
         throw new Error(`댓글 생성에 실패했습니다: ${error.message}`)
       }
@@ -707,7 +707,7 @@ const resolvers = {
         })
         
         return transformComment(updatedComment)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Update comment error:', error)
         throw new Error(`댓글 수정에 실패했습니다: ${error.message}`)
       }
@@ -732,7 +732,7 @@ const resolvers = {
         }
         
         return true
-      } catch (error) {
+      } catch (error: any) {
         console.error('Delete comment error:', error)
         throw new Error(`댓글 삭제에 실패했습니다: ${error.message}`)
       }
@@ -790,7 +790,7 @@ const resolvers = {
           isLiked,
           likeCount: content?.like_count || 0
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Toggle like error:', error)
         throw new Error(`좋아요 처리에 실패했습니다: ${error.message}`)
       }
@@ -809,7 +809,7 @@ const resolvers = {
         })
         
         return count
-      } catch (error) {
+      } catch (error: any) {
         console.error('Category contentCount resolver error:', error)
         return 0
       }
@@ -835,7 +835,7 @@ const resolvers = {
         })
         
         return contents.map(transformContent)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Category contents resolver error:', error)
         return []
       }
@@ -857,7 +857,7 @@ const resolvers = {
         })
         
         return comments.map(transformComment)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Content comments resolver error:', error)
         return []
       }
@@ -871,7 +871,7 @@ const resolvers = {
         })
         
         return contentTags.map(ct => transformTag(ct.blog_tags))
-      } catch (error) {
+      } catch (error: any) {
         console.error('Content tags resolver error:', error)
         return []
       }
@@ -887,7 +887,7 @@ const resolvers = {
         })
         
         return likes.map(transformLike)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Content likes resolver error:', error)
         return []
       }
@@ -912,7 +912,7 @@ const resolvers = {
         })
         
         return contents.map(transformContent)
-      } catch (error) {
+      } catch (error: any) {
         console.error('User contents resolver error:', error)
         return []
       }
@@ -929,7 +929,7 @@ const resolvers = {
         })
         
         return comments.map(transformComment)
-      } catch (error) {
+      } catch (error: any) {
         console.error('User comments resolver error:', error)
         return []
       }
@@ -946,7 +946,7 @@ const resolvers = {
         })
         
         return likes.map(transformLike)
-      } catch (error) {
+      } catch (error: any) {
         console.error('User likes resolver error:', error)
         return []
       }
@@ -971,7 +971,7 @@ const resolvers = {
         return contentTags
           .filter(ct => ct.blog_contents.status === 'PUBLISHED')
           .map(ct => transformContent(ct.blog_contents))
-      } catch (error) {
+      } catch (error: any) {
         console.error('Tag contents resolver error:', error)
         return []
       }
@@ -993,7 +993,7 @@ const resolvers = {
         })
         
         return replies.map(transformComment)
-      } catch (error) {
+      } catch (error: any) {
         console.error('Comment replies resolver error:', error)
         return []
       }
@@ -1120,7 +1120,7 @@ async function getUser(request: NextRequest) {
     // return decoded
     
     return null
-  } catch (error) {
+  } catch (error: any) {
     console.error('Authentication error:', error)
     return null
   }
@@ -1177,7 +1177,7 @@ const handler = startServerAndCreateNextHandler<NextRequest>(server, {
 export async function GET(request: NextRequest) {
   try {
     return handler(request)
-  } catch (error) {
+  } catch (error: any) {
     console.error('GraphQL GET error:', error)
     return new Response(JSON.stringify({ 
       error: 'Internal Server Error',
@@ -1192,7 +1192,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     return handler(request)
-  } catch (error) {
+  } catch (error: any) {
     console.error('GraphQL POST error:', error)
     return new Response(JSON.stringify({ 
       error: 'Internal Server Error',

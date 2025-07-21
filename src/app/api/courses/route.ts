@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
       }))
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Courses fetch error:', error);
     console.error('Error details:', {
       name: error?.name,
