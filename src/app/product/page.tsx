@@ -665,7 +665,7 @@ const Stats = () => {
           <StatLabel>수강생 평점</StatLabel>
         </StatItem>
         <StatItem>
-          <StatNumber>30<span>명</span></StatNumber>
+          <StatNumber>50<span>명</span></StatNumber>
           <StatLabel>초기 선발 인원</StatLabel>
         </StatItem>
         <StatItem>

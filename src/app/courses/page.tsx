@@ -40,8 +40,8 @@ const CoursesPage = () => {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   
   // FOMO 데이터
-  const [onlineUsers, setOnlineUsers] = useState(127);
-  const [recentSignups, setRecentSignups] = useState(23);
+  const [onlineUsers, setOnlineUsers] = useState(12);
+  const [recentSignups, setRecentSignups] = useState(3);
   const [timeRemaining, setTimeRemaining] = useState(86400); // 24시간 초
 
   useEffect(() => {
@@ -49,12 +49,12 @@ const CoursesPage = () => {
     
     // 온라인 사용자 수 랜덤 업데이트
     const userCountInterval = setInterval(() => {
-      setOnlineUsers(prev => Math.max(80, Math.min(200, prev + Math.floor(Math.random() * 10) - 5)));
+      setOnlineUsers(prev => Math.max(5, Math.min(25, prev + Math.floor(Math.random() * 4) - 2)));
     }, 15000);
 
     // 최근 가입자 수 랜덤 업데이트
     const signupInterval = setInterval(() => {
-      setRecentSignups(prev => Math.max(10, Math.min(50, prev + Math.floor(Math.random() * 3) - 1)));
+      setRecentSignups(prev => Math.max(1, Math.min(8, prev + Math.floor(Math.random() * 2) - 1)));
     }, 30000);
 
     // 타이머 카운트다운
@@ -222,7 +222,7 @@ const CoursesPage = () => {
         <StatsRow>
           <StatItem>
             <Users size={16} />
-            <span>총 {formatCurrency(1247)}명 수강</span>
+            <span>총 {formatCurrency(47)}명 수강</span>
           </StatItem>
           <StatItem>
             <TrendingUp size={16} />
@@ -405,7 +405,7 @@ const CoursesPage = () => {
                   <strong>{formatCurrency(onlineUsers)}명</strong>이 지금 학습 중
                 </SocialProofItem>
                 <SocialProofItem>
-                  <strong>평균 수강 완료율 89%</strong> 달성
+                  <strong>평균 수강 완료율 78%</strong> 달성
                 </SocialProofItem>
               </SocialProof>
               

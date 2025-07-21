@@ -64,19 +64,20 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
     }
   };
 
-  if (!isMounted) {
-    return (
-      <HeaderWrapper $theme={theme}>
-        <HeaderContainer>
-          <NavSection>
-            <LogoLink href="/">
-              <LogoImage src="/logo_growsome.png" alt="Growsome" />
-            </LogoLink>
-          </NavSection>
-        </HeaderContainer>
-      </HeaderWrapper>
-    );
-  }
+  // isMounted 체크를 제거하여 항상 헤더가 표시되도록 함
+  // if (!isMounted) {
+  //   return (
+  //     <HeaderWrapper $theme={theme}>
+  //       <HeaderContainer>
+  //         <NavSection>
+  //           <LogoLink href="/">
+  //             <LogoImage src="/logo_growsome.png" alt="Growsome" />
+  //           </LogoLink>
+  //         </NavSection>
+  //       </HeaderContainer>
+  //     </HeaderWrapper>
+  //   );
+  // }
 
   return (
     <HeaderWrapper $theme={theme}>
@@ -283,7 +284,7 @@ const LogoImage = styled.img`
 `;
 
 const MainNav = styled.nav`
-  @media (max-width: 1280px) {
+  @media (max-width: 768px) {
     display: none;
   }
 `;
@@ -331,7 +332,7 @@ const UserSection = styled.div`
   align-items: center;
   gap: 1.5rem;
 
-  @media (max-width: 1280px) {
+  @media (max-width: 768px) {
     display: none;
   }
 `;
@@ -434,7 +435,7 @@ const MobileMenuButton = styled.button`
     background: rgba(0, 0, 0, 0.05);
   }
 
-  @media (max-width: 1280px) {
+  @media (max-width: 768px) {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -444,7 +445,7 @@ const MobileMenuButton = styled.button`
 const MobileOverlay = styled.div`
   display: none;
   
-  @media (max-width: 1280px) {
+  @media (max-width: 768px) {
     display: block;
     position: fixed;
     top: 70px;
@@ -459,7 +460,7 @@ const MobileOverlay = styled.div`
 const MobileMenu = styled.div<MobileMenuProps>`
   display: none;
   
-  @media (max-width: 1280px) {
+  @media (max-width: 768px) {
     display: block;
     position: fixed;
     top: 70px;
