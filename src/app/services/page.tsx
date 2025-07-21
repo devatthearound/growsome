@@ -8,6 +8,31 @@ import { Typography } from '@/components/design-system/Typography';
 import { ColumnBox, RowBox, Container, Section, Card } from '@/components/design-system/Layout';
 import { GreenButton, SecondaryButton, PrimaryButton } from '@/components/design-system/Button';
 
+// Custom styled component for the bright green diagnosis button
+const DiagnosisButton = styled(GreenButton)`
+  background: #1EFF19 !important;
+  color: ${growsomeTheme.color.Black800} !important;
+  font-weight: ${growsomeTheme.fontWeight.Bold} !important;
+  
+  &:hover:not(:disabled) {
+    background: #0AE00A !important;
+    color: ${growsomeTheme.color.Black800} !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 25px rgba(30, 255, 25, 0.4) !important;
+  }
+  
+  &:active:not(:disabled) {
+    background: #08B808 !important;
+    transform: translateY(0) !important;
+    box-shadow: 0 4px 15px rgba(30, 255, 25, 0.3) !important;
+  }
+  
+  &:focus-visible {
+    outline: 2px solid #1EFF19 !important;
+    outline-offset: 2px;
+  }
+`;
+
 // Services Page Component
 const Services = () => {
   const router = useRouter();
@@ -118,9 +143,9 @@ const Services = () => {
                 </ColumnBox>
 
                 <CTAButtonsHero>
-                  <GreenButton $size="large" onClick={handleFreeDiagnosisClick}>
+                  <DiagnosisButton $size="large" onClick={handleFreeDiagnosisClick}>
                     💡 무료 10배 성장 진단 (5분 완료)
-                  </GreenButton>
+                  </DiagnosisButton>
 
                 </CTAButtonsHero>
 
@@ -290,9 +315,9 @@ const Services = () => {
                     </ColumnBox>
                   </ROICard>
                   
-                  <GreenButton $size="large" $width="100%" onClick={handleFreeDiagnosisClick}>
+                  <DiagnosisButton $size="large" $width="100%" onClick={handleFreeDiagnosisClick}>
                     예비 창업가 상담 신청
-                  </GreenButton>
+                  </DiagnosisButton>
                 </TargetCard>
 
                 {/* 100억 매출 기업 */}
@@ -350,9 +375,9 @@ const Services = () => {
                     </ColumnBox>
                   </ROICard>
                   
-                  <GreenButton $size="large" $width="100%" onClick={handleFreeDiagnosisClick}>
+                  <DiagnosisButton $size="large" $width="100%" onClick={handleFreeDiagnosisClick}>
                     대기업 상담 신청
-                  </GreenButton>
+                  </DiagnosisButton>
                 </TargetCard>
               </TargetGrid>
             </ColumnBox>
@@ -413,9 +438,9 @@ const Services = () => {
               </UrgencyCard>
 
               <CTAButtons>
-                <GreenButton $size="large" onClick={handleFreeDiagnosisClick}>
+                <DiagnosisButton $size="large" onClick={handleFreeDiagnosisClick}>
                   💡 지금 무료 진단 받기 (5분 완료)
-                </GreenButton>
+                </DiagnosisButton>
                 <Typography.TextS400 color={growsomeTheme.color.Black600} style={{textAlign: 'center'}}>
                   * 진단 결과는 24시간 내 개별 연락드립니다
                 </Typography.TextS400>

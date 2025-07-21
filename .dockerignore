@@ -46,3 +46,31 @@ docs/
 .prettierrc*
 jest.config.*
 # tsconfig.json
+
+# 임시 파일들 제외
+final_complete_layout.tsx
+temp_*.tsx
+temp_*.ts
+_backup_*.tsx
+_backup_*.ts
+1.2
+blog_backup.sql
+check-blog-status.js
+check-blog.sh
+clear-comments.sql
+create-test-user.js
+create-test-user.ts
+db_schema.txt
+debug-blog.html
+run-blog-seed.sh
+run-complete-blog-seed.sh
+
+# 백업 디렉토리
+_public/
+affili-smart-backend/
+bot/
+content/
+database/
+scripts/
+server/
+types/
