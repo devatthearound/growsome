@@ -88,16 +88,16 @@ const SetupPage = () => {
           <>
             <StatusItem>
               <StatusLabel>연결 상태:</StatusLabel>
-              <StatusValue success={status?.success}>
+              <StatusValue success={status?.success ?? false}>
                 {status?.success ? '✅ 연결됨' : '❌ 연결 실패'}
               </StatusValue>
             </StatusItem>
 
             <StatusItem>
               <StatusLabel>테이블:</StatusLabel>
-              <StatusValue success={status?.tables.length ? status.tables.length > 0 : false}>
-                {status?.tables.length || 0}개 
-                {status?.tables.length ? `(${status.tables.join(', ')})` : ''}
+              <StatusValue success={(status?.tables?.length ?? 0) > 0}>
+                {status?.tables?.length || 0}개 
+                {status?.tables?.length ? `(${status.tables.join(', ')})` : ''}
               </StatusValue>
             </StatusItem>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useState, useEffect, Suspense } from 'react';
+import React, { useCallback, useState, useEffect, Suspense, useRef } from 'react';
 import styled from 'styled-components';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/app/contexts/AuthContext';
@@ -10,6 +10,7 @@ function LoginContent() {
   const searchParams = useSearchParams();
   const { user, setUser, isLoggedIn, isLoading } = useAuth();
   const isExtension = searchParams.get('isExtension') === 'true';
+  const formRef = useRef<HTMLFormElement>(null);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -52,14 +53,12 @@ function LoginContent() {
 
   const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !isLoginLoading) {
-      // 이벤트를 비동기로 처리하여 form 제출 합니다.
-      setTimeout(() => {
-        const form = e.currentTarget.closest('form');
-        if (form) {
-          const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
-          form.dispatchEvent(submitEvent);
-        }
-      }, 0);
+      // Enter 키를 누르면 submit 버튼 클릭
+      e.preventDefault();
+      const submitButton = formRef.current?.querySelector('button[type="submit"]') as HTMLButtonElement;
+      if (submitButton && !submitButton.disabled) {
+        submitButton.click();
+      }
     }
   }, [isLoginLoading]);
 
@@ -187,7 +186,7 @@ function LoginContent() {
         <Tagline>당신도 AI직원을 통해 스마트해지세요.</Tagline>
       </LeftPanel>
       <RightPanel>
-        <Form onSubmit={handleSubmit}>
+        <Form ref={formRef} onSubmit={handleSubmit}>
           <Title>로그인</Title>
           <Input
             type="email"
