@@ -1,15 +1,20 @@
 // components/common/NetworkStatusIndicator.tsx
 'use client'
 
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Wifi, WifiOff, AlertCircle } from 'lucide-react'
 import { useNetworkStatus } from '../../hooks/useNetworkStatus'
 
 const NetworkStatusIndicator: React.FC = () => {
   const { isOnline, isReconnecting } = useNetworkStatus()
+  const [isMounted, setIsMounted] = useState(false)
 
-  // 온라인 상태일 때는 표시하지 않음
-  if (isOnline && !isReconnecting) {
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  // 마운트되지 않았거나 온라인 상태일 때는 표시하지 않음
+  if (!isMounted || (isOnline && !isReconnecting)) {
     return null
   }
 

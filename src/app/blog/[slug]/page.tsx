@@ -227,7 +227,7 @@ export default function BlogDetailPage() {
         createdAt: new Date().toISOString(),
         user: {
           username: user?.username || '그로우썸',
-          avatar: user?.avatar || '/profile_growsome.png'
+          avatar: '/profile_growsome.png'
         },
         replies: [],
         likeCount: 0,

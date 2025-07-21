@@ -9,12 +9,20 @@ interface NetworkStatus {
 
 export function useNetworkStatus() {
   const [networkStatus, setNetworkStatus] = useState<NetworkStatus>({
-    isOnline: typeof navigator !== 'undefined' ? navigator.onLine : true,
+    isOnline: true, // Default to true for SSR
     isReconnecting: false,
     lastOnlineTime: null
   })
 
   useEffect(() => {
+    // Initialize with actual navigator status on client
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined') {
+      setNetworkStatus(prev => ({
+        ...prev,
+        isOnline: navigator.onLine
+      }))
+    }
+
     let reconnectTimeout: NodeJS.Timeout
 
     const handleOnline = () => {
@@ -35,7 +43,7 @@ export function useNetworkStatus() {
 
       // 네트워크가 다시 연결될 때까지 주기적으로 확인
       const checkConnection = () => {
-        if (navigator.onLine) {
+        if (typeof navigator !== 'undefined' && navigator.onLine) {
           handleOnline()
         } else {
           reconnectTimeout = setTimeout(checkConnection, 5000)
@@ -45,12 +53,16 @@ export function useNetworkStatus() {
       reconnectTimeout = setTimeout(checkConnection, 5000)
     }
 
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
+    if (typeof window !== 'undefined') {
+      window.addEventListener('online', handleOnline)
+      window.addEventListener('offline', handleOffline)
+    }
 
     return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('online', handleOnline)
+        window.removeEventListener('offline', handleOffline)
+      }
       if (reconnectTimeout) {
         clearTimeout(reconnectTimeout)
       }

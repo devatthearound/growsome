@@ -1,62 +1,89 @@
 // scripts/create-test-user.ts
-// 간단한 테스트 사용자 생성 스크립트
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';
 
-import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient();
 
-const prisma = new PrismaClient()
-
-async function main() {
-  console.log('🔍 테스트 사용자 생성 시작...')
-
+async function createTestUser() {
   try {
-    // 기존 사용자 확인
+    console.log('🚀 테스트 사용자 생성 시작...');
+
+    // 기존 사용자가 있는지 확인
     const existingUser = await prisma.user.findUnique({
-      where: { email: 'admin@growsome.co.kr' }
-    })
+      where: { email: 'bbuzaddaa@gmail.com' }
+    });
 
     if (existingUser) {
-      console.log('✅ 기존 사용자가 있습니다:', existingUser.email)
+      console.log('👤 기존 사용자가 발견되었습니다:', existingUser.email);
       
-      // 비밀번호가 없다면 추가
-      if (!existingUser.password) {
-        await prisma.user.update({
-          where: { email: 'admin@growsome.co.kr' },
-          data: { password: 'password123' }
-        })
-        console.log('✅ 비밀번호가 추가되었습니다.')
-      }
+      // 비밀번호 업데이트
+      const hashedPassword = await bcrypt.hash('growsome123!', 10);
+      
+      const updatedUser = await prisma.user.update({
+        where: { email: 'bbuzaddaa@gmail.com' },
+        data: {
+          password: hashedPassword,
+          status: 'active',
+          username: 'testuser',
+          phoneNumber: '010-1234-5678'
+        }
+      });
+      
+      console.log('✅ 기존 사용자 정보가 업데이트되었습니다:', {
+        id: updatedUser.id,
+        email: updatedUser.email,
+        username: updatedUser.username,
+        status: updatedUser.status
+      });
     } else {
       // 새 사용자 생성
-      const user = await prisma.user.create({
+      const hashedPassword = await bcrypt.hash('growsome123!', 10);
+      
+      const newUser = await prisma.user.create({
         data: {
-          email: 'admin@growsome.co.kr',
-          username: 'Growsome 관리자',
-          password: 'password123',
-          companyName: 'Growsome',
-          position: 'Admin',
+          email: 'bbuzaddaa@gmail.com',
+          username: 'testuser',
+          password: hashedPassword,
           phoneNumber: '010-1234-5678',
-          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
-          status: 'active'
+          status: 'active',
+          companyName: 'Test Company',
+          position: 'Developer'
         }
-      })
-      console.log('✅ 새 사용자가 생성되었습니다:', user.email)
+      });
+      
+      console.log('✅ 새 테스트 사용자가 생성되었습니다:', {
+        id: newUser.id,
+        email: newUser.email,
+        username: newUser.username,
+        status: newUser.status
+      });
     }
 
-    console.log('\n🎉 테스트 사용자 준비 완료!')
-    console.log('\n📋 로그인 정보:')
-    console.log('- 이메일: admin@growsome.co.kr')
-    console.log('- 비밀번호: password123')
+    // 비밀번호 검증 테스트
+    const user = await prisma.user.findUnique({
+      where: { email: 'bbuzaddaa@gmail.com' }
+    });
+
+    if (user && user.password) {
+      const isValid = await bcrypt.compare('growsome123!', user.password);
+      console.log('🔐 비밀번호 검증 테스트:', isValid ? '✅ 성공' : '❌ 실패');
+    }
+
+    console.log('🎉 테스트 사용자 설정 완료!');
+    console.log('📝 로그인 정보:');
+    console.log('   이메일: bbuzaddaa@gmail.com');
+    console.log('   비밀번호: growsome123!');
 
   } catch (error) {
-    console.error('❌ 오류 발생:', error)
-    throw error
+    console.error('❌ 테스트 사용자 생성 오류:', error);
   } finally {
-    await prisma.$disconnect()
+    await prisma.$disconnect();
   }
 }
 
-main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
+// 스크립트 실행
+if (require.main === module) {
+  createTestUser();
+}
+
+export default createTestUser;

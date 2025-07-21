@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { PlayCircle, CheckCircle, Lock, Clock, ArrowLeft, X, Star, Zap } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import styled, { keyframes } from 'styled-components';
+import { PlayCircle, CheckCircle, Lock, Clock, ArrowLeft, X, Star, Zap, DollarSign, Users, Timer, TrendingUp, Award, Briefcase } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface Course {
@@ -31,13 +31,67 @@ const CoursesPage = () => {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [userProgress, setUserProgress] = useState<{[key: number]: CourseProgress}>({});
   const [loading, setLoading] = useState(true);
-  const [videoWatchTime, setVideoWatchTime] = useState<{[key: number]: number}>({});
   const [showCTA, setShowCTA] = useState(false);
-  const [hasWatchedPreview, setHasWatchedPreview] = useState(false);
+  const [watchStartTime, setWatchStartTime] = useState<number | null>(null);
+  const [currentWatchTime, setCurrentWatchTime] = useState(0);
+  const [showTimerAlert, setShowTimerAlert] = useState(false);
+  const [ctaTriggered, setCtaTriggered] = useState(false);
+  const [videoError, setVideoError] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // FOMO 데이터
+  const [onlineUsers, setOnlineUsers] = useState(127);
+  const [recentSignups, setRecentSignups] = useState(23);
+  const [timeRemaining, setTimeRemaining] = useState(86400); // 24시간 초
 
   useEffect(() => {
     fetchCourses();
+    
+    // 온라인 사용자 수 랜덤 업데이트
+    const userCountInterval = setInterval(() => {
+      setOnlineUsers(prev => Math.max(80, Math.min(200, prev + Math.floor(Math.random() * 10) - 5)));
+    }, 15000);
+
+    // 최근 가입자 수 랜덤 업데이트
+    const signupInterval = setInterval(() => {
+      setRecentSignups(prev => Math.max(10, Math.min(50, prev + Math.floor(Math.random() * 3) - 1)));
+    }, 30000);
+
+    // 타이머 카운트다운
+    const timerInterval = setInterval(() => {
+      setTimeRemaining(prev => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => {
+      clearInterval(userCountInterval);
+      clearInterval(signupInterval);
+      clearInterval(timerInterval);
+    };
   }, []);
+
+  // 1분 타이머 설정
+  useEffect(() => {
+    if (watchStartTime && !ctaTriggered) {
+      timerRef.current = setTimeout(() => {
+        console.log('1분 경과 - CTA 표시');
+        setShowTimerAlert(true);
+        setTimeout(() => {
+          setShowCTA(true);
+          setCtaTriggered(true);
+        }, 2000); // 2초 후 CTA 표시
+      }, 60000); // 1분 = 60,000ms
+
+      // 실시간 시청 시간 업데이트
+      const watchInterval = setInterval(() => {
+        setCurrentWatchTime(prev => prev + 1);
+      }, 1000);
+
+      return () => {
+        if (timerRef.current) clearTimeout(timerRef.current);
+        clearInterval(watchInterval);
+      };
+    }
+  }, [watchStartTime, ctaTriggered]);
 
   const fetchCourses = async () => {
     try {
@@ -48,47 +102,39 @@ const CoursesPage = () => {
         setCourses(data.courses);
         setSelectedCourse(data.courses[0]);
       } else {
-        // 데이터베이스에 강의가 없으면 테스트 데이터 사용
-        console.log('API에서 강의 데이터를 받지 못했습니다. 테스트 데이터를 사용합니다.');
         const testCourses: Course[] = [
           {
             id: 1,
-            title: '1강 흑수저',
+            title: '1강 흑수저 - AI 사업계획서 기초',
             slug: '1-black-spoon',
             description: 'AI 사업계획서 작성의 첫 번째 강의입니다. 기본 개념과 시작 방법을 배웁니다.',
             vimeoId: '1027151927',
             vimeoUrl: 'https://player.vimeo.com/video/1027151927?badge=0&autopause=0&player_id=0&app_id=58479',
             thumbnailUrl: '',
-            duration: 1800, // 30분
+            duration: 1800,
             level: '초급',
             isPublic: true,
+            isPremium: true
+          },
+          {
+            id: 2,
+            title: '2강 시장 분석 및 경쟁사 리서치',
+            slug: '2-market-analysis',
+            description: 'AI를 활용한 체계적인 시장 분석 방법론을 학습합니다.',
+            vimeoId: '1027151928',
+            vimeoUrl: 'https://player.vimeo.com/video/1027151928',
+            thumbnailUrl: '',
+            duration: 2100,
+            level: '중급',
+            isPublic: false,
             isPremium: true
           }
         ];
         setCourses(testCourses);
         setSelectedCourse(testCourses[0]);
       }
-      // TODO: 사용자 진도 정보도 함께 가져오기
     } catch (error) {
       console.error('강의 데이터 로드 오류:', error);
-      // 에러 시에도 테스트 데이터 사용
-      const testCourses: Course[] = [
-        {
-          id: 1,
-          title: '1강 흑수저',
-          slug: '1-black-spoon',
-          description: 'AI 사업계획서 작성의 첫 번째 강의입니다. 기본 개념과 시작 방법을 배웁니다.',
-          vimeoId: '1027151927',
-          vimeoUrl: 'https://player.vimeo.com/video/1027151927?badge=0&autopause=0&player_id=0&app_id=58479',
-          thumbnailUrl: '',
-          duration: 1800,
-          level: '초급',
-          isPublic: true,
-          isPremium: true
-        }
-      ];
-      setCourses(testCourses);
-      setSelectedCourse(testCourses[0]);
     } finally {
       setLoading(false);
     }
@@ -96,84 +142,46 @@ const CoursesPage = () => {
 
   const handleCourseSelect = (course: Course) => {
     setSelectedCourse(course);
+    // 새 강의 선택 시 타이머 리셋
+    setWatchStartTime(Date.now());
+    setCurrentWatchTime(0);
+    setCtaTriggered(false);
+    setShowTimerAlert(false);
+    setVideoError(false);
   };
 
-  const handleVideoProgress = (courseId: number, currentTime: number, duration: number) => {
-    setVideoWatchTime(prev => ({ ...prev, [courseId]: currentTime }));
+  const handleVideoStart = () => {
+    if (!watchStartTime) {
+      setWatchStartTime(Date.now());
+      console.log('비디오 시청 시작 - 1분 타이머 시작');
+    }
+  };
+
+  const calculateSavings = () => {
+    return {
+      consultingFee: 5000000, // 500만원 컨설팅
+      agencyFee: 15000000,    // 1500만원 대행업체
+      timeValue: 2000000,     // 200만원 시간 가치
+      total: 22000000         // 총 2200만원
+    };
+  };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('ko-KR').format(amount);
+  };
+
+  const formatTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
     
-    // 맛보기 영상(첫 번째 강의)을 80% 이상 시청했을 때 CTA 노출
-    if (courseId === 1 && currentTime / duration >= 0.8 && !hasWatchedPreview) {
-      setHasWatchedPreview(true);
-      setShowCTA(true);
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleCTAClose = () => {
-    setShowCTA(false);
-  };
-
-  const handleCTAAction = (action: string) => {
-    // CTA 클릭 추적
-    console.log('CTA Action:', action);
-    
-    if (action === 'purchase') {
-      // 구매 페이지로 이동
-      window.open('/pricing', '_blank');
-    } else if (action === 'contact') {
-      // 상담 문의 페이지로 이동
-      window.open('/contact', '_blank');
-    }
-    
-    setShowCTA(false);
-  };
-
-  const handleVideoComplete = async (courseId: number) => {
-    try {
-      // TODO: 진도 업데이트 API 호출
-      const response = await fetch('/api/courses/progress', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          courseId,
-          isCompleted: true,
-          watchTime: selectedCourse?.duration || 0
-        })
-      });
-
-      if (response.ok) {
-        setUserProgress(prev => ({
-          ...prev,
-          [courseId]: {
-            ...prev[courseId],
-            isCompleted: true
-          }
-        }));
-      }
-    } catch (error) {
-      console.error('진도 업데이트 오류:', error);
-    }
-  };
-
-  const formatDuration = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
-  const getProgressPercentage = () => {
-    const completedCount = Object.values(userProgress).filter(p => p.isCompleted).length;
-    return courses.length > 0 ? (completedCount / courses.length) * 100 : 0;
-  };
-
-  // 올바른 비메오 임베드 URL 생성
-  const getVimeoEmbedUrl = (course: Course) => {
-    if (course.vimeoId) {
-      return `https://player.vimeo.com/video/${course.vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0`;
-    }
-    return course.vimeoUrl;
-  };
+  const savings = calculateSavings();
 
   if (loading) {
     return (
@@ -185,142 +193,125 @@ const CoursesPage = () => {
 
   return (
     <Container>
+      {/* 1분 알림 팝업 */}
+      {showTimerAlert && (
+        <TimerAlert>
+          <TimerAlertContent>
+            <Timer size={24} color="#f59e0b" />
+            <span>1분간 시청해주셨네요! 잠시 후 특별한 제안을 드릴게요 🎉</span>
+          </TimerAlertContent>
+        </TimerAlert>
+      )}
+
       <Header>
         <TitleSection>
           <BackButton onClick={() => router.back()}>
             <ArrowLeft size={20} />
           </BackButton>
           <Title>AI 사업계획서 작성 완성 솔루션</Title>
+          <LiveIndicator>
+            <LiveDot />
+            <span>{onlineUsers}명 온라인</span>
+          </LiveIndicator>
         </TitleSection>
+        
         <ProgressBar>
-          <ProgressFill $progress={getProgressPercentage()} />
+          <ProgressFill $progress={25} />
         </ProgressBar>
-        <ProgressText>
-          진도: {Object.values(userProgress).filter(p => p.isCompleted).length} / {courses.length} 강의 완료
-        </ProgressText>
+        
+        <StatsRow>
+          <StatItem>
+            <Users size={16} />
+            <span>총 {formatCurrency(1247)}명 수강</span>
+          </StatItem>
+          <StatItem>
+            <TrendingUp size={16} />
+            <span>지난 24시간 {recentSignups}명 신규 가입</span>
+          </StatItem>
+          <StatItem>
+            <Award size={16} />
+            <span>만족도 4.9/5.0</span>
+          </StatItem>
+        </StatsRow>
       </Header>
 
       <MainContent>
-        {/* 강의 목록 */}
         <Sidebar>
-          <SidebarTitle>강의 목록</SidebarTitle>
-          <CourseTable>
-            <CourseTableHeader>
-              <CourseTableRow>
-                <CourseTableHeaderCell>순번</CourseTableHeaderCell>
-                <CourseTableHeaderCell>강의명</CourseTableHeaderCell>
-                <CourseTableHeaderCell>시간</CourseTableHeaderCell>
-                <CourseTableHeaderCell>상태</CourseTableHeaderCell>
-              </CourseTableRow>
-            </CourseTableHeader>
-            <CourseTableBody>
-              {courses.map((course, index) => {
-                const progress = userProgress[course.id];
-                const isCompleted = progress?.isCompleted || false;
-                const canAccess = index === 0 || course.isPublic; // 첫 번째 강의(OT)만 접근 가능
+          <SidebarTitle>강의 목록 ({courses.length}강)</SidebarTitle>
+          <CourseList>
+            {courses.map((course, index) => {
+              const progress = userProgress[course.id];
+              const isCompleted = progress?.isCompleted || false;
+              const canAccess = index === 0 || course.isPublic;
 
-                return (
-                  <CourseTableRow
-                    key={course.id}
-                    isSelected={selectedCourse?.id === course.id}
-                    isCompleted={isCompleted}
-                    onClick={() => canAccess && handleCourseSelect(course)}
-                    disabled={!canAccess}
-                  >
-                    <CourseTableCell>
-                      <CourseNumber>{index + 1}</CourseNumber>
-                    </CourseTableCell>
-                    
-                    <CourseTableCell>
-                      <CourseContent>
-                        <CourseItemTitle canAccess={canAccess}>
-                          {course.title}
-                          {!canAccess && <LockIcon><Lock size={14} /></LockIcon>}
-                        </CourseItemTitle>
-                        <CourseLevel>{course.level}</CourseLevel>
-                      </CourseContent>
-                    </CourseTableCell>
-                    
-                    <CourseTableCell>
-                      <Duration>
-                        <Clock size={12} />
-                        {formatDuration(course.duration)}
-                      </Duration>
-                    </CourseTableCell>
-                    
-                    <CourseTableCell>
-                      <StatusIcon>
-                        {!canAccess ? (
-                          <Lock size={16} color="#94a3b8" />
-                        ) : isCompleted ? (
-                          <CheckCircle size={16} color="#10B981" />
-                        ) : (
-                          <PlayCircle size={16} color="#3b82f6" />
-                        )}
-                      </StatusIcon>
-                    </CourseTableCell>
-                  </CourseTableRow>
-                );
-              })}
-            </CourseTableBody>
-          </CourseTable>
+              return (
+                <CourseItem
+                  key={course.id}
+                  isSelected={selectedCourse?.id === course.id}
+                  canAccess={canAccess}
+                  onClick={() => canAccess && handleCourseSelect(course)}
+                >
+                  <CourseNumber>{index + 1}</CourseNumber>
+                  <CourseContent>
+                    <CourseTitle canAccess={canAccess}>
+                      {course.title}
+                      {!canAccess && <Lock size={14} />}
+                    </CourseTitle>
+                    <CourseMeta>
+                      <span>레벨: {course.level}</span>
+                      <span>{Math.floor(course.duration / 60)}분</span>
+                    </CourseMeta>
+                  </CourseContent>
+                  <CourseStatus>
+                    {!canAccess ? (
+                      <Lock size={16} color="#94a3b8" />
+                    ) : isCompleted ? (
+                      <CheckCircle size={16} color="#10B981" />
+                    ) : (
+                      <PlayCircle size={16} color="#3b82f6" />
+                    )}
+                  </CourseStatus>
+                </CourseItem>
+              );
+            })}
+          </CourseList>
         </Sidebar>
 
-        {/* 영상 플레이어 */}
         <VideoSection>
           {selectedCourse ? (
             <>
               <VideoContainer>
-                <VimeoPlayer
-                  src={getVimeoEmbedUrl(selectedCourse)}
-                  title={selectedCourse.title}
-                  frameBorder="0"
-                  allow="autoplay; fullscreen; picture-in-picture; clipboard-write; encrypted-media; web-share"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  allowFullScreen
-                  onLoad={() => console.log('Vimeo player loaded:', selectedCourse.title)}
-                  onError={() => console.log('Vimeo player error:', selectedCourse.title)}
-                />
+                {!videoError ? (
+                  <VimeoPlayer
+                    src={`https://player.vimeo.com/video/${selectedCourse.vimeoId}?badge=0&autopause=0&player_id=0&app_id=58479&title=0&byline=0&portrait=0`}
+                    title={selectedCourse.title}
+                    frameBorder="0"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                    onLoad={handleVideoStart}
+                    onError={() => setVideoError(true)}
+                  />
+                ) : (
+                  <VideoErrorPlaceholder>
+                    <PlayCircle size={48} />
+                    <p>비디오를 불러올 수 없습니다</p>
+                    <button onClick={() => setVideoError(false)}>다시 시도</button>
+                  </VideoErrorPlaceholder>
+                )}
+                
+                {/* 시청 시간 표시 */}
+                {watchStartTime && !videoError && (
+                  <WatchTimeIndicator>
+                    <Clock size={14} />
+                    시청 시간: {formatTime(currentWatchTime)}
+                  </WatchTimeIndicator>
+                )}
               </VideoContainer>
               
               <VideoInfo>
                 <VideoTitle>{selectedCourse.title}</VideoTitle>
                 <VideoDescription>{selectedCourse.description}</VideoDescription>
-                
-                <VideoMeta>
-                  <MetaItem>
-                    <Clock size={16} />
-                    {formatDuration(selectedCourse.duration)}
-                  </MetaItem>
-                  <MetaItem>
-                    <span>레벨: {selectedCourse.level}</span>
-                  </MetaItem>
-                </VideoMeta>
 
-                {userProgress[selectedCourse.id]?.isCompleted && (
-                  <CompletionBadge>
-                    <CheckCircle size={16} />
-                    완료됨
-                  </CompletionBadge>
-                )}
-                
-                {/* 진도 완료 버튼 (테스트용) */}
-                {!userProgress[selectedCourse.id]?.isCompleted && (
-                  <CompleteButton onClick={() => handleVideoComplete(selectedCourse.id)}>
-                    강의 완료 표시
-                  </CompleteButton>
-                )}
-                
-                {/* CTA 테스트 버튼 */}
-                <CompleteButton 
-                  onClick={() => {
-                    setHasWatchedPreview(true);
-                    setShowCTA(true);
-                  }}
-                  style={{ marginLeft: '10px', backgroundColor: '#f59e0b' }}
-                >
-                  CTA 테스트 (맛보기 완료)
-                </CompleteButton>
               </VideoInfo>
             </>
           ) : (
@@ -332,12 +323,16 @@ const CoursesPage = () => {
         </VideoSection>
       </MainContent>
       
-      {/* CTA 모달 */}
+      {/* 향상된 CTA 모달 */}
       {showCTA && (
-        <CTAOverlay>
+        <CTAOverlay onClick={(e) => e.target === e.currentTarget && setShowCTA(false)}>
           <CTAModal>
             <CTAHeader>
-              <CTACloseButton onClick={handleCTAClose}>
+              <UrgencyBadge>
+                <Timer size={16} />
+                한정 특가 {formatTime(timeRemaining)} 남음
+              </UrgencyBadge>
+              <CTACloseButton onClick={() => setShowCTA(false)}>
                 <X size={20} />
               </CTACloseButton>
             </CTAHeader>
@@ -347,43 +342,96 @@ const CoursesPage = () => {
                 <Zap size={48} color="#f59e0b" />
               </CTAIcon>
               
-              <CTATitle>축하합니다! 맛보기 영상을 완주하셨네요!</CTATitle>
+              <CTATitle>
+                🎉 축하합니다!<br />
+                이제 전문가 수준 노하우를 배워보세요
+              </CTATitle>
               
-              <CTADescription>
-                이제 전체 강의를 통해 AI 사업계획서 작성의 모든 노하우를 배워보세요.
-                <strong>전문가 수준의 노하우</strong>를 단시간에 습득할 수 있습니다.
-              </CTADescription>
+              <SavingsSection>
+                <SavingsTitle>
+                  <DollarSign size={20} color="#10b981" />
+                  스스로 배워서 절약하는 비용
+                </SavingsTitle>
+                
+                <SavingsGrid>
+                  <SavingsItem>
+                    <SavingsLabel>전문 컨설팅 비용</SavingsLabel>
+                    <SavingsAmount>{formatCurrency(savings.consultingFee)}원</SavingsAmount>
+                  </SavingsItem>
+                  <SavingsItem>
+                    <SavingsLabel>대행업체 수수료</SavingsLabel>
+                    <SavingsAmount>{formatCurrency(savings.agencyFee)}원</SavingsAmount>
+                  </SavingsItem>
+                  <SavingsItem>
+                    <SavingsLabel>시간 기회비용</SavingsLabel>
+                    <SavingsAmount>{formatCurrency(savings.timeValue)}원</SavingsAmount>
+                  </SavingsItem>
+                </SavingsGrid>
+                
+                <TotalSavings>
+                  <span>총 절약 비용</span>
+                  <TotalAmount>{formatCurrency(savings.total)}원</TotalAmount>
+                </TotalSavings>
+              </SavingsSection>
+
+              <ValueProposition>
+                <ValueTitle>단 39,000원으로 모든 노하우를 습득하세요</ValueTitle>
+                <ValueSubtitle>
+                  98.2% 할인가로 <strong>2200만원 상당의 가치</strong>를 제공합니다
+                </ValueSubtitle>
+              </ValueProposition>
               
               <CTAFeatures>
                 <CTAFeature>
                   <Star size={16} color="#10b981" />
-                  <span>전체 20강의 무제한 시청</span>
+                  <span>전체 20강의 평생 무제한 시청</span>
                 </CTAFeature>
                 <CTAFeature>
-                  <Star size={16} color="#10b981" />
-                  <span>AI 도구 활용 템플릿 제공</span>
+                  <Briefcase size={16} color="#10b981" />
+                  <span>실전 템플릿 & 체크리스트 제공</span>
                 </CTAFeature>
                 <CTAFeature>
-                  <Star size={16} color="#10b981" />
-                  <span>1:1 맞춤 컨설팅 서비스</span>
+                  <Users size={16} color="#10b981" />
+                  <span>전용 커뮤니티 및 Q&A 지원</span>
+                </CTAFeature>
+                <CTAFeature>
+                  <Award size={16} color="#10b981" />
+                  <span>수료증 발급 (선택사항)</span>
                 </CTAFeature>
               </CTAFeatures>
+
+              <SocialProof>
+                <SocialProofItem>
+                  <strong>{formatCurrency(onlineUsers)}명</strong>이 지금 학습 중
+                </SocialProofItem>
+                <SocialProofItem>
+                  <strong>평균 수강 완료율 89%</strong> 달성
+                </SocialProofItem>
+              </SocialProof>
               
               <CTAButtons>
-                <CTAPrimaryButton onClick={() => handleCTAAction('purchase')}>
-                  전체 강의 수강하기
-                  <CTAPrice>월 39,000원</CTAPrice>
+                <CTAPrimaryButton onClick={() => window.open('/payment', '_blank')}>
+                  <span>지금 시작하기</span>
+                  <CTAPrice>
+                    <span className="original">월 99,000원</span>
+                    <span className="discounted">월 39,000원</span>
+                  </CTAPrice>
                 </CTAPrimaryButton>
                 
-                <CTASecondaryButton onClick={() => handleCTAAction('contact')}>
-                  무료 상담 문의하기
+                <CTASecondaryButton onClick={() => window.open('/consultation', '_blank')}>
+                  1:1 무료 상담 신청 (15분)
                 </CTASecondaryButton>
               </CTAButtons>
               
               <CTAFooter>
                 <CTADisclaimer>
-                  현재 <strong>300명 한정</strong> 얼리버드 할인 진행중! (정가: 99,000원)
+                  ⚡ <strong>지금 가입하는 {recentSignups}번째</strong> 고객에게 
+                  <strong style={{color: '#dc2626'}}> 추가 10% 할인</strong> 적용! (자정까지)
                 </CTADisclaimer>
+                
+                <Testimonial>
+                  "이 강의로 3개월 만에 5억 투자 유치에 성공했습니다!" - 김○○ 대표
+                </Testimonial>
               </CTAFooter>
             </CTAContent>
           </CTAModal>
@@ -393,23 +441,60 @@ const CoursesPage = () => {
   );
 };
 
-// Styled Components
+// 스타일 컴포넌트들
 const Container = styled.div`
   min-height: 100vh;
   background: #f8fafc;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+`;
+
+// 타이머 알림 애니메이션
+const slideInFromTop = keyframes`
+  from {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+`;
+
+const TimerAlert = styled.div`
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1001;
+  animation: ${slideInFromTop} 0.3s ease-out;
+`;
+
+const TimerAlertContent = styled.div`
+  background: linear-gradient(135deg, #fef3c7, #fed7aa);
+  border: 2px solid #f59e0b;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 10px 25px rgba(245, 158, 11, 0.2);
+  font-weight: 600;
+  color: #92400e;
+  max-width: 400px;
 `;
 
 const Header = styled.div`
   background: white;
-  padding: 1rem 2rem 2rem;
+  padding: 1.5rem 2rem;
   border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 `;
 
 const TitleSection = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 `;
 
 const BackButton = styled.button`
@@ -431,10 +516,6 @@ const BackButton = styled.button`
     border-color: #cbd5e1;
     color: #475569;
   }
-  
-  &:active {
-    transform: translateY(1px);
-  }
 `;
 
 const Title = styled.h1`
@@ -443,6 +524,32 @@ const Title = styled.h1`
   color: #1a202c;
   margin: 0;
   flex: 1;
+  margin-left: 1rem;
+`;
+
+const LiveIndicator = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fee2e2;
+  color: #dc2626;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+`;
+
+const LiveDot = styled.div`
+  width: 8px;
+  height: 8px;
+  background: #dc2626;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+  
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
 `;
 
 const ProgressBar = styled.div`
@@ -451,7 +558,7 @@ const ProgressBar = styled.div`
   background: #e2e8f0;
   border-radius: 4px;
   overflow: hidden;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1rem;
 `;
 
 const ProgressFill = styled.div<{ $progress: number }>`
@@ -461,14 +568,24 @@ const ProgressFill = styled.div<{ $progress: number }>`
   transition: width 0.3s ease;
 `;
 
-const ProgressText = styled.p`
+const StatsRow = styled.div`
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+`;
+
+const StatItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.875rem;
   color: #64748b;
+  font-weight: 500;
 `;
 
 const MainContent = styled.div`
   display: flex;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 160px);
 `;
 
 const Sidebar = styled.div`
@@ -487,119 +604,71 @@ const SidebarTitle = styled.h2`
   margin: 0;
 `;
 
-const CourseTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
+const CourseList = styled.div`
+  padding: 1rem;
 `;
 
-const CourseTableHeader = styled.thead`
-  background: #f8fafc;
-  border-bottom: 2px solid #e2e8f0;
-`;
-
-const CourseTableBody = styled.tbody``;
-
-const CourseTableRow = styled.tr.withConfig({
-  shouldForwardProp: (prop) => !['isSelected', 'isCompleted', 'disabled'].includes(prop),
-})<{ isSelected: boolean; isCompleted: boolean; disabled: boolean }>`
-  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
-  background: ${props => {
-    if (props.disabled) return '#f8fafc';
-    if (props.isSelected) return '#eff6ff';
-    return 'white';
-  }};
-  opacity: ${props => props.disabled ? 0.6 : 1};
+const CourseItem = styled.div.withConfig({
+  shouldForwardProp: (prop) => !['isSelected', 'canAccess'].includes(prop),
+})<{ isSelected: boolean; canAccess: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 8px;
+  cursor: ${props => props.canAccess ? 'pointer' : 'not-allowed'};
+  background: ${props => props.isSelected ? '#eff6ff' : 'transparent'};
+  opacity: ${props => props.canAccess ? 1 : 0.6};
   transition: all 0.2s ease;
-  border-bottom: 1px solid #f1f5f9;
-
+  border: 2px solid transparent;
+  
   &:hover {
-    background: ${props => {
-      if (props.disabled) return '#f8fafc';
-      if (props.isSelected) return '#eff6ff';
-      return '#f8fafc';
-    }};
+    background: ${props => props.canAccess ? (props.isSelected ? '#eff6ff' : '#f8fafc') : 'transparent'};
+    border-color: ${props => props.canAccess ? '#e2e8f0' : 'transparent'};
   }
 `;
 
-const CourseTableHeaderCell = styled.th`
-  padding: 1rem;
-  text-align: left;
-  font-size: 0.75rem;
+const CourseNumber = styled.div`
+  width: 32px;
+  height: 32px;
+  background: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 600;
-  color: #64748b;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  
-  &:first-child {
-    width: 60px;
-  }
-  
-  &:nth-child(3) {
-    width: 80px;
-  }
-  
-  &:last-child {
-    width: 60px;
-    text-align: center;
-  }
-`;
-
-const CourseTableCell = styled.td`
-  padding: 1rem;
-  vertical-align: middle;
-  
-  &:last-child {
-    text-align: center;
-  }
+  font-size: 0.875rem;
 `;
 
 const CourseContent = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+  flex: 1;
 `;
 
-const CourseItemTitle = styled.h3.withConfig({
+const CourseTitle = styled.h3.withConfig({
   shouldForwardProp: (prop) => prop !== 'canAccess',
 })<{ canAccess: boolean }>`
   font-size: 0.875rem;
   font-weight: 600;
   color: ${props => props.canAccess ? '#1a202c' : '#9ca3af'};
-  margin: 0;
+  margin: 0 0 0.25rem 0;
   line-height: 1.3;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 `;
 
-const CourseLevel = styled.span`
+const CourseMeta = styled.div`
+  display: flex;
+  gap: 1rem;
   font-size: 0.75rem;
-  color: #3b82f6;
-  font-weight: 500;
-`;
-
-const LockIcon = styled.span`
-  color: #94a3b8;
-`;
-
-const CourseNumber = styled.span`
-  font-size: 0.75rem;
-  font-weight: 600;
   color: #64748b;
 `;
 
-const StatusIcon = styled.div`
+const CourseStatus = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-`;
-
-const Duration = styled.span`
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.75rem;
-  color: #64748b;
 `;
 
 const VideoSection = styled.div`
@@ -613,16 +682,31 @@ const VideoContainer = styled.div`
   max-width: 800px;
   margin: 0 auto 2rem;
   background: black;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
   position: relative;
   aspect-ratio: 16/9;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 `;
 
 const VimeoPlayer = styled.iframe`
   width: 100%;
   height: 100%;
   border: none;
+`;
+
+const WatchTimeIndicator = styled.div`
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 `;
 
 const VideoInfo = styled.div`
@@ -644,49 +728,6 @@ const VideoDescription = styled.p`
   margin-bottom: 1.5rem;
 `;
 
-const VideoMeta = styled.div`
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  margin-bottom: 1rem;
-`;
-
-const MetaItem = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.875rem;
-  color: #64748b;
-`;
-
-const CompletionBadge = styled.div`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: #d1fae5;
-  color: #065f46;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-bottom: 1rem;
-`;
-
-const CompleteButton = styled.button`
-  background: #3b82f6;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  
-  &:hover {
-    background: #2563eb;
-  }
-`;
 
 const EmptyState = styled.div`
   display: flex;
@@ -711,14 +752,14 @@ const LoadingMessage = styled.div`
   color: #64748b;
 `;
 
-// CTA 모달 스타일링
+// CTA 모달 스타일
 const CTAOverlay = styled.div`
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -735,7 +776,7 @@ const CTAModal = styled.div`
   background: white;
   border-radius: 16px;
   width: 90%;
-  max-width: 500px;
+  max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -754,9 +795,24 @@ const CTAModal = styled.div`
 `;
 
 const CTAHeader = styled.div`
-  padding: 1rem 1.5rem 0;
+  padding: 1rem 1.5rem;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #e5e7eb;
+`;
+
+const UrgencyBadge = styled.div`
+  background: linear-gradient(135deg, #fee2e2, #fecaca);
+  color: #dc2626;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  animation: pulse 2s infinite;
 `;
 
 const CTACloseButton = styled.button`
@@ -775,7 +831,7 @@ const CTACloseButton = styled.button`
 `;
 
 const CTAContent = styled.div`
-  padding: 0 2rem 2rem;
+  padding: 2rem;
   text-align: center;
 `;
 
@@ -786,28 +842,104 @@ const CTAIcon = styled.div`
 `;
 
 const CTATitle = styled.h2`
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: 700;
   color: #1a202c;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
   line-height: 1.3;
 `;
 
-const CTADescription = styled.p`
+const SavingsSection = styled.div`
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border: 2px solid #22c55e;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+`;
+
+const SavingsTitle = styled.h3`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #15803d;
+  margin-bottom: 1rem;
+`;
+
+const SavingsGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+`;
+
+const SavingsItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #d1fae5;
+`;
+
+const SavingsLabel = styled.span`
+  font-size: 0.875rem;
+  color: #374151;
+`;
+
+const SavingsAmount = styled.span`
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #15803d;
+`;
+
+const TotalSavings = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: #15803d;
+  color: white;
+  border-radius: 8px;
+  font-weight: 700;
+`;
+
+const TotalAmount = styled.span`
+  font-size: 1.25rem;
+`;
+
+const ValueProposition = styled.div`
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
+  border-radius: 12px;
+  border: 2px solid #3b82f6;
+`;
+
+const ValueTitle = styled.h3`
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e40af;
+  margin-bottom: 0.5rem;
+`;
+
+const ValueSubtitle = styled.p`
   font-size: 1rem;
-  color: #4a5568;
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
+  color: #374151;
+  margin: 0;
   
   strong {
-    color: #2d3748;
-    font-weight: 600;
+    color: #dc2626;
+    font-weight: 700;
   }
 `;
 
 const CTAFeatures = styled.div`
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 0.75rem;
   margin-bottom: 2rem;
   text-align: left;
@@ -817,18 +949,40 @@ const CTAFeature = styled.div`
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #374151;
+  font-weight: 500;
+`;
+
+const SocialProof = styled.div`
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: #f8fafc;
+  border-radius: 8px;
+`;
+
+const SocialProofItem = styled.div`
+  text-align: center;
   font-size: 0.875rem;
   color: #374151;
   
-  span {
-    flex: 1;
+  strong {
+    display: block;
+    font-size: 1rem;
+    color: #1a202c;
+    margin-bottom: 0.25rem;
   }
 `;
 
 const CTAButtons = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 1rem;
   margin-bottom: 1.5rem;
 `;
 
@@ -836,18 +990,18 @@ const CTAPrimaryButton = styled.button`
   background: linear-gradient(135deg, #3b82f6, #1d4ed8);
   color: white;
   border: none;
-  padding: 1rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
+  padding: 1.25rem 2rem;
+  border-radius: 12px;
+  font-size: 1.125rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
   position: relative;
   overflow: hidden;
   
   &:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 15px 30px rgba(59, 130, 246, 0.4);
   }
   
   &:active {
@@ -856,20 +1010,29 @@ const CTAPrimaryButton = styled.button`
 `;
 
 const CTAPrice = styled.div`
-  font-size: 0.875rem;
-  font-weight: 500;
-  opacity: 0.9;
-  margin-top: 0.25rem;
+  margin-top: 0.5rem;
+  
+  .original {
+    text-decoration: line-through;
+    opacity: 0.7;
+    font-size: 0.875rem;
+    margin-right: 0.5rem;
+  }
+  
+  .discounted {
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
 `;
 
 const CTASecondaryButton = styled.button`
   background: transparent;
   color: #374151;
   border: 2px solid #e5e7eb;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 500;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
   
@@ -880,18 +1043,62 @@ const CTASecondaryButton = styled.button`
 `;
 
 const CTAFooter = styled.div`
-  padding-top: 1rem;
+  padding-top: 1.5rem;
   border-top: 1px solid #e5e7eb;
 `;
 
 const CTADisclaimer = styled.p`
-  font-size: 0.75rem;
+  font-size: 0.875rem;
   color: #6b7280;
-  line-height: 1.4;
+  line-height: 1.5;
+  margin-bottom: 1rem;
   
   strong {
     color: #dc2626;
+    font-weight: 700;
+  }
+`;
+
+const Testimonial = styled.div`
+  background: #f8fafc;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #3b82f6;
+  font-style: italic;
+  color: #374151;
+  font-size: 0.875rem;
+`;
+
+const VideoErrorPlaceholder = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #64748b;
+  background: #f1f5f9;
+  border-radius: 8px;
+  
+  p {
+    margin: 1rem 0;
+    font-size: 1rem;
+    font-weight: 500;
+  }
+  
+  button {
+    background: #3b82f6;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
     font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: #2563eb;
+    }
   }
 `;
 

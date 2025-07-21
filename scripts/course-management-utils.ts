@@ -35,9 +35,9 @@ export async function listAllCourses() {
       
       console.log(`${status} ${level} ${index + 1}. ${course.title}`);
       console.log(`   📁 카테고리: ${course.category.name}`);
-      console.log(`   🕐 시간: ${Math.floor(course.duration / 60)}분`);
+      console.log(`   🕐 시간: ${Math.floor((course.duration || 0) / 60)}분`);
       console.log(`   👥 완료자: ${completedUsers}명`);
-      console.log(`   🔗 비메오 ID: ${course.vimeoId}`);
+      console.log(`   🔗 비메오 ID: ${course.vimeoId || 'N/A'}`);
       console.log(`   📅 생성일: ${course.createdAt.toLocaleDateString('ko-KR')}`);
       console.log('');
     });
@@ -159,10 +159,11 @@ export async function getUserProgressStats() {
       if (course) {
         const completionRate = Math.round((stat._count.userId / 100) * 100); // 전체 사용자 대비
         const avgWatchTime = Math.floor((stat._sum.watchTime || 0) / stat._count.userId / 60);
+        const courseDuration = Math.floor((course.duration || 0) / 60);
         
         console.log(`📚 ${course.title}`);
         console.log(`   ✅ 완료자: ${stat._count.userId}명`);
-        console.log(`   ⏱️ 평균 시청시간: ${avgWatchTime}분`);
+        console.log(`   ⏱️ 평균 시청시간: ${avgWatchTime}분 / 전체 ${courseDuration}분`);
         console.log('');
       }
     });

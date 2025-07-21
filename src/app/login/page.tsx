@@ -50,9 +50,28 @@ function LoginContent() {
     setMessages(prev => ({ ...prev, [name]: '', general: '' }));
   }, []);
 
+  const handleKeyPress = useCallback((e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && !isLoginLoading) {
+      // 이벤트를 비동기로 처리하여 form 제출 합니다.
+      setTimeout(() => {
+        const form = e.currentTarget.closest('form');
+        if (form) {
+          const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+          form.dispatchEvent(submitEvent);
+        }
+      }, 0);
+    }
+  }, [isLoginLoading]);
+
   const handleSubmit = useCallback(async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoginLoading(true);
+    
+    console.log('🚀 로그인 시도:', {
+      email: formData.email,
+      rememberMe: formData.rememberMe
+    });
+    
     try {
       const redirectTo = searchParams.get('redirect_to') || '';
 
@@ -72,7 +91,7 @@ function LoginContent() {
       const data = await response.json();
       
       if (!response.ok) {
-        setMessages(prev => ({ ...prev, general: data.error || '로그인에 실패했습니다.' }));
+        setMessages(prev => ({ ...prev, general: data.message || '로그인에 실패했습니다.' }));
         return;
       }
       
@@ -176,6 +195,7 @@ function LoginContent() {
             placeholder="이메일"
             value={formData.email}
             onChange={handleChange}
+            onKeyPress={handleKeyPress}
           />
           {messages.email && <Message>{messages.email}</Message>}
           <Input
@@ -184,17 +204,20 @@ function LoginContent() {
             placeholder="비밀번호"
             value={formData.password}
             onChange={handleChange}
+            onKeyPress={handleKeyPress}
           />
           {messages.password && <Message>{messages.password}</Message>}
           
-          <CheckboxLabel>
+          <CheckboxLabel $checked={formData.rememberMe}>
             <Checkbox
               type="checkbox"
               name="rememberMe"
               checked={formData.rememberMe}
               onChange={handleChange}
             />
-            로그인 상태 유지
+            <CheckboxText>
+              로그인 상태 유지 {formData.rememberMe && '(최대 30일)'}
+            </CheckboxText>
           </CheckboxLabel>
 
           {messages.general && <Message>{messages.general}</Message>}
@@ -290,23 +313,46 @@ const Input = styled.input`
   }
 `;
 
+// Input prop 인터페이스 등록
+Input.defaultProps = {
+  onKeyPress: () => {}
+};
+
 const Message = styled.p`
   font-size: 0.9rem;
   color: red;
   margin-top: -0.5rem;
 `;
 
-const CheckboxLabel = styled.label`
+const CheckboxLabel = styled.label<{ $checked?: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 1rem;
-  color: #333;
+  color: ${props => props.$checked ? '#514FE4' : '#333'};
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background: #f8f9fa;
+  }
+`;
+
+const CheckboxText = styled.span`
+  transition: color 0.2s ease;
 `;
 
 const Checkbox = styled.input`
   width: 20px;
   height: 20px;
+  accent-color: #514FE4;
+  cursor: pointer;
+  
+  &:checked {
+    background-color: #514FE4;
+  }
 `;
 
 const SolidButton = styled.button`

@@ -26,26 +26,6 @@ export function useAuth(): AuthState & {
   refreshAuth: () => Promise<void>;
 } {
   const [authState, setAuthState] = useState<AuthState>(() => {
-    // 초기 상태를 로컬 스토리지에서 불러오기
-    if (typeof window !== 'undefined') {
-      try {
-        const stored = localStorage.getItem(AUTH_STORAGE_KEY);
-        if (stored) {
-          const parsed = JSON.parse(stored);
-          if (parsed.user && Date.now() - parsed.timestamp < AUTH_CHECK_INTERVAL) {
-            return {
-              user: parsed.user,
-              isLoading: false,
-              isLoggedIn: true,
-              error: null
-            };
-          }
-        }
-      } catch (error) {
-        console.warn('로컬 스토리지에서 인증 상태 로드 실패:', error);
-      }
-    }
-    
     return {
       user: null,
       isLoading: true,
@@ -53,6 +33,33 @@ export function useAuth(): AuthState & {
       error: null
     };
   });
+
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    
+    // 클라이언트에서만 로컬 스토리지에서 로드
+    if (typeof window !== 'undefined') {
+      try {
+        const stored = localStorage.getItem(AUTH_STORAGE_KEY);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed.user && Date.now() - parsed.timestamp < AUTH_CHECK_INTERVAL) {
+            setAuthState({
+              user: parsed.user,
+              isLoading: false,
+              isLoggedIn: true,
+              error: null
+            });
+            return;
+          }
+        }
+      } catch (error) {
+        console.warn('로컬 스토리지에서 인증 상태 로드 실패:', error);
+      }
+    }
+  }, []);
 
   // 인증 상태를 로컬 스토리지에 저장
   const saveAuthState = useCallback((state: AuthState) => {
@@ -222,8 +229,8 @@ export function useAuth(): AuthState & {
   }, [checkAuthStatus]);
 
   useEffect(() => {
-    // 초기 로드 시에만 인증 상태 확인
-    if (authState.isLoading) {
+    // 초기 로드 시에만 인증 상태 확인 (isMounted가 true가 된 후)
+    if (isMounted && authState.isLoading) {
       checkAuthStatus();
     }
     
@@ -233,7 +240,7 @@ export function useAuth(): AuthState & {
         clearTimeout(authCheckTimeout);
       }
       
-      if (authState.isLoggedIn) {
+      if (isMounted && authState.isLoggedIn) {
         authCheckTimeout = setTimeout(() => {
           checkAuthStatus();
           setupPeriodicCheck();
@@ -248,7 +255,7 @@ export function useAuth(): AuthState & {
         clearTimeout(authCheckTimeout);
       }
     };
-  }, [authState.isLoading, authState.isLoggedIn, checkAuthStatus]);
+  }, [isMounted, authState.isLoading, authState.isLoggedIn, checkAuthStatus]);
 
   // 브라우저 탭/윈도우 포커스 시 인증 상태 확인
   useEffect(() => {

@@ -6,6 +6,9 @@
 @import '../styles/editor.css';
 @import '../components/editor/editor-styles.css';
 
+/* 한글 폰트 추가 */
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css');
+
 /* SafeEditor 추가 스타일 */
 .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
@@ -31,9 +34,59 @@
   }
 }
 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Malgun Gothic', '맑은 고딕', sans-serif;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Malgun Gothic', '맑은 고딕', sans-serif;
   color: #333;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  /* 한글 폰트 렌더링 개선 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'liga' 1, 'kern' 1;
+  text-rendering: optimizeLegibility;
+}
+
+/* 숫자 표시 개선 */
+.number {
+  font-variant-numeric: tabular-nums;
+  font-family: 'Pretendard', monospace;
+}
+
+/* 금액 표시 개선 */
+.price {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+/* 반응형 폰트 크기 */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 1025px) {
+  html {
+    font-size: 16px;
+  }
 }

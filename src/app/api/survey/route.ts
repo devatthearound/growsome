@@ -5,6 +5,8 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     
+    console.log('받은 설문 데이터:', JSON.stringify(body, null, 2)); // 디버깅용
+    
     // 요청 데이터 검증
     const {
       businessStage,
@@ -22,17 +24,57 @@ export async function POST(request: NextRequest) {
       company
     } = body;
 
-    // 필수 필드 검증
-    if (!businessStage || !mainConcern || !currentWebsite || !desiredTimeline || 
-        !budgetRange || !dataCollection || !desiredData || !brandingSituation || 
-        !brandDirection || !name || !phone || !email) {
+    // 필수 필드 검증 (company는 선택사항)
+    const requiredFields = {
+      businessStage,
+      mainConcern,
+      currentWebsite,
+      desiredTimeline,
+      budgetRange,
+      dataCollection,
+      desiredData,
+      brandingSituation,
+      brandDirection,
+      name,
+      phone,
+      email
+    };
+
+    const missingFields = Object.entries(requiredFields)
+      .filter(([key, value]) => !value || value.toString().trim() === '')
+      .map(([key, value]) => key);
+
+    if (missingFields.length > 0) {
+      console.log('누락된 필드:', missingFields);
       return NextResponse.json(
-        { error: '필수 필드가 누락되었습니다.' },
+        { 
+          error: '필수 필드가 누락되었습니다.',
+          missingFields: missingFields
+        },
         { status: 400 }
       );
     }
 
-    // 이메일 중복 체크
+    // 이메일 형식 검증
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: '올바른 이메일 형식이 아닙니다.' },
+        { status: 400 }
+      );
+    }
+
+    // 휴대폰 번호 형식 검증 (기본적인 형식만)
+    const phoneRegex = /^[0-9-+\s()]{10,}$/;
+    if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
+      return NextResponse.json(
+        { error: '올바른 전화번호 형식이 아닙니다.' },
+        { status: 400 }
+      );
+    }
+
+    // 이메일 중복 체크 (선택적 - 중복 허용할 경우 주석 처리)
+    /*
     const existingSurvey = await prisma.surveyResponse.findFirst({
       where: {
         email: email
@@ -45,6 +87,7 @@ export async function POST(request: NextRequest) {
         { status: 409 }
       );
     }
+    */
 
     // 요청 메타 정보 수집
     const forwarded = request.headers.get('x-forwarded-for');
@@ -77,6 +120,8 @@ export async function POST(request: NextRequest) {
       }
     });
 
+    console.log('설문 응답 저장 성공:', surveyResponse.id);
+
     // 맞춤형 추천 로직 (간단한 버전)
     const recommendations = generateRecommendations({
       businessStage,
@@ -94,14 +139,17 @@ export async function POST(request: NextRequest) {
     }, { status: 201 });
 
   } catch (error) {
-  console.error('Survey submission error:', error);
-  
-  return NextResponse.json(
-  { error: '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.' },
-  { status: 500 }
-  );
+    console.error('Survey submission error:', error);
+    
+    return NextResponse.json(
+      { 
+        error: '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { status: 500 }
+    );
   }
-  }
+}
 
 // 맞춤형 추천 로직
 function generateRecommendations(data: {

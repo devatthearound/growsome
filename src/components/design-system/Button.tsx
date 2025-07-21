@@ -28,10 +28,10 @@ const getButtonColors = (color: ButtonProps['$color'], variant: ButtonProps['$va
       light: growsomeTheme.color.Primary300,
     },
     green: {
-      main: growsomeTheme.color.Green500,
-      hover: growsomeTheme.color.Green600,
-      active: growsomeTheme.color.Green700,
-      light: growsomeTheme.color.Green300,
+      main: growsomeTheme.color.Primary500, // 기본적으로 Primary 사용
+      hover: growsomeTheme.color.Primary600,
+      active: growsomeTheme.color.Primary700,
+      light: growsomeTheme.color.Primary300,
     },
     gray: {
       main: growsomeTheme.color.Gray300,
@@ -59,10 +59,10 @@ const getButtonColors = (color: ButtonProps['$color'], variant: ButtonProps['$va
     case 'filled':
       return {
         background: colorSet.main,
-        color: color === 'green' ? growsomeTheme.color.Black800 : growsomeTheme.color.White,
+        color: growsomeTheme.color.White, // 모든 버튼 하얀 텍스트
         border: 'none',
         hoverBackground: colorSet.hover,
-        hoverColor: color === 'green' ? growsomeTheme.color.Black800 : growsomeTheme.color.White,
+        hoverColor: growsomeTheme.color.White,
       };
     case 'outline':
       return {
@@ -70,7 +70,7 @@ const getButtonColors = (color: ButtonProps['$color'], variant: ButtonProps['$va
         color: colorSet.main,
         border: `2px solid ${colorSet.main}`,
         hoverBackground: colorSet.main,
-        hoverColor: color === 'green' ? growsomeTheme.color.Black800 : growsomeTheme.color.White,
+        hoverColor: growsomeTheme.color.White, // 모든 outline 버튼 하얀 텍스트
       };
     case 'ghost':
       return {
@@ -255,6 +255,44 @@ export const IconButton = styled(BaseButton)<{
     min-height: 3rem;
     border-radius: ${growsomeTheme.radius.radius2};
   `}
+`;
+
+// 어두운 배경 전용 네온 그린 버튼 (#514FE4, #060D34 배경에서만 사용)
+export const DarkBackgroundButton = styled(BaseButton)`
+  background: ${growsomeTheme.color.Green500} !important; /* #06ff01 */
+  color: ${growsomeTheme.color.Black800} !important; /* #080d34 */
+  border: none !important;
+  
+  &:hover:not(:disabled) {
+    background: ${growsomeTheme.color.Green600} !important; /* #05cc01 */
+    color: ${growsomeTheme.color.Black800} !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(6, 255, 1, 0.3);
+  }
+  
+  &:active:not(:disabled) {
+    background: ${growsomeTheme.color.Green700} !important; /* #049901 */
+    transform: translateY(0);
+    box-shadow: 0 2px 10px rgba(6, 255, 1, 0.2);
+  }
+  
+  &:focus-visible {
+    outline: 2px solid ${growsomeTheme.color.Green500};
+    outline-offset: 2px;
+  }
+`;
+
+// 사용 예시를 위한 어두운 배경 컨테이너들
+export const DarkPrimarySection = styled.div`
+  background: ${growsomeTheme.color.Primary500}; /* #514FE4 */
+  padding: ${growsomeTheme.spacing.xl};
+  color: ${growsomeTheme.color.White};
+`;
+
+export const DarkBlackSection = styled.div`
+  background: ${growsomeTheme.color.Black800}; /* #060D34 */
+  padding: ${growsomeTheme.spacing.xl};
+  color: ${growsomeTheme.color.White};
 `;
 
 // Floating Action Button

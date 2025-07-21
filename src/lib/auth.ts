@@ -18,23 +18,29 @@ export interface TokenPayload {
 }
 
 // 쿠키 설정 함수
-export function setAuthCookies(accessToken: string, refreshToken: string, response: NextResponse, redirectUrl?: string) {
-  // Access Token 쿠키 설정 (짧은 유효기간)
+export function setAuthCookies(accessToken: string, refreshToken: string, response: NextResponse, options?: { redirectUrl?: string, rememberMe?: boolean }) {
+  const { redirectUrl, rememberMe = false } = options || {};
+  
+  // rememberMe에 따라 다른 만료 시간 설정
+  const accessTokenMaxAge = rememberMe ? 60 * 60 * 24 * 7 : 60 * 60 * 2; // 7일 또는 2시간
+  const refreshTokenMaxAge = rememberMe ? 60 * 60 * 24 * 30 : 60 * 60 * 24 * 7; // 30일 또는 7일
+  
+  // Access Token 쿠키 설정
   response.cookies.set(ACCESS_TOKEN_NAME, accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 2, // 2시간
+    maxAge: accessTokenMaxAge,
   });
 
-  // Refresh Token 쿠키 설정 (긴 유효기간)
+  // Refresh Token 쿠키 설정
   response.cookies.set(REFRESH_TOKEN_NAME, refreshToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 24 * 7, // 7일
+    maxAge: refreshTokenMaxAge,
   });
 
   // 리다이렉트 URL이 있는 경우

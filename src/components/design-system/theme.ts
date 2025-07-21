@@ -5,7 +5,7 @@ export const growsomeTheme = {
   color: {
     // Growsome Brand Colors
     Primary500: "#514fe4",
-    Green500: "#06ff01", 
+    Green500: "#06ff01", // 네온 그린 - 어두운 배경 전용
     Gray50: "#f2f5fa",
     Black800: "#080d34",
     
@@ -19,10 +19,22 @@ export const growsomeTheme = {
     Primary50: "#F0F0FF",
     Primary25: "#F8F8FF",
     
-    Green600: "#05cc01",
-    Green700: "#049901",
-    Green400: "#39ff34",
-    Green300: "#6cff67",
+    // Green colors - 컨텍스트별 사용
+    Green600: "#05cc01", // 네온 그린 진한 버전 - 어두운 배경 전용
+    Green700: "#049901", // 네온 그린 더 진한 버전 - 어두운 배경 전용
+    Green400: "#39ff34", // 네온 그린 밝은 버전 - 어두운 배경 전용
+    Green300: "#6cff67", // 네온 그린 더 밝은 버전 - 어두운 배경 전용
+    
+    // 흰색 배경용 Green 색상들
+    GreenSafe500: "#22C55E", // 흰색 배경에서 사용할 안전한 그린
+    GreenSafe600: "#16A34A", // 흰색 배경용 진한 그린
+    GreenSafe700: "#15803D", // 흰색 배경용 더 진한 그린
+    GreenSafe400: "#4ADE80", // 흰색 배경용 밝은 그린
+    GreenSafe300: "#86EFAC", // 흰색 배경용 더 밝은 그린
+    GreenSafe200: "#BBF7D0", // 흰색 배경용 연한 그린
+    GreenSafe100: "#DCFCE7", // 흰색 배경용 더 연한 그린
+    GreenSafe50: "#F0FDF4", // 흰색 배경용 가장 연한 그린
+    
     Green200: "#C6F6D5",
     Green100: "#d9f7d9",
     Green50: "#F0FFF0",
@@ -139,4 +151,32 @@ export const growsomeTheme = {
     normal: "0.3s ease",
     slow: "0.5s ease",
   },
+  
+  // 배경별 버튼 색상 헬퍼 함수
+  getButtonColorForBackground: (backgroundColor: string) => {
+    // 어두운 브랜드 배경인지 확인
+    const isDarkBrandBackground = 
+      backgroundColor === "#514FE4" || 
+      backgroundColor === "#514fe4" ||
+      backgroundColor === "#060D34" ||
+      backgroundColor === "#060d34";
+    
+    if (isDarkBrandBackground) {
+      // 어두운 브랜드 배경: 네온 그린 사용
+      return {
+        main: "#06ff01",
+        hover: "#05cc01",
+        active: "#049901",
+        text: "#080d34"
+      };
+    } else {
+      // 흰색 배경 포함 나머지: Primary 색상 사용
+      return {
+        main: "#514fe4",
+        hover: "#4240c7",
+        active: "#362fb8",
+        text: "#FFFFFF"
+      };
+    }
+  }
 };

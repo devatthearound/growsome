@@ -30,6 +30,7 @@ const TypeformSurvey = () => {
   const [answers, setAnswers] = useState<Partial<SurveyData>>({});
   const [isAnimating, setIsAnimating] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [inputError, setInputError] = useState(false);
 
   const questions = [
     {
@@ -210,6 +211,32 @@ const TypeformSurvey = () => {
     try {
       setLoading(true);
       
+      // 제출 전 모든 필수 필드 검증
+      const requiredFields = [
+        'businessStage', 'mainConcern', 'currentWebsite', 'desiredTimeline',
+        'budgetRange', 'dataCollection', 'desiredData', 'brandingSituation',
+        'brandDirection', 'name', 'phone', 'email'
+      ];
+      
+      const missingFields = requiredFields.filter(field => 
+        !answers[field as keyof SurveyData] || 
+        answers[field as keyof SurveyData]?.toString().trim() === ''
+      );
+      
+      if (missingFields.length > 0) {
+        alert(`다음 필드를 입력해주세요: ${missingFields.join(', ')}`);
+        return;
+      }
+      
+      // 이메일 형식 검증
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(answers.email || '')) {
+        alert('올바른 이메일 형식을 입력해주세요.');
+        return;
+      }
+      
+      console.log('제출할 데이터:', answers);
+      
       const response = await fetch('/api/survey', {
         method: 'POST',
         headers: {
@@ -221,6 +248,7 @@ const TypeformSurvey = () => {
       const result = await response.json();
       
       if (!response.ok) {
+        console.error('API 오류 응답:', result);
         throw new Error(result.error || '서버 오류가 발생했습니다.');
       }
       
@@ -236,15 +264,22 @@ const TypeformSurvey = () => {
       
     } catch (error) {
       console.error('설문 제출 오류:', error);
-      alert('설문 제출 중 오류가 발생했습니다. 다시 시도해주세요.');
+      const errorMessage = error instanceof Error ? error.message : '설문 제출 중 오류가 발생했습니다.';
+      alert(errorMessage + ' 다시 시도해주세요.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleKeyPress = (e: KeyboardEvent) => {
-    if (e.key === 'Enter' && canProceed()) {
-      nextQuestion();
+    if (e.key === 'Enter') {
+      if (canProceed()) {
+        nextQuestion();
+      } else if (questions[currentQuestion].type !== 'choice') {
+        // 입력형 질문에서만 입력창 강조
+        setInputError(true);
+        setTimeout(() => setInputError(false), 2000);
+      }
     }
   };
 
@@ -327,16 +362,27 @@ const TypeformSurvey = () => {
                       </OptionCard>
                     ))}
                   </OptionsContainer>
-                ) : (
+                                ) : (
                   // 입력형 질문
                   <InputContainer>
                     <InputField
                       type={currentQ.type}
                       placeholder={currentQ.placeholder}
                       value={answers[currentQ.id] || ''}
-                      onChange={(e) => handleAnswer(e.target.value)}
+                      onChange={(e) => {
+                        handleAnswer(e.target.value);
+                        if (inputError) setInputError(false); // 입력 시 에러 상태 해제
+                      }}
                       autoFocus
+                      $hasError={inputError}
                     />
+                    {inputError && (
+                      <ErrorMessage>
+                        <Typography.TextS400 color={growsomeTheme.color.Red500}>
+                          답변을 입력해주세요.
+                        </Typography.TextS400>
+                      </ErrorMessage>
+                    )}
                     <InputHint>
                       <Typography.TextS400 color={growsomeTheme.color.Black600}>
                         Press <KeyboardKey>Enter</KeyboardKey> to continue
@@ -351,8 +397,15 @@ const TypeformSurvey = () => {
                 <ButtonContainer>
                   <GreenButton
                     $size="large"
-                    onClick={nextQuestion}
-                    disabled={!canProceed() || loading}
+                    onClick={() => {
+                      if (canProceed()) {
+                        nextQuestion();
+                      } else {
+                        setInputError(true);
+                        setTimeout(() => setInputError(false), 2000);
+                      }
+                    }}
+                    disabled={loading}
                   >
                     {loading ? '제출 중...' : 
                      currentQuestion === questions.length - 1 ? '진단 완료하기 🎉' : '다음 질문'}
@@ -572,24 +625,45 @@ const InputContainer = styled.div`
   align-items: center;
 `;
 
-const InputField = styled.input`
+const InputField = styled.input<{ $hasError?: boolean }>`
   width: 100%;
   max-width: 500px;
   font-size: ${growsomeTheme.fontSize.TextXL};
   padding: ${growsomeTheme.spacing.xl};
   border: none;
-  border-bottom: 3px solid ${growsomeTheme.color.Gray300};
+  border-bottom: 3px solid ${props => props.$hasError ? growsomeTheme.color.Red400 : growsomeTheme.color.Gray300};
   background: transparent;
   outline: none;
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
   text-align: center;
   
   &:focus {
-    border-bottom-color: ${growsomeTheme.color.Primary500};
+    border-bottom-color: ${props => props.$hasError ? growsomeTheme.color.Red500 : growsomeTheme.color.Primary500};
   }
   
   &::placeholder {
     color: ${growsomeTheme.color.Gray400};
+  }
+  
+  ${props => props.$hasError && `
+    animation: shake 0.3s ease-in-out;
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+  `}
+`;
+
+const ErrorMessage = styled.div`
+  text-align: center;
+  margin-top: ${growsomeTheme.spacing.sm};
+  animation: fadeIn 0.3s ease-in-out;
+  
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
   }
 `;
 

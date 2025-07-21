@@ -1,4 +1,6 @@
 
+'use client';
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface ApiKeys {
@@ -22,9 +24,11 @@ export const CoupangApiProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   });
 
   useEffect(() => {
-    const savedKeys = localStorage.getItem('coupangApiKeys');
-    if (savedKeys) {
-      setApiKeys(JSON.parse(savedKeys));
+    if (typeof window !== 'undefined') {
+      const savedKeys = localStorage.getItem('coupangApiKeys');
+      if (savedKeys) {
+        setApiKeys(JSON.parse(savedKeys));
+      }
     }
   }, []);
 

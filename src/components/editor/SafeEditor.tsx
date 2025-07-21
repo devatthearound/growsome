@@ -110,6 +110,8 @@ const SafeEditor = ({
         heading: {
           levels: [1, 2, 3],
         },
+        // 기본 codeBlock을 비활성화하여 CodeBlockLowlight와 충돌 방지
+        codeBlock: false,
       }),
       Image.configure({
         HTMLAttributes: {

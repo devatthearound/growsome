@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone', // ✅ 이 줄을 추가하세요
   images: {
     domains: [
       'picsum.photos',

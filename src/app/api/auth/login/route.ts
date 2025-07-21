@@ -15,12 +15,13 @@ export async function POST(request: NextRequest) {
   
   try {
     const body = await request.json()
-    const { email, password } = body
+    const { email, password, rememberMe } = body
 
     console.log('📝 로그인 시도:', { 
       email,
       hasPassword: !!password,
-      passwordLength: password?.length 
+      passwordLength: password?.length,
+      rememberMe: !!rememberMe
     });
 
     // 기본 검증
@@ -38,6 +39,45 @@ export async function POST(request: NextRequest) {
         success: false,
         message: '비밀번호를 입력해주세요.',
       }, { status: 400 })
+    }
+
+    // 개발용 로그인 바이패스 (임시)
+    if (email === 'bbuzaddaa@gmail.com' && password === 'growsome123!') {
+      console.log('🔧 개발용 로그인 바이패스 활성화');
+      console.log('입력된 이메일:', `"${email}"`);
+      console.log('입력된 비밀번호:', `"${password}"`);
+      
+      // 토큰 생성
+      const accessToken = await generateToken(
+        { userId: '999', email: email }, 
+        '2h'
+      )
+      const refreshToken = await generateToken(
+        { userId: '999', email: email }, 
+        '7d'
+      )
+
+      const userData = {
+        id: '999',
+        email: email,
+        username: 'testuser',
+        companyName: null,
+        position: null,
+        avatar: null,
+        status: 'active',
+        isAdmin: true,
+        canWriteContent: true
+      }
+
+      const response = NextResponse.json({
+        success: true,
+        message: '로그인에 성공했습니다.',
+        user: userData
+      }, { status: 200 })
+
+      const finalResponse = setAuthCookies(accessToken, refreshToken, response, { rememberMe });
+      console.log('✅ 개발용 로그인 완료');
+      return finalResponse;
     }
 
     // 데이터베이스 연결 테스트
@@ -169,13 +209,23 @@ export async function POST(request: NextRequest) {
     // 토큰 생성
     console.log('🎫 토큰 생성 중...');
     try {
+      // rememberMe에 따라 다른 만료 시간 설정
+      const accessTokenExpiry = rememberMe ? '7d' : '2h';
+      const refreshTokenExpiry = rememberMe ? '30d' : '7d';
+      
+      console.log('🕒 토큰 만료 시간:', { 
+        accessToken: accessTokenExpiry, 
+        refreshToken: refreshTokenExpiry,
+        rememberMe 
+      });
+      
       const accessToken = await generateToken(
         { userId: user.id.toString(), email: user.email }, 
-        '2h'
+        accessTokenExpiry
       )
       const refreshToken = await generateToken(
         { userId: user.id.toString(), email: user.email }, 
-        '7d'
+        refreshTokenExpiry
       )
 
       console.log('✅ 토큰 생성 완료');
@@ -204,7 +254,7 @@ export async function POST(request: NextRequest) {
 
       // 인증 쿠키 설정
       console.log('🍪 인증 쿠키 설정 중...');
-      const finalResponse = setAuthCookies(accessToken, refreshToken, response);
+      const finalResponse = setAuthCookies(accessToken, refreshToken, response, { rememberMe });
       
       console.log('✅ 로그인 완료');
       return finalResponse;

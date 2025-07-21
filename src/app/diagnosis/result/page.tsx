@@ -4,6 +4,7 @@ import React, { useEffect, useState, Suspense } from 'react';
 import styled, { ThemeProvider, keyframes } from 'styled-components';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { growsomeTheme } from '@/components/design-system/theme';
+import { Typography } from '@/components/design-system/Typography';
 
 interface Recommendation {
   primary: string;
@@ -25,7 +26,7 @@ const Loading = () => (
 
 const LoadingContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, ${growsomeTheme.color.Green50} 0%, ${growsomeTheme.color.Primary50} 100%);
+  background: ${growsomeTheme.color.White};
   padding: ${growsomeTheme.spacing.xl} 0;
   display: flex;
   align-items: center;
@@ -74,75 +75,58 @@ const DiagnosisResultContent = () => {
           {/* Success Header */}
           <SuccessHeader>
             <SuccessIcon>🎉</SuccessIcon>
-            <Title>진단 완료!</Title>
-            <Subtitle>
+            <Typography.DisplayS600 color={growsomeTheme.color.Black800} style={{ marginBottom: '1rem' }}>
+              진단 완료!
+            </Typography.DisplayS600>
+            <Typography.TextL400 color={growsomeTheme.color.Black600} style={{ textAlign: 'center', lineHeight: '1.6' }}>
               설문에 참여해주셔서 감사합니다.<br/>
-              맞춤형 10배 성장 전략을 준비해드리겠습니다.
-            </Subtitle>
+              맞춤형 성장 전략을 준비해드리겠습니다.
+            </Typography.TextL400>
           </SuccessHeader>
-
-          {/* Next Steps */}
-          <NextStepsSection>
-            <SectionTitle>📋 다음 단계</SectionTitle>
-
-            <StepsGrid>
-              <StepCard>
-                <StepNumber>1</StepNumber>
-                <StepTitle>진단 분석</StepTitle>
-                <StepDescription>
-                  전문가가 귀하의 설문 내용을 바탕으로 맞춤형 성장 전략을 분석합니다.
-                </StepDescription>
-              </StepCard>
-
-              <StepCard>
-                <StepNumber>2</StepNumber>
-                <StepTitle>개별 연락</StepTitle>
-                <StepDescription>
-                  24시간 내 담당자가 진단 결과와 함께 개별 상담을 위해 연락드립니다.
-                </StepDescription>
-              </StepCard>
-
-              <StepCard>
-                <StepNumber>3</StepNumber>
-                <StepTitle>맞춤 제안</StepTitle>
-                <StepDescription>
-                  귀하의 비즈니스에 최적화된 AI 개발, 데이터 운영, 브랜딩 솔루션을 제안합니다.
-                </StepDescription>
-              </StepCard>
-            </StepsGrid>
-          </NextStepsSection>
 
           {/* Personalized Recommendation */}
           {recommendation && (
             <RecommendationSection>
-              <SectionTitle>🎁 귀하만을 위한 맞춤형 추천</SectionTitle>
+              <Typography.DisplayS600 color={growsomeTheme.color.Black800} style={{ textAlign: 'center', marginBottom: '2rem' }}>
+                🎁 귀하만을 위한 맞춤형 추천
+              </Typography.DisplayS600>
               
               <RecommendationCard>
                 <RecommendationHeader>
-                  <RecommendationTitle>{recommendation.primary}</RecommendationTitle>
-                  <RecommendationPrice>{recommendation.price}</RecommendationPrice>
+                  <Typography.DisplayS600 color={growsomeTheme.color.Primary600}>
+                    {recommendation.primary}
+                  </Typography.DisplayS600>
+                  <RecommendationPrice>
+                    <Typography.TextXL600 color={growsomeTheme.color.GreenSafe600} className="price">
+                      {recommendation.price}
+                    </Typography.TextXL600>
+                  </RecommendationPrice>
                 </RecommendationHeader>
                 
                 <RecommendationDetails>
-                  <RecommendationDescription>
+                  <Typography.TextL400 color={growsomeTheme.color.Black700} style={{ marginBottom: '1rem', lineHeight: '1.6' }}>
                     {recommendation.description}
-                  </RecommendationDescription>
-                  <RecommendationTimeline>
+                  </Typography.TextL400>
+                  <Typography.TextM500 color={growsomeTheme.color.Primary600}>
                     예상 기간: {recommendation.timeline}
-                  </RecommendationTimeline>
+                  </Typography.TextM500>
                 </RecommendationDetails>
                 
                 <FeaturesList>
-                  <FeaturesTitle>주요 기능:</FeaturesTitle>
+                  <Typography.TextL500 color={growsomeTheme.color.Black800} style={{ marginBottom: '1rem' }}>
+                    주요 기능:
+                  </Typography.TextL500>
                   {recommendation.features.map((feature, index) => (
                     <FeatureItem key={index}>
-                      ✓ {feature}
+                      <Typography.TextM400 color={growsomeTheme.color.Black700}>
+                        ✓ {feature}
+                      </Typography.TextM400>
                     </FeatureItem>
                   ))}
                 </FeaturesList>
                 
                 <RecommendationCTA>
-                  <CTAButton primary onClick={handleSubscription}>
+                  <CTAButton onClick={handleSubscription}>
                     🚀 이 패키지 선택하기
                   </CTAButton>
                 </RecommendationCTA>
@@ -150,56 +134,97 @@ const DiagnosisResultContent = () => {
             </RecommendationSection>
           )}
 
+          {/* Next Steps */}
+          <NextStepsSection>
+            <Typography.DisplayS600 color={growsomeTheme.color.Black800} style={{ textAlign: 'center', marginBottom: '2rem' }}>
+              📋 다음 단계
+            </Typography.DisplayS600>
+
+            <StepsGrid>
+              <StepCard>
+                <StepNumber>1</StepNumber>
+                <Typography.TextL500 color={growsomeTheme.color.Black800} style={{ marginBottom: '0.5rem' }}>
+                  진단 분석
+                </Typography.TextL500>
+                <Typography.TextM400 color={growsomeTheme.color.Black600} style={{ textAlign: 'center', lineHeight: '1.5' }}>
+                  전문가가 귀하의 설문 내용을 바탕으로 맞춤형 성장 전략을 분석합니다.
+                </Typography.TextM400>
+              </StepCard>
+
+              <StepCard>
+                <StepNumber>2</StepNumber>
+                <Typography.TextL500 color={growsomeTheme.color.Black800} style={{ marginBottom: '0.5rem' }}>
+                  개별 연락
+                </Typography.TextL500>
+                <Typography.TextM400 color={growsomeTheme.color.Black600} style={{ textAlign: 'center', lineHeight: '1.5' }}>
+                  24시간 내 담당자가 진단 결과와 함께 개별 상담을 위해 연락드립니다.
+                </Typography.TextM400>
+              </StepCard>
+
+              <StepCard>
+                <StepNumber>3</StepNumber>
+                <Typography.TextL500 color={growsomeTheme.color.Black800} style={{ marginBottom: '0.5rem' }}>
+                  맞춤 제안
+                </Typography.TextL500>
+                <Typography.TextM400 color={growsomeTheme.color.Black600} style={{ textAlign: 'center', lineHeight: '1.5' }}>
+                  귀하의 비즈니스에 최적화된 AI 개발, 데이터 운영, 브랜딩 솔루션을 제안합니다.
+                </Typography.TextM400>
+              </StepCard>
+            </StepsGrid>
+          </NextStepsSection>
+
           {/* Expected Benefits */}
           <BenefitsSection>
-            <SectionTitle>🚀 기대 효과</SectionTitle>
+            <Typography.DisplayS600 color={growsomeTheme.color.Black800} style={{ textAlign: 'center', marginBottom: '2rem' }}>
+              🚀 기대 효과
+            </Typography.DisplayS600>
 
             <BenefitsGrid>
               <BenefitCard>
                 <BenefitIcon>📈</BenefitIcon>
                 <div>
-                  <BenefitTitle style={{color: growsomeTheme.color.Green600}}>
+                  <Typography.TextL500 color={growsomeTheme.color.GreenSafe600} style={{ marginBottom: '0.5rem' }}>
                     매출 10배 성장
-                  </BenefitTitle>
-                  <BenefitDescription>
+                  </Typography.TextL500>
+                  <Typography.TextM400 color={growsomeTheme.color.Black600} style={{ lineHeight: '1.5' }}>
                     AI 자동화와 데이터 기반 최적화로 기존 대비 10배 매출 증대
-                  </BenefitDescription>
+                  </Typography.TextM400>
                 </div>
               </BenefitCard>
 
               <BenefitCard>
                 <BenefitIcon>⚡</BenefitIcon>
                 <div>
-                  <BenefitTitle style={{color: growsomeTheme.color.Blue600}}>
+                  <Typography.TextL500 color={growsomeTheme.color.Blue600} style={{ marginBottom: '0.5rem' }}>
                     운영 효율 극대화
-                  </BenefitTitle>
-                  <BenefitDescription>
+                  </Typography.TextL500>
+                  <Typography.TextM400 color={growsomeTheme.color.Black600} style={{ lineHeight: '1.5' }}>
                     1인이 10명 규모 업무를 처리할 수 있는 완전 자동화 시스템
-                  </BenefitDescription>
-                </div>
-              </BenefitCard>
-
-              <BenefitCard>
-                <BenefitIcon>🎯</BenefitIcon>
-                <div>
-                  <BenefitTitle style={{color: growsomeTheme.color.Primary600}}>
-                    브랜드 차별화
-                  </BenefitTitle>
-                  <BenefitDescription>
-                    경쟁사 대비 독보적인 브랜드 포지셔닝과 고객 경험 제공
-                  </BenefitDescription>
+                  </Typography.TextM400>
                 </div>
               </BenefitCard>
 
               <BenefitCard>
                 <BenefitIcon>💰</BenefitIcon>
                 <div>
-                  <BenefitTitle style={{color: growsomeTheme.color.Orange600}}>
+                  <Typography.TextL500 color={growsomeTheme.color.Orange600} style={{ marginBottom: '0.5rem' }}>
                     비용 75% 절감
-                  </BenefitTitle>
-                  <BenefitDescription>
+                  </Typography.TextL500>
+                  <Typography.TextM400 color={growsomeTheme.color.Black600} style={{ lineHeight: '1.5' }}>
                     기존 개발 비용 대비 75% 절감하면서 더 나은 결과 달성
-                  </BenefitDescription>
+                  </Typography.TextM400>
+                </div>
+              </BenefitCard>
+
+              <BenefitCard>
+                <BenefitIcon>🎯</BenefitIcon>
+                <div>
+                  <Typography.TextL500 color={growsomeTheme.color.Primary600} style={{ marginBottom: '0.5rem' }}>
+                    브랜드 차별화
+                  </Typography.TextL500>
+                  <Typography.TextM400 color={growsomeTheme.color.Black600} style={{ lineHeight: '1.5' }}>
+                    경쟁사 대비 독보적인 브랜드 포지셔닝과 고객 경험 제공
+                  </Typography.TextM400>
                 </div>
               </BenefitCard>
             </BenefitsGrid>
@@ -208,17 +233,23 @@ const DiagnosisResultContent = () => {
           {/* Urgent Message */}
           <UrgentCard>
             <UrgentIcon>⏰</UrgentIcon>
-            <UrgentTitle>한정 특가 진행 중!</UrgentTitle>
-            <UrgentDescription>
+            <Typography.TextXL500 color={growsomeTheme.color.Red600} style={{ marginBottom: '1rem' }}>
+              한정 특가 진행 중!
+            </Typography.TextXL500>
+            <Typography.TextM400 color={growsomeTheme.color.Black700} style={{ marginBottom: '1rem', lineHeight: '1.5', textAlign: 'center' }}>
               설문 참여자 한정으로 최대 55% 할인가로 제공합니다.<br/>
               이 기회를 놓치지 마세요!
-            </UrgentDescription>
-            <DiscountBadge>최대 55% 할인</DiscountBadge>
+            </Typography.TextM400>
+            <DiscountBadge>
+              <Typography.TextL600 color={growsomeTheme.color.White}>
+                최대 55% 할인
+              </Typography.TextL600>
+            </DiscountBadge>
           </UrgentCard>
 
           {/* CTA Buttons */}
           <CTAButtons>
-            <CTAButton primary onClick={handleConsultation}>
+            <CTAButton onClick={handleConsultation}>
               💬 즉시 상담 받기 (카카오톡)
             </CTAButton>
             <CTAButton onClick={handleSubscription}>
@@ -231,20 +262,24 @@ const DiagnosisResultContent = () => {
             <InfoCard>
               <InfoIcon>🔒</InfoIcon>
               <div>
-                <InfoTitle>개인정보 보호</InfoTitle>
-                <InfoDescription>
+                <Typography.TextM500 color={growsomeTheme.color.Black800} style={{ marginBottom: '0.5rem' }}>
+                  개인정보 보호
+                </Typography.TextM500>
+                <Typography.TextS400 color={growsomeTheme.color.Black600} style={{ lineHeight: '1.5' }}>
                   귀하의 정보는 진단 및 상담 목적으로만 사용되며, 별도 동의 없이 마케팅에 활용되지 않습니다.
-                </InfoDescription>
+                </Typography.TextS400>
               </div>
             </InfoCard>
 
             <InfoCard>
               <InfoIcon>📞</InfoIcon>
               <div>
-                <InfoTitle>빠른 응답 보장</InfoTitle>
-                <InfoDescription>
+                <Typography.TextM500 color={growsomeTheme.color.Black800} style={{ marginBottom: '0.5rem' }}>
+                  빠른 응답 보장
+                </Typography.TextM500>
+                <Typography.TextS400 color={growsomeTheme.color.Black600} style={{ lineHeight: '1.5' }}>
                   설문 제출 후 24시간 내 담당자가 직접 연락드려 맞춤형 상담을 진행합니다.
-                </InfoDescription>
+                </Typography.TextS400>
               </div>
             </InfoCard>
           </InfoSection>
@@ -289,75 +324,66 @@ const slideUp = keyframes`
   to { opacity: 1; transform: translateY(0); }
 `;
 
-// Styled Components
+// Styled Components - 반응형 개선
 const Container = styled.div`
-  max-width: 1200px;
+  max-width: 1200px; /* PC에서 더 넓게 */
   margin: 0 auto;
   padding: 0 ${growsomeTheme.spacing.lg};
+  
+  @media ${growsomeTheme.device.mobile} {
+    max-width: 600px; /* 모바일에서는 600px로 제한 */
+    padding: 0 ${growsomeTheme.spacing.md};
+  }
+  
+  @media ${growsomeTheme.device.tablet} {
+    max-width: 800px; /* 태블릿에서는 800px */
+    padding: 0 ${growsomeTheme.spacing.lg};
+  }
 `;
 
 const ResultContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, ${growsomeTheme.color.Green50} 0%, ${growsomeTheme.color.Primary50} 100%);
+  background: ${growsomeTheme.color.White};
   padding: ${growsomeTheme.spacing.xl} 0;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Malgun Gothic', sans-serif;
 `;
 
 const ResultWrapper = styled.div`
-  max-width: 900px;
-  margin: 0 auto;
   animation: ${slideUp} 0.6s ease-out;
 `;
 
 const SuccessHeader = styled.div`
-  background: ${growsomeTheme.color.White};
-  border-radius: ${growsomeTheme.radius.radius3};
-  padding: ${growsomeTheme.spacing["3xl"]};
   text-align: center;
-  box-shadow: ${growsomeTheme.shadow.Elevation2};
-  margin-bottom: ${growsomeTheme.spacing["2xl"]};
+  margin-bottom: ${growsomeTheme.spacing.xl};
+  padding: ${growsomeTheme.spacing.xl};
 `;
 
 const SuccessIcon = styled.div`
-  font-size: 4rem;
+  font-size: 3rem;
   animation: ${bounce} 2s ease-in-out infinite;
-  margin-bottom: ${growsomeTheme.spacing.xl};
-`;
-
-const Title = styled.h1`
-  font-size: ${growsomeTheme.fontSize.DisplayL};
-  font-weight: ${growsomeTheme.fontWeight.Bold};
-  color: ${growsomeTheme.color.Black800};
-  margin: 0 0 ${growsomeTheme.spacing.lg} 0;
-`;
-
-const Subtitle = styled.p`
-  font-size: ${growsomeTheme.fontSize.TextL};
-  color: ${growsomeTheme.color.Black600};
-  margin: 0;
-  line-height: 1.6;
+  margin-bottom: ${growsomeTheme.spacing.lg};
 `;
 
 const NextStepsSection = styled.div`
-  background: ${growsomeTheme.color.White};
-  border-radius: ${growsomeTheme.radius.radius3};
-  padding: ${growsomeTheme.spacing["2xl"]};
-  box-shadow: ${growsomeTheme.shadow.Elevation1};
-  margin-bottom: ${growsomeTheme.spacing["2xl"]};
-`;
-
-const SectionTitle = styled.h2`
-  font-size: ${growsomeTheme.fontSize.DisplayS};
-  font-weight: ${growsomeTheme.fontWeight.SemiBold};
-  color: ${growsomeTheme.color.Black800};
-  text-align: center;
-  margin: 0 0 ${growsomeTheme.spacing["2xl"]} 0;
+  margin-bottom: ${growsomeTheme.spacing.xl};
+  padding: ${growsomeTheme.spacing.xl};
+  background: ${growsomeTheme.color.Gray50};
+  border-radius: ${growsomeTheme.radius.radius2};
 `;
 
 const StepsGrid = styled.div`
   display: grid;
-  gap: ${growsomeTheme.spacing.xl};
+  gap: ${growsomeTheme.spacing.lg};
+  
+  @media ${growsomeTheme.device.mobile} {
+    grid-template-columns: 1fr;
+  }
   
   @media ${growsomeTheme.device.tablet} {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (min-width: 1024px) {
     grid-template-columns: repeat(3, 1fr);
   }
 `;
@@ -367,20 +393,16 @@ const StepCard = styled.div`
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: ${growsomeTheme.spacing.xl};
+  padding: ${growsomeTheme.spacing.lg};
   border: 1px solid ${growsomeTheme.color.Gray200};
   border-radius: ${growsomeTheme.radius.radius2};
-  transition: transform 0.2s ease;
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: ${growsomeTheme.shadow.Elevation1};
-  }
+  background: ${growsomeTheme.color.White};
+  flex: 1;
 `;
 
 const StepNumber = styled.div`
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   background: ${growsomeTheme.color.Primary500};
   color: ${growsomeTheme.color.White};
   border-radius: 50%;
@@ -389,100 +411,55 @@ const StepNumber = styled.div`
   justify-content: center;
   font-size: ${growsomeTheme.fontSize.TextL};
   font-weight: ${growsomeTheme.fontWeight.Bold};
-  margin-bottom: ${growsomeTheme.spacing.lg};
-`;
-
-const StepTitle = styled.h3`
-  font-size: ${growsomeTheme.fontSize.TextL};
-  font-weight: ${growsomeTheme.fontWeight.SemiBold};
-  color: ${growsomeTheme.color.Black800};
-  margin: 0 0 ${growsomeTheme.spacing.sm} 0;
-`;
-
-const StepDescription = styled.p`
-  font-size: ${growsomeTheme.fontSize.TextM};
-  color: ${growsomeTheme.color.Black600};
-  margin: 0;
-  line-height: 1.5;
+  margin-bottom: ${growsomeTheme.spacing.md};
 `;
 
 const RecommendationSection = styled.div`
-  background: linear-gradient(135deg, ${growsomeTheme.color.Primary50} 0%, ${growsomeTheme.color.Green50} 100%);
-  border-radius: ${growsomeTheme.radius.radius3};
-  padding: ${growsomeTheme.spacing["2xl"]};
-  margin-bottom: ${growsomeTheme.spacing["2xl"]};
-  border: 2px solid ${growsomeTheme.color.Primary200};
+  background: ${growsomeTheme.color.Primary25};
+  border-radius: ${growsomeTheme.radius.radius2};
+  padding: ${growsomeTheme.spacing.xl};
+  margin-bottom: ${growsomeTheme.spacing.xl};
+  border: 1px solid ${growsomeTheme.color.Primary200};
 `;
 
 const RecommendationCard = styled.div`
   background: ${growsomeTheme.color.White};
-  border-radius: ${growsomeTheme.radius.radius3};
-  padding: ${growsomeTheme.spacing["2xl"]};
-  box-shadow: ${growsomeTheme.shadow.Elevation2};
-  border: 2px solid ${growsomeTheme.color.Primary300};
+  border-radius: ${growsomeTheme.radius.radius2};
+  padding: ${growsomeTheme.spacing.xl};
+  border: 1px solid ${growsomeTheme.color.Primary300};
 `;
 
 const RecommendationHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: ${growsomeTheme.spacing.xl};
+  margin-bottom: ${growsomeTheme.spacing.lg};
   
   @media ${growsomeTheme.device.mobile} {
     flex-direction: column;
     gap: ${growsomeTheme.spacing.md};
+    text-align: center;
   }
 `;
 
-const RecommendationTitle = styled.h3`
-  font-size: ${growsomeTheme.fontSize.DisplayS};
-  font-weight: ${growsomeTheme.fontWeight.Bold};
-  color: ${growsomeTheme.color.Primary600};
-  margin: 0;
-`;
-
 const RecommendationPrice = styled.div`
-  font-size: ${growsomeTheme.fontSize.TextXL};
-  font-weight: ${growsomeTheme.fontWeight.Bold};
-  color: ${growsomeTheme.color.Green600};
-  background: ${growsomeTheme.color.Green50};
-  padding: ${growsomeTheme.spacing.md} ${growsomeTheme.spacing.lg};
-  border-radius: ${growsomeTheme.radius.radius2};
-  border: 2px solid ${growsomeTheme.color.Green200};
+  background: ${growsomeTheme.color.GreenSafe50};
+  padding: ${growsomeTheme.spacing.sm} ${growsomeTheme.spacing.lg};
+  border-radius: ${growsomeTheme.radius.radius1};
+  border: 1px solid ${growsomeTheme.color.GreenSafe200};
+  font-family: 'Pretendard', sans-serif;
+  font-weight: 600;
 `;
 
 const RecommendationDetails = styled.div`
-  margin-bottom: ${growsomeTheme.spacing.xl};
-`;
-
-const RecommendationDescription = styled.p`
-  font-size: ${growsomeTheme.fontSize.TextL};
-  color: ${growsomeTheme.color.Black700};
-  margin: 0 0 ${growsomeTheme.spacing.md} 0;
-  line-height: 1.6;
-`;
-
-const RecommendationTimeline = styled.p`
-  font-size: ${growsomeTheme.fontSize.TextM};
-  color: ${growsomeTheme.color.Primary600};
-  font-weight: ${growsomeTheme.fontWeight.SemiBold};
-  margin: 0;
+  margin-bottom: ${growsomeTheme.spacing.lg};
 `;
 
 const FeaturesList = styled.div`
-  margin-bottom: ${growsomeTheme.spacing.xl};
-`;
-
-const FeaturesTitle = styled.h4`
-  font-size: ${growsomeTheme.fontSize.TextL};
-  font-weight: ${growsomeTheme.fontWeight.SemiBold};
-  color: ${growsomeTheme.color.Black800};
-  margin: 0 0 ${growsomeTheme.spacing.md} 0;
+  margin-bottom: ${growsomeTheme.spacing.lg};
 `;
 
 const FeatureItem = styled.div`
-  font-size: ${growsomeTheme.fontSize.TextM};
-  color: ${growsomeTheme.color.Black700};
   margin-bottom: ${growsomeTheme.spacing.sm};
   padding-left: ${growsomeTheme.spacing.md};
   
@@ -498,16 +475,19 @@ const RecommendationCTA = styled.div`
 `;
 
 const BenefitsSection = styled.div`
-  background: ${growsomeTheme.color.White};
-  border-radius: ${growsomeTheme.radius.radius3};
-  padding: ${growsomeTheme.spacing["2xl"]};
-  box-shadow: ${growsomeTheme.shadow.Elevation1};
-  margin-bottom: ${growsomeTheme.spacing["2xl"]};
+  background: ${growsomeTheme.color.Gray50};
+  border-radius: ${growsomeTheme.radius.radius2};
+  padding: ${growsomeTheme.spacing.xl};
+  margin-bottom: ${growsomeTheme.spacing.xl};
 `;
 
 const BenefitsGrid = styled.div`
   display: grid;
-  gap: ${growsomeTheme.spacing.xl};
+  gap: ${growsomeTheme.spacing.lg};
+  
+  @media ${growsomeTheme.device.mobile} {
+    grid-template-columns: 1fr;
+  }
   
   @media ${growsomeTheme.device.tablet} {
     grid-template-columns: repeat(2, 1fr);
@@ -517,120 +497,94 @@ const BenefitsGrid = styled.div`
 const BenefitCard = styled.div`
   display: flex;
   align-items: flex-start;
-  gap: ${growsomeTheme.spacing.lg};
-  padding: ${growsomeTheme.spacing.xl};
-  background: ${growsomeTheme.color.Gray50};
+  gap: ${growsomeTheme.spacing.md};
+  padding: ${growsomeTheme.spacing.lg};
+  background: ${growsomeTheme.color.White};
   border-radius: ${growsomeTheme.radius.radius2};
-  transition: transform 0.2s ease;
-  
-  &:hover {
-    transform: translateY(-2px);
-  }
+  border: 1px solid ${growsomeTheme.color.Gray200};
 `;
 
 const BenefitIcon = styled.div`
-  font-size: 2.5rem;
-  background: ${growsomeTheme.color.White};
-  padding: ${growsomeTheme.spacing.md};
-  border-radius: ${growsomeTheme.radius.radius2};
-  box-shadow: ${growsomeTheme.shadow.Elevation1};
+  font-size: 2rem;
+  background: ${growsomeTheme.color.Primary50};
+  padding: ${growsomeTheme.spacing.sm};
+  border-radius: ${growsomeTheme.radius.radius1};
   flex-shrink: 0;
 `;
 
-const BenefitTitle = styled.h4`
-  font-size: ${growsomeTheme.fontSize.TextL};
-  font-weight: ${growsomeTheme.fontWeight.SemiBold};
-  margin: 0 0 ${growsomeTheme.spacing.sm} 0;
-`;
-
-const BenefitDescription = styled.p`
-  font-size: ${growsomeTheme.fontSize.TextM};
-  color: ${growsomeTheme.color.Black600};
-  margin: 0;
-  line-height: 1.5;
-`;
-
 const UrgentCard = styled.div`
-  background: linear-gradient(135deg, ${growsomeTheme.color.Red50} 0%, ${growsomeTheme.color.Orange50} 100%);
-  border: 2px solid ${growsomeTheme.color.Red200};
-  border-radius: ${growsomeTheme.radius.radius3};
-  padding: ${growsomeTheme.spacing["2xl"]};
+  background: ${growsomeTheme.color.Red25};
+  border: 1px solid ${growsomeTheme.color.Red200};
+  border-radius: ${growsomeTheme.radius.radius2};
+  padding: ${growsomeTheme.spacing.xl};
   text-align: center;
   animation: ${pulse} 2s ease-in-out infinite;
-  margin-bottom: ${growsomeTheme.spacing["2xl"]};
+  margin-bottom: ${growsomeTheme.spacing.xl};
 `;
 
 const UrgentIcon = styled.div`
-  font-size: 3rem;
+  font-size: 2.5rem;
   margin-bottom: ${growsomeTheme.spacing.lg};
-`;
-
-const UrgentTitle = styled.h3`
-  font-size: ${growsomeTheme.fontSize.TextXL};
-  font-weight: ${growsomeTheme.fontWeight.SemiBold};
-  color: ${growsomeTheme.color.Red600};
-  margin: 0 0 ${growsomeTheme.spacing.lg} 0;
-`;
-
-const UrgentDescription = styled.p`
-  font-size: ${growsomeTheme.fontSize.TextM};
-  color: ${growsomeTheme.color.Black700};
-  margin: 0 0 ${growsomeTheme.spacing.lg} 0;
-  line-height: 1.5;
 `;
 
 const DiscountBadge = styled.div`
   background: linear-gradient(90deg, ${growsomeTheme.color.Red500}, ${growsomeTheme.color.Orange500});
   color: ${growsomeTheme.color.White};
-  padding: ${growsomeTheme.spacing.md} ${growsomeTheme.spacing.xl};
+  padding: ${growsomeTheme.spacing.sm} ${growsomeTheme.spacing.lg};
   border-radius: ${growsomeTheme.radius.radius5};
   display: inline-block;
-  box-shadow: ${growsomeTheme.shadow.Elevation1};
-  font-size: ${growsomeTheme.fontSize.TextL};
-  font-weight: ${growsomeTheme.fontWeight.Bold};
 `;
 
 const CTAButtons = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: ${growsomeTheme.spacing.lg};
-  max-width: 400px;
-  margin: 0 auto ${growsomeTheme.spacing["2xl"]};
+  display: grid;
+  gap: ${growsomeTheme.spacing.md};
+  margin-bottom: ${growsomeTheme.spacing.xl};
+  
+  @media ${growsomeTheme.device.mobile} {
+    grid-template-columns: 1fr;
+  }
+  
+  @media ${growsomeTheme.device.tablet} {
+    grid-template-columns: repeat(2, 1fr);
+  }
 `;
 
-const CTAButton = styled.button<{primary?: boolean}>`
+const CTAButton = styled.button`
   width: 100%;
-  padding: ${growsomeTheme.spacing.lg} ${growsomeTheme.spacing.xl};
+  padding: ${growsomeTheme.spacing.lg};
   font-size: ${growsomeTheme.fontSize.TextL};
   font-weight: ${growsomeTheme.fontWeight.SemiBold};
   border: none;
   border-radius: ${growsomeTheme.radius.radius2};
   cursor: pointer;
   transition: all 0.2s ease;
+  background: ${growsomeTheme.color.Primary500};
+  color: ${growsomeTheme.color.White};
+  font-family: 'Pretendard', sans-serif;
   
-  ${props => props.primary ? `
-    background: ${growsomeTheme.color.Green500};
-    color: ${growsomeTheme.color.White};
-    
-    &:hover {
-      background: ${growsomeTheme.color.Green600};
-      transform: translateY(-2px);
-    }
-  ` : `
+  &:hover {
+    background: ${growsomeTheme.color.Primary600};
+    transform: translateY(-2px);
+  }
+  
+  /* 첫 번째 버튼도 Primary 색상 사용 (흰색 배경이므로) */
+  &:first-child {
     background: ${growsomeTheme.color.Primary500};
-    color: ${growsomeTheme.color.White};
     
     &:hover {
       background: ${growsomeTheme.color.Primary600};
-      transform: translateY(-2px);
     }
-  `}
+  }
 `;
 
 const InfoSection = styled.div`
   display: grid;
   gap: ${growsomeTheme.spacing.lg};
-  margin-bottom: ${growsomeTheme.spacing["2xl"]};
+  margin-bottom: ${growsomeTheme.spacing.xl};
+  
+  @media ${growsomeTheme.device.mobile} {
+    grid-template-columns: 1fr;
+  }
   
   @media ${growsomeTheme.device.tablet} {
     grid-template-columns: repeat(2, 1fr);
@@ -640,11 +594,11 @@ const InfoSection = styled.div`
 const InfoCard = styled.div`
   display: flex;
   align-items: flex-start;
-  gap: ${growsomeTheme.spacing.lg};
-  background: ${growsomeTheme.color.White};
-  padding: ${growsomeTheme.spacing.xl};
+  gap: ${growsomeTheme.spacing.md};
+  background: ${growsomeTheme.color.Gray50};
+  padding: ${growsomeTheme.spacing.lg};
   border-radius: ${growsomeTheme.radius.radius2};
-  box-shadow: ${growsomeTheme.shadow.Elevation1};
+  flex: 1;
 `;
 
 const InfoIcon = styled.div`
@@ -653,20 +607,6 @@ const InfoIcon = styled.div`
   padding: ${growsomeTheme.spacing.sm};
   border-radius: ${growsomeTheme.radius.radius1};
   flex-shrink: 0;
-`;
-
-const InfoTitle = styled.h4`
-  font-size: ${growsomeTheme.fontSize.TextM};
-  font-weight: ${growsomeTheme.fontWeight.SemiBold};
-  color: ${growsomeTheme.color.Black800};
-  margin: 0 0 ${growsomeTheme.spacing.sm} 0;
-`;
-
-const InfoDescription = styled.p`
-  font-size: ${growsomeTheme.fontSize.TextS};
-  color: ${growsomeTheme.color.Black600};
-  margin: 0;
-  line-height: 1.5;
 `;
 
 const BackSection = styled.div`
@@ -682,6 +622,7 @@ const BackButton = styled.button`
   font-size: ${growsomeTheme.fontSize.TextM};
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: 'Pretendard', sans-serif;
   
   &:hover {
     background: ${growsomeTheme.color.Gray300};

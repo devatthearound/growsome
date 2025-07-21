@@ -9,6 +9,8 @@ import { Check, X, TrendingUp, CheckCircle, Clock, AlertTriangle, ArrowRight, Sm
 import Link from 'next/link';
 import CoursePreviewTable from '@/components/CoursePreviewTable';
 
+
+
 // Global style to remove underline from all links
 const GlobalStyle = createGlobalStyle`
   a {
@@ -1423,13 +1425,7 @@ const CourseDescription = styled.p`
   line-height: 1.4;
 `;
 
-const CourseDuration = styled.div`
-  font-size: 0.9rem;
-  color: ${colors.text.secondary};
-  display: flex;
-  align-items: center;
-  gap: 6px;
-`;
+
 
 const CourseLevel = styled.div`
   font-size: 0.9rem;
@@ -1459,171 +1455,7 @@ const CoursePreviewCTA = styled.div`
   margin-top: 40px;
 `;
 
-const CoursePreview = () => {
-  const [courses, setCourses] = useState([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchCourses = async () => {
-      try {
-        const response = await fetch('/api/courses?preview=true');
-        const data = await response.json();
-        
-        if (data.success) {
-          setCourses(data.courses);
-        } else {
-          console.error('강의 데이터 로드 실패:', data.error);
-        }
-      } catch (error) {
-        console.error('강의 데이터 로드 오류:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCourses();
-  }, []);
-
-  // 로딩 중이거나 강의가 없을 때 샘플 데이터 사용
-  const previewCourses = courses.length > 0 ? courses : [
-    {
-      id: 1,
-      title: "1강. 혁신적인 사업계획서 작성법",
-      description: "AI를 활용한 체계적인 사업계획서 작성 방법론을 배웁니다.",
-      duration: 234, // 초 단위
-      level: "초급",
-      thumbnailUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=400&h=200&fit=crop",
-      isPublic: true
-    },
-    {
-      id: 2,
-      title: "2강. 시장 분석과 경쟁사 분석",
-      description: "효과적인 시장 조사 방법과 경쟁사 분석 프레임워크를 학습합니다.",
-      duration: 279,
-      level: "초급",
-      thumbnailUrl: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=200&fit=crop",
-      isPublic: false
-    },
-    {
-      id: 3,
-      title: "3강. 재무 계획 수립하기",
-      description: "사업의 재무 모델링과 수익성 분석 방법을 익힙니다.",
-      duration: 361,
-      level: "중급",
-      thumbnailUrl: "https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=400&h=200&fit=crop",
-      isPublic: false
-    },
-    {
-      id: 4,
-      title: "4강. MVP 설계와 검증",
-      description: "최소기능제품(MVP) 설계 및 시장 검증 전략을 다룹니다.",
-      duration: 307,
-      level: "중급",
-      thumbnailUrl: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&h=200&fit=crop",
-      isPublic: false
-    }
-  ];
-
-  const formatDuration = (seconds: number) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
-  };
-
-  const handleCourseClick = (course: any) => {
-    if (course.isPublic && course.vimeoUrl) {
-      // 미리보기 가능한 강의는 바로 재생
-      console.log('미리보기 강의 재생:', course.title);
-      // TODO: 모달로 Vimeo 플레이어 열기
-      window.open(course.vimeoUrl, '_blank');
-    } else {
-      // 유료 강의는 강의 페이지로 이동
-      window.location.href = '/courses';
-    }
-  };
-
-  if (loading) {
-    return (
-      <CoursePreviewSection>
-        <CoursePreviewContainer>
-          <CoursePreviewTitle>
-            💎 강의 미리보기
-          </CoursePreviewTitle>
-          <CoursePreviewSubtitle>
-            강의 데이터를 로드하고 있습니다...
-          </CoursePreviewSubtitle>
-        </CoursePreviewContainer>
-      </CoursePreviewSection>
-    );
-  }
-
-  return (
-    <CoursePreviewSection>
-      <CoursePreviewContainer>
-        <CoursePreviewTitle>
-          💎 강의 미리보기
-        </CoursePreviewTitle>
-        <CoursePreviewSubtitle>
-          실제 강의 내용을 미리 확인해보세요.<br/>
-          첫 번째 강의는 무료로 시청할 수 있습니다.
-        </CoursePreviewSubtitle>
-        
-        <CourseGrid>
-          {previewCourses.map((course) => (
-            <CourseCard
-              key={course.id}
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => handleCourseClick(course)}
-            >
-              <CourseVideoContainer>
-                <CourseThumbnail 
-                  src={course.thumbnailUrl} 
-                  alt={course.title}
-                />
-                <PlayButton>
-                  <FontAwesomeIcon icon={faPlay} />
-                </PlayButton>
-                {course.isPublic ? (
-                  <PreviewBadge>무료 미리보기</PreviewBadge>
-                ) : (
-                  <LockedBadge>
-                    <FontAwesomeIcon icon={faLock} />
-                    프리미엄
-                  </LockedBadge>
-                )}
-              </CourseVideoContainer>
-              
-              <CourseContent>
-                <CourseTitle>{course.title}</CourseTitle>
-                <CourseDescription>{course.description || course.shortDescription}</CourseDescription>
-                <CourseMeta>
-                  <CourseDuration>{formatDuration(course.duration || 0)}</CourseDuration>
-                  <CourseLevel>{course.level}</CourseLevel>
-                </CourseMeta>
-              </CourseContent>
-            </CourseCard>
-          ))}
-        </CourseGrid>
-        
-        <CoursePreviewCTA>
-          <Link href="/courses" passHref>
-            <HeroButton
-              as="button"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              onClick={() => {}}
-            >
-              전체 강의 패키지 시작하기
-              <ArrowRight size={20} />
-            </HeroButton>
-          </Link>
-        </CoursePreviewCTA>
-      </CoursePreviewContainer>
-    </CoursePreviewSection>
-  );
-};
 
 const CouponSection = styled.section`
   padding: 80px 24px;

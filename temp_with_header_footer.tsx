@@ -1,28 +1,16 @@
 'use client'
-import React, { useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import React from 'react';
+import { usePathname } from 'next/navigation';
 import "./globals.css";
 import styled, { createGlobalStyle } from 'styled-components';
-import Script from 'next/script';
-
-// 기본 imports
 import StyledComponentsRegistry from '../lib/registry';
 import { AuthProvider } from './contexts/AuthContext';
 import { CoupangApiProvider } from './contexts/CoupangApiContext';
 import { EmailProvider } from './contexts/EmailContext';
-
-// 컴포넌트 imports
+import AuthErrorBoundary from '../components/error/AuthErrorBoundary';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
-import ClarityAnalytics from '../components/common/ClarityAnalytics';
-import AuthErrorBoundary from '../components/error/AuthErrorBoundary';
-
-// FontAwesome 가져오기 (에러 방지를 위해 try-catch로 감쌈)
-try {
-  require('../lib/fontawesome');
-} catch (error) {
-  console.warn('FontAwesome 로딩 실패:', error);
-}
+import Script from 'next/script';
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -69,6 +57,10 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
     <AppContainer>
       <Header />
       <Main>
+        <div style={{ padding: '20px' }}>
+          <h1>3단계: Header와 Footer 추가됨</h1>
+          <p>전체 레이아웃이 복원되었습니다!</p>
+        </div>
         {children}
       </Main>
       <Footer />
@@ -84,9 +76,6 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
         <Script id="google-tag-manager" strategy="afterInteractive">
           {`
             (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
@@ -97,7 +86,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body suppressHydrationWarning={true}>
+      <body>
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-TNM368S3"
@@ -108,7 +97,6 @@ export default function RootLayout({
         </noscript>
         <StyledComponentsRegistry>
           <GlobalStyle />
-          <ClarityAnalytics />
           <AuthProvider>
             <CoupangApiProvider>
               <EmailProvider>

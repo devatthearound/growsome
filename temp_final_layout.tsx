@@ -5,24 +5,20 @@ import "./globals.css";
 import styled, { createGlobalStyle } from 'styled-components';
 import Script from 'next/script';
 
-// 기본 imports
+// 안전한 동적 import 사용
 import StyledComponentsRegistry from '../lib/registry';
 import { AuthProvider } from './contexts/AuthContext';
 import { CoupangApiProvider } from './contexts/CoupangApiContext';
 import { EmailProvider } from './contexts/EmailContext';
 
-// 컴포넌트 imports
-import Header from './components/layout/Header';
-import Footer from './components/layout/Footer';
-import ClarityAnalytics from '../components/common/ClarityAnalytics';
-import AuthErrorBoundary from '../components/error/AuthErrorBoundary';
+// 동적 import로 문제 가능성이 있는 컴포넌트들 처리
+import dynamic from 'next/dynamic';
 
-// FontAwesome 가져오기 (에러 방지를 위해 try-catch로 감쌈)
-try {
-  require('../lib/fontawesome');
-} catch (error) {
-  console.warn('FontAwesome 로딩 실패:', error);
-}
+const Header = dynamic(() => import('./components/layout/Header'), { ssr: false });
+const Footer = dynamic(() => import('./components/layout/Footer'), { ssr: false });
+const ClarityAnalytics = dynamic(() => import('../components/common/ClarityAnalytics'), { ssr: false });
+const AuthErrorBoundary = dynamic(() => import('../components/error/AuthErrorBoundary'), { ssr: false });
+const ClientOnlyComponents = dynamic(() => import('../components/common/ClientOnlyComponents'), { ssr: false });
 
 const GlobalStyle = createGlobalStyle`
   * {
@@ -84,9 +80,6 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
         <Script id="google-tag-manager" strategy="afterInteractive">
           {`
             (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
@@ -97,7 +90,7 @@ export default function RootLayout({
           `}
         </Script>
       </head>
-      <body suppressHydrationWarning={true}>
+      <body>
         <noscript>
           <iframe
             src="https://www.googletagmanager.com/ns.html?id=GTM-TNM368S3"
@@ -117,6 +110,7 @@ export default function RootLayout({
                     {children}
                   </LayoutContent>
                 </AuthErrorBoundary>
+                <ClientOnlyComponents />
               </EmailProvider>
             </CoupangApiProvider>
           </AuthProvider>
