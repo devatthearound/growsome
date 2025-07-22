@@ -1,14 +1,27 @@
 #!/usr/bin/env node
 
-// 🚀 개선된 그로우썸 블로그 자동화 시스템
+// 🚀 다중 AI 제공자 블로그 자동화 시스템 (OpenAI + Claude)
 require('dotenv').config({ path: '.env.local' });
 
 const https = require('https');
 const http = require('http');
 const { URL } = require('url');
 
-console.log('🔄 그로우썸 전문 블로그 자동화 시스템');
+console.log('🤖 다중 AI 제공자 블로그 자동화 시스템');
+console.log('🔄 OpenAI + Claude API 지원');
 console.log('📚 구조화된 콘텐츠 + 신뢰도 높은 글쓰기\n');
+
+// AI 제공자 설정
+const AI_PROVIDERS = {
+  OPENAI: 'openai',
+  CLAUDE: 'claude',
+  AUTO: 'auto' // 자동 선택 (Claude 우선, 실패 시 OpenAI)
+};
+
+// 현재 사용할 AI 제공자 (환경변수로 설정 가능)
+const CURRENT_AI_PROVIDER = process.env.AI_PROVIDER || AI_PROVIDERS.AUTO;
+
+console.log(`🎯 AI 제공자: ${CURRENT_AI_PROVIDER.toUpperCase()}`);
 
 // 슬랙 알림 함수
 const sendSlackNotification = async (options) => {
@@ -17,8 +30,8 @@ const sendSlackNotification = async (options) => {
 
   const payload = {
     channel: '#growsome-alerts',
-    username: 'Growsome 전문 블로거',
-    icon_emoji: ':writing_hand:',
+    username: 'Growsome AI 블로거',
+    icon_emoji: ':robot_face:',
     text: `${options.level === 'success' ? '✅' : '❌'} ${options.title}`,
     attachments: [{
       color: options.level === 'success' ? '#28a745' : '#dc3545',
@@ -28,7 +41,7 @@ const sendSlackNotification = async (options) => {
         value: String(value),
         short: true
       })) : [],
-      footer: '📝 Growsome 전문 블로거 | 자동화',
+      footer: `🤖 ${options.aiProvider || 'AI'} 블로거 | Growsome 자동화`,
       ts: Math.floor(Date.now() / 1000)
     }]
   };
@@ -87,7 +100,133 @@ const makeRequest = (options, body = null) => {
   });
 };
 
-// 데이터베이스 직접 연결
+// OpenAI API 호출
+const callOpenAI = async (prompt) => {
+  console.log('🔵 OpenAI API 호출 중...');
+  
+  const openaiPayload = {
+    model: "gpt-4o-mini", // 더 안정적인 모델 사용
+    messages: [{
+      role: "system",
+      content: "당신은 Growsome의 수석 테크 블로거입니다. 비즈니스 성장에 도움이 되는 인사이트를 제공하며, 항상 신뢰할 수 있는 정보와 실용적인 조언을 제공합니다. 출처를 명확히 밝히고 그로우썸의 전문성을 자연스럽게 녹여내세요."
+    }, {
+      role: "user",
+      content: prompt
+    }],
+    max_tokens: 4000,
+    temperature: 0.6
+  };
+
+  const response = await makeRequest({
+    hostname: 'api.openai.com',
+    path: '/v1/chat/completions',
+    method: 'POST',
+    protocol: 'https:',
+    headers: {
+      'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+      'Content-Type': 'application/json'
+    }
+  }, openaiPayload);
+
+  if (response.statusCode === 200) {
+    console.log('✅ OpenAI API 호출 성공');
+    return {
+      success: true,
+      content: response.body.choices[0].message.content,
+      provider: 'OpenAI GPT-4o-mini'
+    };
+  } else {
+    console.log('❌ OpenAI API 오류:', response.statusCode, response.body?.error?.message);
+    throw new Error(`OpenAI API 오류: ${response.statusCode} - ${response.body?.error?.message || 'Unknown error'}`);
+  }
+};
+
+// Claude API 호출
+const callClaude = async (prompt) => {
+  console.log('🟣 Claude API 호출 중...');
+  
+  const claudePayload = {
+    model: "claude-3-5-haiku-20241022", // 빠르고 효율적인 모델
+    max_tokens: 4000,
+    temperature: 0.6,
+    messages: [{
+      role: "user", 
+      content: prompt
+    }],
+    system: "당신은 Growsome의 수석 테크 블로거입니다. 비즈니스 성장에 도움이 되는 인사이트를 제공하며, 항상 신뢰할 수 있는 정보와 실용적인 조언을 제공합니다. 출처를 명확히 밝히고 그로우썸의 전문성을 자연스럽게 녹여내세요. 마크다운 형식으로 구조화된 글을 작성하세요."
+  };
+
+  const response = await makeRequest({
+    hostname: 'api.anthropic.com',
+    path: '/v1/messages',
+    method: 'POST',
+    protocol: 'https:',
+    headers: {
+      'x-api-key': process.env.CLAUDE_API_KEY,
+      'Content-Type': 'application/json',
+      'anthropic-version': '2023-06-01'
+    }
+  }, claudePayload);
+
+  if (response.statusCode === 200) {
+    console.log('✅ Claude API 호출 성공');
+    return {
+      success: true,
+      content: response.body.content[0].text,
+      provider: 'Claude 3.5 Haiku'
+    };
+  } else {
+    console.log('❌ Claude API 오류:', response.statusCode, response.body?.error?.message);
+    throw new Error(`Claude API 오류: ${response.statusCode} - ${response.body?.error?.message || 'Unknown error'}`);
+  }
+};
+
+// 다중 AI 제공자 호출 함수
+const callAI = async (prompt, preferredProvider = CURRENT_AI_PROVIDER) => {
+  const attempts = [];
+  
+  try {
+    // AUTO 모드인 경우 Claude 우선 시도
+    if (preferredProvider === AI_PROVIDERS.AUTO) {
+      if (process.env.CLAUDE_API_KEY && process.env.CLAUDE_API_KEY !== 'sk-ant-api03-여기에_Claude_API_키를_입력하세요') {
+        try {
+          const result = await callClaude(prompt);
+          attempts.push({ provider: 'Claude', success: true });
+          return result;
+        } catch (error) {
+          console.log('⚠️ Claude API 실패, OpenAI로 전환 중...');
+          attempts.push({ provider: 'Claude', success: false, error: error.message });
+        }
+      }
+      
+      if (process.env.OPENAI_API_KEY) {
+        try {
+          const result = await callOpenAI(prompt);
+          attempts.push({ provider: 'OpenAI', success: true });
+          return result;
+        } catch (error) {
+          attempts.push({ provider: 'OpenAI', success: false, error: error.message });
+          throw error;
+        }
+      }
+    }
+    // 특정 제공자 지정
+    else if (preferredProvider === AI_PROVIDERS.CLAUDE) {
+      return await callClaude(prompt);
+    } 
+    else if (preferredProvider === AI_PROVIDERS.OPENAI) {
+      return await callOpenAI(prompt);
+    }
+    
+    throw new Error('사용 가능한 AI 제공자가 없습니다');
+    
+  } catch (error) {
+    console.log('📊 API 호출 시도 결과:', attempts);
+    throw error;
+  }
+};
+
+// 데이터베이스 연결
 const { Client } = require('pg');
 
 const createDatabaseClient = () => {
@@ -102,7 +241,7 @@ const createDatabaseClient = () => {
 };
 
 // 그로우썸 서비스 연결 포인트 생성
-const generateGrowsomeConnection = (category, content) => {
+const generateGrowsomeConnection = (category) => {
   const serviceConnections = {
     'AI': {
       service: '스마트 어필리에이트',
@@ -111,7 +250,7 @@ const generateGrowsomeConnection = (category, content) => {
       link: '/affiliate-smart'
     },
     '마케팅': {
-      service: '성장 분석 도구',
+      service: '성장 분석 도구', 
       connection: '데이터 기반 마케팅으로 비즈니스를 성장시키세요',
       cta: '성장 분석으로 마케팅 최적화하기',
       link: '/growth-analytics'
@@ -130,17 +269,15 @@ const generateGrowsomeConnection = (category, content) => {
     }
   };
 
-  const defaultConnection = {
+  return serviceConnections[category] || {
     service: '성장 솔루션',
     connection: '그로우썸과 함께 비즈니스를 한 단계 높여보세요',
     cta: '그로우썸 솔루션 알아보기',
     link: '/solutions'
   };
-
-  return serviceConnections[category] || defaultConnection;
 };
 
-// 개선된 AI 프롬프트 생성
+// 향상된 AI 프롬프트 생성
 const createEnhancedPrompt = (selectedItem, category) => {
   return `당신은 Growsome의 수석 테크 블로거로서, 비즈니스 성장과 기술 트렌드를 전문적으로 다루는 글을 씁니다. 반드시 유효한 JSON 형식으로만 응답하세요.
 
@@ -162,12 +299,11 @@ const createEnhancedPrompt = (selectedItem, category) => {
 3. 그로우썸의 관점과 경험 - ## 그로우썸이 보는 관점
 4. 실무 활용 방안 - ## 실무 적용 가이드
 5. 결론 및 앞으로의 전망 - ## 결론: 앞으로의 전망
-6. 그로우썸 서비스 연결은 별도 처리
 
 응답 형식 (반드시 JSON):
 {
   "title": "SEO 최적화된 50자 내외 제목",
-  "content": "구조화된 4000-6000자 마크다운 본문 (# ## ### 활용, 목록과 강조 포함)",
+  "content": "구조화된 4000-6000자 마크다운 본문 (# ## ### 활용)",
   "summary": "핵심 인사이트를 담은 150자 요약",
   "tags": ["관련태그1", "관련태그2", "관련태그3", "관련태그4"],
   "category": "${category}",
@@ -179,7 +315,7 @@ const createEnhancedPrompt = (selectedItem, category) => {
 }`;
 };
 
-// 개선된 콘텐츠 후처리
+// 콘텐츠 후처리
 const enhanceContent = (parsedContent, selectedItem, growsomeConnection) => {
   let enhancedContent = parsedContent.content;
   
@@ -209,15 +345,13 @@ ${growsomeConnection.connection}
 *💡 더 많은 비즈니스 인사이트가 필요하시다면? [그로우썸 블로그](https://growsome.kr/blog)에서 매주 새로운 글을 만나보세요.*
 `;
 
-  // 구조화된 콘텐츠 조합
-  enhancedContent = sourceInfo + enhancedContent + serviceConnection;
-  
-  return enhancedContent;
+  return sourceInfo + enhancedContent + serviceConnection;
 };
 
 // 메인 실행 함수
-async function generateEnhancedBlogPost() {
+async function generateMultiAIBlogPost() {
   let dbClient = null;
+  let aiProvider = 'Unknown';
   
   try {
     console.log('1️⃣ 신뢰도 높은 뉴스 소스에서 콘텐츠 수집 중...');
@@ -237,35 +371,29 @@ async function generateEnhancedBlogPost() {
       throw new Error(`RSS 피드 가져오기 실패: ${rssResponse.statusCode}`);
     }
 
-    const xml = rssResponse.body;
     console.log('✅ TechCrunch RSS 피드 수집 완료');
 
-    console.log('2️⃣ 고품질 콘텐츠 선별 및 분석 중...');
+    console.log('2️⃣ 고품질 콘텐츠 선별 중...');
     
-    // 향상된 RSS 파싱 및 관련성 분석
+    // RSS 파싱 및 관련성 분석
     const items = [];
-    const itemMatches = xml.match(/<item[^>]*>[\s\S]*?<\/item>/g);
+    const itemMatches = rssResponse.body.match(/<item[^>]*>[\s\S]*?<\/item>/g);
 
     if (itemMatches) {
       for (const item of itemMatches.slice(0, 10)) {
         const titleMatch = item.match(/<title><!\[CDATA\[([^\]]+)\]\]><\/title>/) || item.match(/<title>([^<]+)<\/title>/);
         const linkMatch = item.match(/<link>([^<]+)<\/link>/);
         const descMatch = item.match(/<description><!\[CDATA\[([^\]]+)\]\]><\/description>/) || item.match(/<description>([^<]+)<\/description>/);
-        const dateMatch = item.match(/<pubDate>([^<]+)<\/pubDate>/);
         
         if (titleMatch && linkMatch) {
           const title = titleMatch[1];
           const description = descMatch ? descMatch[1] : '';
-          const pubDate = dateMatch ? new Date(dateMatch[1]) : new Date();
           
-          // 더 정교한 관련성 분석
           const businessKeywords = [
             'AI', 'artificial intelligence', 'machine learning', 'automation',
             'startup', 'business', 'growth', 'marketing', 'strategy', 'innovation',
             'data', 'analytics', 'digital transformation', 'SaaS', 'platform',
-            'investment', 'funding', 'venture capital', 'scale', 'revenue',
-            'customer', 'user experience', 'conversion', 'optimization',
-            'ecommerce', 'online business', 'digital marketing', 'SEO'
+            'investment', 'funding', 'venture capital', 'ecommerce'
           ];
           
           const content = (title + ' ' + description).toLowerCase();
@@ -280,20 +408,13 @@ async function generateEnhancedBlogPost() {
             }
           });
           
-          // 최신성 보너스
-          const hoursAgo = (new Date() - pubDate) / (1000 * 60 * 60);
-          if (hoursAgo < 24) relevanceScore += 3;
-          else if (hoursAgo < 72) relevanceScore += 1;
-          
           if (relevanceScore >= 3) {
             items.push({
               title: title,
               url: linkMatch[1],
               description: description.substring(0, 1000),
-              pubDate: pubDate,
               relevanceScore: relevanceScore,
-              foundKeywords: foundKeywords,
-              source: 'TechCrunch'
+              foundKeywords: foundKeywords
             });
           }
         }
@@ -308,55 +429,28 @@ async function generateEnhancedBlogPost() {
     const selectedItem = items[0];
     
     console.log(`✅ 최적 기사 선별: "${selectedItem.title.substring(0, 50)}..."`);
-    console.log(`📊 관련성: ${selectedItem.relevanceScore}점, 키워드: ${selectedItem.foundKeywords.slice(0, 5).join(', ')}`);
+    console.log(`📊 관련성: ${selectedItem.relevanceScore}점`);
 
-    console.log('3️⃣ 그로우썸 전문 AI로 고품질 콘텐츠 생성 중...');
-    
-    // 카테고리 자동 분류
+    // 카테고리 분류
     const category = selectedItem.foundKeywords.some(k => ['AI', 'artificial intelligence', 'machine learning'].includes(k)) ? 'AI' :
-                    selectedItem.foundKeywords.some(k => ['marketing', 'SEO', 'conversion'].includes(k)) ? '마케팅' :
-                    selectedItem.foundKeywords.some(k => ['ecommerce', 'online business'].includes(k)) ? '이커머스' :
+                    selectedItem.foundKeywords.some(k => ['marketing'].includes(k)) ? '마케팅' :
+                    selectedItem.foundKeywords.some(k => ['ecommerce'].includes(k)) ? '이커머스' :
                     selectedItem.foundKeywords.some(k => ['startup', 'venture', 'funding'].includes(k)) ? '스타트업' : 'AI';
 
-    const enhancedPrompt = createEnhancedPrompt(selectedItem, category);
+    console.log('3️⃣ 다중 AI로 고품질 콘텐츠 생성 중...');
     
-    const openaiPayload = {
-      model: "gpt-4o-mini", // 안정적인 모델 사용
-      messages: [{
-        role: "system",
-        content: "당신은 Growsome의 수석 테크 블로거입니다. 비즈니스 성장에 도움이 되는 인사이트를 제공하며, 항상 신뢰할 수 있는 정보와 실용적인 조언을 제공합니다. 출처를 명확히 밝히고 그로우썸의 전문성을 자연스럽게 녹여내세요. 마크다운 형식으로 구조화된 글을 작성하세요."
-      }, {
-        role: "user",
-        content: enhancedPrompt
-      }],
-      max_tokens: 6000,
-      temperature: 0.6
-    };
-
-    const openaiResponse = await makeRequest({
-      hostname: 'api.openai.com',
-      path: '/v1/chat/completions',
-      method: 'POST',
-      protocol: 'https:',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (openaiResponse.statusCode !== 200) {
-      throw new Error(`OpenAI API 오류: ${openaiResponse.statusCode}`);
-    }
-
-    const aiContent = openaiResponse.body.choices[0].message.content;
-    console.log('✅ 전문가급 AI 콘텐츠 생성 완료');
+    const enhancedPrompt = createEnhancedPrompt(selectedItem, category);
+    const aiResult = await callAI(enhancedPrompt);
+    aiProvider = aiResult.provider;
+    
+    console.log(`✅ ${aiResult.provider}로 콘텐츠 생성 완료`);
 
     console.log('4️⃣ 구조화된 블로그 데이터 처리 중...');
     
     let parsedContent;
     try {
-      const jsonMatch = aiContent.match(/```json\s*(\{[\s\S]*?\})\s*```/) || 
-                       aiContent.match(/(\{[\s\S]*\})/);
+      const jsonMatch = aiResult.content.match(/```json\s*(\{[\s\S]*?\})\s*```/) || 
+                       aiResult.content.match(/(\{[\s\S]*\})/);
       
       if (jsonMatch) {
         parsedContent = JSON.parse(jsonMatch[1]);
@@ -366,7 +460,7 @@ async function generateEnhancedBlogPost() {
 
       // 필수 필드 검증
       if (!parsedContent.title) parsedContent.title = selectedItem.title;
-      if (!parsedContent.content) parsedContent.content = aiContent;
+      if (!parsedContent.content) parsedContent.content = aiResult.content;
       if (!parsedContent.tags) parsedContent.tags = ['기술뉴스', category];
       if (!parsedContent.category) parsedContent.category = category;
       if (!parsedContent.readingTime) parsedContent.readingTime = Math.ceil(parsedContent.content.length / 600);
@@ -376,21 +470,18 @@ async function generateEnhancedBlogPost() {
     } catch (parseError) {
       console.warn('⚠️ JSON 파싱 실패, 대체 방법 사용');
       parsedContent = {
-        title: selectedItem.title.length > 50 ? 
-               selectedItem.title.substring(0, 47) + '...' : 
-               selectedItem.title,
-        content: aiContent.replace(/```json[\s\S]*?```/g, '').trim(),
+        title: selectedItem.title.length > 50 ? selectedItem.title.substring(0, 47) + '...' : selectedItem.title,
+        content: aiResult.content.replace(/```json[\s\S]*?```/g, '').trim(),
         summary: selectedItem.description.substring(0, 150) + '...',
         tags: ['기술뉴스', category, '그로우썸'],
         category: category,
-        readingTime: Math.ceil(aiContent.length / 600),
+        readingTime: Math.ceil(aiResult.content.length / 600),
         sourceUrl: selectedItem.url,
         sourceTitle: selectedItem.title
       };
     }
 
-    // 그로우썸 서비스 연결
-    const growsomeConnection = generateGrowsomeConnection(category, parsedContent.content);
+    const growsomeConnection = generateGrowsomeConnection(category);
     const enhancedContent = enhanceContent(parsedContent, selectedItem, growsomeConnection);
 
     // SEO 슬러그 생성
@@ -420,13 +511,7 @@ async function generateEnhancedBlogPost() {
     
     const slug = createSeoSlug(parsedContent.title, selectedItem.title, category);
 
-    // 카테고리 ID 매핑
-    const categoryIds = {
-      'AI': 10,
-      '마케팅': 11, 
-      '이커머스': 12,
-      '스타트업': 13
-    };
+    const categoryIds = { 'AI': 10, '마케팅': 11, '이커머스': 12, '스타트업': 13 };
 
     const blogPost = {
       title: parsedContent.title,
@@ -444,16 +529,13 @@ async function generateEnhancedBlogPost() {
       updated_at: new Date().toISOString()
     };
 
-    console.log(`✅ 블로그 데이터 준비: ${blogPost.word_count.toLocaleString()}자 (${blogPost.reading_time}분)`);
+    console.log(`✅ 블로그 데이터 준비: ${blogPost.word_count.toLocaleString()}자`);
 
-    console.log('5️⃣ 데이터베이스 연결 중...');
+    console.log('5️⃣ 데이터베이스 저장 중...');
     
     dbClient = createDatabaseClient();
     await dbClient.connect();
-    console.log('✅ 데이터베이스 연결 성공');
 
-    console.log('6️⃣ 블로그 포스트 저장 중...');
-    
     const insertQuery = `
       INSERT INTO blog_contents (
         title, content_body, slug, category_id, meta_title, meta_description,
@@ -464,19 +546,10 @@ async function generateEnhancedBlogPost() {
     `;
 
     const result = await dbClient.query(insertQuery, [
-      blogPost.title,
-      blogPost.content, 
-      blogPost.slug,
-      blogPost.category_id,
-      blogPost.meta_title,
-      blogPost.meta_description,
-      blogPost.author_id,
-      blogPost.status,
-      blogPost.is_featured,
-      0, 0, 0,
-      blogPost.created_at,
-      blogPost.updated_at,
-      new Date().toISOString()
+      blogPost.title, blogPost.content, blogPost.slug, blogPost.category_id,
+      blogPost.meta_title, blogPost.meta_description, blogPost.author_id,
+      blogPost.status, blogPost.is_featured, 0, 0, 0,
+      blogPost.created_at, blogPost.updated_at, new Date().toISOString()
     ]);
 
     const savedPost = result.rows[0];
@@ -485,30 +558,28 @@ async function generateEnhancedBlogPost() {
     // 성공 알림
     await sendSlackNotification({
       level: 'success',
-      title: '📝 그로우썸 전문 블로그 발행 완료!',
-      message: '구조화된 고품질 콘텐츠가 성공적으로 생성되어 발행되었습니다.',
+      title: '🤖 다중 AI 블로그 발행 완료!',
+      message: '다중 AI 시스템으로 고품질 콘텐츠가 성공적으로 생성되었습니다.',
+      aiProvider: aiProvider,
       details: {
+        'AI 제공자': aiProvider,
         '제목': blogPost.title,
         '카테고리': `${category} (${parsedContent.tags.join(', ')})`,
         '글자 수': `${blogPost.word_count.toLocaleString()}자`,
         '읽기 시간': `${blogPost.reading_time}분`,
-        '관련성 점수': `${selectedItem.relevanceScore}점`,
         '라이브 링크': `https://growsome.kr/blog/${savedPost.slug}`,
         '원본 기사': selectedItem.url,
         '포스트 ID': savedPost.id
       }
     });
 
-    console.log('\n🎉 그로우썸 전문 블로그 발행 완료!');
+    console.log('\n🎉 다중 AI 블로그 발행 완료!');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log(`🤖 AI 제공자: ${aiProvider}`);
     console.log(`📰 제목: ${blogPost.title}`);
-    console.log(`📂 카테고리: ${category} (ID: ${blogPost.category_id})`);
-    console.log(`🏷️ 태그: ${parsedContent.tags.join(', ')}`);
-    console.log(`📄 콘텐츠: ${blogPost.word_count.toLocaleString()}자 (${blogPost.reading_time}분 읽기)`);
-    console.log(`📊 품질 점수: ${selectedItem.relevanceScore}점`);
-    console.log(`🔗 원본: ${selectedItem.url}`);
+    console.log(`📂 카테고리: ${category}`);
+    console.log(`📄 콘텐츠: ${blogPost.word_count.toLocaleString()}자 (${blogPost.reading_time}분)`);
     console.log(`🚀 발행 링크: https://growsome.kr/blog/${savedPost.slug}`);
-    console.log(`🆔 포스트 ID: ${savedPost.id}`);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     return { 
@@ -516,10 +587,7 @@ async function generateEnhancedBlogPost() {
       blogPost, 
       savedPost, 
       selectedItem, 
-      category,
-      tags: parsedContent.tags,
-      readingTime: blogPost.reading_time,
-      growsomeConnection
+      aiProvider
     };
 
   } catch (error) {
@@ -527,12 +595,13 @@ async function generateEnhancedBlogPost() {
     
     await sendSlackNotification({
       level: 'error',
-      title: '📝 그로우썸 블로그 자동화 오류',
-      message: `전문 블로그 생성 중 오류가 발생했습니다.`,
+      title: '🤖 다중 AI 블로그 자동화 오류',
+      message: `다중 AI 블로그 생성 중 오류가 발생했습니다.`,
+      aiProvider: aiProvider,
       details: {
+        'AI 제공자': aiProvider,
         '오류 내용': error.message,
-        '발생 시간': new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' }),
-        '조치 사항': '로그 확인 후 재시도 필요'
+        '발생 시간': new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })
       }
     });
 
@@ -541,16 +610,15 @@ async function generateEnhancedBlogPost() {
   } finally {
     if (dbClient) {
       await dbClient.end();
-      console.log('🔌 데이터베이스 연결 종료');
     }
   }
 }
 
 // 실행
 if (require.main === module) {
-  generateEnhancedBlogPost()
+  generateMultiAIBlogPost()
     .then(result => {
-      console.log(result.success ? '\n✅ 모든 작업이 성공적으로 완료되었습니다!' : '\n❌ 작업 중 오류가 발생했습니다.');
+      console.log(result.success ? '\n✅ 다중 AI 시스템 작업 완료!' : '\n❌ 작업 중 오류가 발생했습니다.');
       process.exit(result.success ? 0 : 1);
     })
     .catch(error => {
@@ -559,4 +627,4 @@ if (require.main === module) {
     });
 }
 
-module.exports = { generateEnhancedBlogPost };
+module.exports = { generateMultiAIBlogPost };
