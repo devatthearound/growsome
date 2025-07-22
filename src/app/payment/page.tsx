@@ -14,13 +14,6 @@ if (!storeId || !channelKey) {
   console.error('포트원 Store ID 또는 Channel Key가 설정되지 않았습니다.');
 }
 
-// 포트원 전역 변수 타입 정의
-declare global {
-  interface Window {
-    PortOne: any;
-  }
-}
-
 interface PaymentPlan {
   id: string;
   name: string;
@@ -29,6 +22,8 @@ interface PaymentPlan {
   period: string;
   features: string[];
   popular?: boolean;
+  description: string;
+  monthlyPrice: number;
 }
 
 const plans: PaymentPlan[] = [
@@ -38,6 +33,8 @@ const plans: PaymentPlan[] = [
     price: 300000,
     originalPrice: 500000,
     period: '2주',
+    monthlyPrice: 25000,
+    description: '사업계획서 초안과 MVP 예시 아이디어를 통한 스타트업에 적합',
     features: [
       '40만원 상당의 강의 무료 제공',
       '사업계획서 초안 원본 제공',
@@ -51,6 +48,8 @@ const plans: PaymentPlan[] = [
     price: 990000,
     originalPrice: 1500000,
     period: '2주',
+    monthlyPrice: 82500,
+    description: '10페이지 내의 사업계획서 초안과 러본 목업 제작 지원',
     features: [
       '기본 패키지의 모든 혜택 포함',
       '러버블 목업 제작 지원',
@@ -65,6 +64,8 @@ const plans: PaymentPlan[] = [
     price: 9900000,
     originalPrice: 15000000,
     period: '2주',
+    monthlyPrice: 825000,
+    description: '프로젝트 제작까지 완료한 완전한 솔루션에 적합',
     features: [
       '스탠다드 패키지의 모든 혜택 포함',
       '프로젝트 제작 완료까지 지원',
@@ -109,6 +110,32 @@ export default function PaymentPage() {
     }
   };
 
+  // 이메일 형식 검증 함수
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  // 전화번호 형식 정리 함수
+  const formatPhoneNumber = (phone: string) => {
+    // 숫자만 추출
+    const numbers = phone.replace(/[^0-9]/g, '');
+    // 010으로 시작하는 11자리 번호로 변환
+    if (numbers.length === 11 && numbers.startsWith('010')) {
+      return numbers;
+    } else if (numbers.length === 10 && numbers.startsWith('10')) {
+      return '0' + numbers;
+    }
+    return numbers;
+  };
+
+  // 스마트로 호환 주문번호 생성 함수 (영문자+숫자만)
+  const generateOrderId = () => {
+    const timestamp = Date.now().toString();
+    const randomString = Math.random().toString(36).substring(2, 8); // 6자리 랜덤 문자
+    return `growsome${timestamp}${randomString}`.replace(/[^a-zA-Z0-9]/g, '').substring(0, 40); // 최대 40자로 제한
+  };
+
   const handlePayment = async () => {
     if (!storeId || !channelKey) {
       alert('결제 시스템이 설정되지 않았습니다. 관리자에게 문의하세요.');
@@ -120,24 +147,42 @@ export default function PaymentPage() {
       return;
     }
 
+    // 이메일 형식 검증
+    if (!isValidEmail(userInfo.email)) {
+      alert('올바른 이메일 형식을 입력해주세요.');
+      return;
+    }
+
+    // 전화번호 형식 검증
+    const formattedPhone = formatPhoneNumber(userInfo.phone);
+    if (formattedPhone.length !== 11) {
+      alert('올바른 전화번호를 입력해주세요. (010-1234-5678 형식)');
+      return;
+    }
+
     setLoading(true);
     
     try {
-      const orderId = `growsome_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const orderId = generateOrderId();
+      console.log('Generated Order ID:', orderId);
       
       // 포트원 결제 요청
+      if (!window.PortOne) {
+        throw new Error('PortOne SDK가 로드되지 않았습니다.');
+      }
+      
       const response = await window.PortOne.requestPayment({
         storeId: storeId?.replace(/'/g, ''), // 문자열에서 따옴표 제거
         channelKey: channelKey?.replace(/'/g, ''), // 문자열에서 따옴표 제거
         paymentId: orderId,
         orderName: `그로우썸 ${selectedPlan.name} - AI 사업계획서 작성 완성 솔루션`,
         totalAmount: finalPrice,
-        currency: "KRW",
+        currency: "KRW" as any,
         payMethod: "CARD",
         customer: {
-          fullName: userInfo.name,
-          phoneNumber: userInfo.phone,
-          email: userInfo.email,
+          fullName: userInfo.name.trim(),
+          phoneNumber: formattedPhone,
+          email: userInfo.email.trim().toLowerCase(),
         },
         redirectUrl: window.location.origin + "/payment/success",
         noticeUrls: [
@@ -181,30 +226,47 @@ export default function PaymentPage() {
 
       <Content>
         <LeftSection>
-          <PlanSection>
-            <SectionTitle>선택한 솔루션</SectionTitle>
-            <PlanCard
-              $selected={true}
-              $popular={selectedPlan.popular}
-            >
-              {selectedPlan.popular && <PopularBadge>인기</PopularBadge>}
-              <PlanName>{selectedPlan.name}</PlanName>
-              <PlanPrice>
-                <span className="price">₩{selectedPlan.price.toLocaleString()}</span>
-                <span className="period">/{selectedPlan.period}</span>
-              </PlanPrice>
-              <OriginalPrice>₩{selectedPlan.originalPrice.toLocaleString()}</OriginalPrice>
-              <DiscountBadge>{discountRate}% 할인</DiscountBadge>
-              <PlanFeatures>
-                {selectedPlan.features.map((feature, index) => (
-                  <FeatureItem key={index}>
-                    <Check size={16} color="#10B981" />
-                    {feature}
-                  </FeatureItem>
-                ))}
-              </PlanFeatures>
-            </PlanCard>
-          </PlanSection>
+          {/* 플랜 선택 섹션 추가 */}
+          <PlanSelectionSection>
+            <SectionTitle>솔루션 선택</SectionTitle>
+            <PlansGrid>
+              {plans.map((plan) => {
+                const discountRate = Math.round(((plan.originalPrice - plan.price) / plan.originalPrice) * 100);
+                return (
+                  <PlanSelectionCard
+                    key={plan.id}
+                    $selected={selectedPlan.id === plan.id}
+                    $popular={plan.popular}
+                    onClick={() => {
+                      console.log('Selecting plan:', plan.id, plan.name);
+                      setSelectedPlan(plan);
+                    }}
+                  >
+                    {plan.popular && <PopularBadge>추천</PopularBadge>}
+                    <PlanName>{plan.name}</PlanName>
+                    <PlanDescription>{plan.description}</PlanDescription>
+                    <PlanPricing>
+                      <PlanPrice>
+                        <span className="price">₩{plan.price.toLocaleString()}</span>
+                        <span className="period">/{plan.period}</span>
+                      </PlanPrice>
+                      <OriginalPrice>₩{plan.originalPrice.toLocaleString()}</OriginalPrice>
+                      <MonthlyPrice>월 {plan.monthlyPrice?.toLocaleString()}원 (12개월 할부시)</MonthlyPrice>
+                    </PlanPricing>
+                    <DiscountBadge>{discountRate}% 할인</DiscountBadge>
+                    <PlanFeatures>
+                      {plan.features.map((feature, index) => (
+                        <FeatureItem key={index}>
+                          <Check size={16} color="#10B981" />
+                          {feature}
+                        </FeatureItem>
+                      ))}
+                    </PlanFeatures>
+                  </PlanSelectionCard>
+                );
+              })}
+            </PlansGrid>
+          </PlanSelectionSection>
 
           <UserInfoSection>
             <SectionTitle>결제자 정보</SectionTitle>
@@ -224,6 +286,9 @@ export default function PaymentPage() {
                 placeholder="이메일을 입력하세요"
                 value={userInfo.email}
                 onChange={(e) => setUserInfo(prev => ({ ...prev, email: e.target.value }))}
+                style={{
+                  borderColor: userInfo.email && !isValidEmail(userInfo.email) ? '#ef4444' : undefined
+                }}
               />
             </InputGroup>
             <InputGroup>
@@ -232,7 +297,22 @@ export default function PaymentPage() {
                 type="tel"
                 placeholder="010-0000-0000"
                 value={userInfo.phone}
-                onChange={(e) => setUserInfo(prev => ({ ...prev, phone: e.target.value }))}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // 자동 하이픈 추가
+                  let formatted = value.replace(/[^0-9]/g, '');
+                  if (formatted.length > 3 && formatted.length <= 7) {
+                    formatted = formatted.replace(/(\d{3})(\d+)/, '$1-$2');
+                  } else if (formatted.length > 7) {
+                    formatted = formatted.replace(/(\d{3})(\d{4})(\d+)/, '$1-$2-$3');
+                  }
+                  if (formatted.length <= 13) { // 010-1234-5678 최대 길이
+                    setUserInfo(prev => ({ ...prev, phone: formatted }));
+                  }
+                }}
+                style={{
+                  borderColor: userInfo.phone && formatPhoneNumber(userInfo.phone).length !== 11 ? '#ef4444' : undefined
+                }}
               />
             </InputGroup>
           </UserInfoSection>
@@ -401,6 +481,59 @@ const LeftSection = styled.div`
   gap: 2rem;
 `;
 
+const PlanSelectionSection = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+`;
+
+const PlansGrid = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+`;
+
+const PlanSelectionCard = styled.div<{ $selected: boolean; $popular?: boolean }>`
+  background: white;
+  border: 2px solid ${props => props.$selected ? '#5d4ac7' : '#e2e8f0'};
+  border-radius: 12px;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  
+  ${props => props.$selected && `
+    border-color: #5d4ac7;
+    background: linear-gradient(135deg, #f8f7ff, #ffffff);
+    box-shadow: 0 4px 12px rgba(93, 74, 199, 0.15);
+  `}
+  
+  &:hover {
+    border-color: #5d4ac7;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(93, 74, 199, 0.1);
+  }
+`;
+
+const PlanDescription = styled.div`
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+`;
+
+const PlanPricing = styled.div`
+  margin-bottom: 1rem;
+`;
+
+const MonthlyPrice = styled.div`
+  font-size: 0.75rem;
+  color: #5d4ac7;
+  font-weight: 600;
+  margin-top: 0.25rem;
+`;
+
 const PlanSection = styled.div`
   background: white;
   border-radius: 12px;
@@ -447,6 +580,7 @@ const PopularBadge = styled.div`
   border-radius: 12px;
   font-size: 0.75rem;
   font-weight: 600;
+  z-index: 1;
 `;
 
 const PlanName = styled.h3`
