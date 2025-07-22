@@ -1,12 +1,14 @@
 'use client';
 import { useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 
-const GoogleAuthPage = () => {
+const GoogleAuthContent = () => {
+  const searchParams = useSearchParams();
   const [status, setStatus] = useState('초기화 중...');
 
   useEffect(() => {
-  
+    const code = searchParams.get('code');
+    
     const checkExistingToken = async () => {
       try {
         setStatus('기존 인증 정보 확인 중...');
@@ -51,8 +53,13 @@ const GoogleAuthPage = () => {
       }
     };
 
-    startAuthFlow();
-  }, []);
+    if (code) {
+      // 인증 콜백 처리
+      setStatus('인증 코드 처리 중...');
+    } else {
+      startAuthFlow();
+    }
+  }, [searchParams]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -60,6 +67,19 @@ const GoogleAuthPage = () => {
       <p className="text-lg">{status}</p>
       <p className="mt-4">외부 브라우저에서 인증을 완료해주세요.</p>
     </div>
+  );
+};
+
+const GoogleAuthPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <h1 className="text-2xl font-bold mb-4">구글 인증</h1>
+        <p className="text-lg">로딩 중...</p>
+      </div>
+    }>
+      <GoogleAuthContent />
+    </Suspense>
   );
 };
 
