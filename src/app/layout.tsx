@@ -15,6 +15,9 @@ import { EmailProvider } from './contexts/EmailContext';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import ClarityAnalytics from '../components/common/ClarityAnalytics';
+import { GoogleAnalytics } from '../components/common/GoogleAnalytics';
+import { EnhancedGoogleAnalytics } from '../components/common/EnhancedGoogleAnalytics';
+import { ErrorTracker } from '../components/common/ErrorTracker';
 import AuthErrorBoundary from '../components/error/AuthErrorBoundary';
 import KakaoChatButton from './components/common/KakaoChatButton';
 
@@ -98,6 +101,7 @@ export default function RootLayout({
             })(window,document,'script','dataLayer','GTM-TNM368S3');
           `}
         </Script>
+        <GoogleAnalytics />
       </head>
       <body suppressHydrationWarning={true}>
         <noscript>
@@ -111,6 +115,8 @@ export default function RootLayout({
         <StyledComponentsRegistry>
           <GlobalStyle />
           <ClarityAnalytics />
+          <EnhancedGoogleAnalytics />
+          <ErrorTracker />
           <AuthProvider>
             <CoupangApiProvider>
               <EmailProvider>

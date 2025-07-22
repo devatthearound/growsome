@@ -18,6 +18,8 @@
     "db:reset": "prisma migrate reset",
     "db:pull": "prisma db pull",
     "db:format": "prisma format",
+    "test:blog-automation": "node test-blog-automation.js",
+    "blog:auto-upload": "node test-blog-automation.js",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed-simple": "tsx prisma/seed-simple.ts",
     "db:seed-blog": "tsx scripts/seed-blog.ts",
@@ -121,7 +123,8 @@
     "styled-components": "^6.1.14",
     "tailwind-merge": "^2.2.0",
     "three": "^0.173.0",
-    "uuid": "^11.0.5"
+    "uuid": "^11.0.5",
+    "web-vitals": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

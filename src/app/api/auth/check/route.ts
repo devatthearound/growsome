@@ -75,14 +75,61 @@ export async function GET(request: NextRequest) {
       }, { status: 401 })
     }
 
-    // 6. 인증 성공 - 사용자 정보 반환
-    const userData = {
-      id: userId,
-      email: userEmail,
-      username: userEmail.split('@')[0], // 이메일에서 사용자명 추출
-      slug: userEmail.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-'),
-      role: 'user',
-      canWriteContent: true
+    // 6. 인증 성공 - 사용자 정보 반환 (데이터베이스에서 사용자 정보 조회)
+    let userData;
+    
+    try {
+      // Prisma를 사용해 사용자 정보 조회 (role 포함)
+      const { PrismaClient } = require('@prisma/client');
+      const prisma = new PrismaClient();
+      
+      const user = await prisma.user.findUnique({
+        where: { email: userEmail },
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          role: true,
+          status: true
+        }
+      });
+      
+      await prisma.$disconnect();
+      
+      if (user) {
+        userData = {
+          id: user.id.toString(),
+          email: user.email,
+          username: user.username,
+          slug: user.username.toLowerCase().replace(/[^a-z0-9]/g, '-'),
+          role: user.role || 'user',
+          isAdmin: user.role === 'admin',
+          canWriteContent: true
+        };
+      } else {
+        // 데이터베이스에 사용자가 없는 경우 기본값
+        userData = {
+          id: userId,
+          email: userEmail,
+          username: userEmail.split('@')[0],
+          slug: userEmail.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-'),
+          role: 'user',
+          isAdmin: false,
+          canWriteContent: true
+        };
+      }
+    } catch (dbError) {
+      console.error('데이터베이스 조회 오류:', dbError);
+      // 데이터베이스 오류 시 기본값 사용
+      userData = {
+        id: userId,
+        email: userEmail,
+        username: userEmail.split('@')[0],
+        slug: userEmail.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '-'),
+        role: 'user',
+        isAdmin: false,
+        canWriteContent: true
+      };
     }
 
     console.log('인증 성공:', userData)

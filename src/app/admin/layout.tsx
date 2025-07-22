@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled from 'styled-components';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 interface NavLinkProps {
   $active?: boolean;  // $ prefix를 추가하여 DOM에 전달되지 않도록 함
@@ -11,8 +11,60 @@ interface NavLinkProps {
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState(null);
 
   const isActive = (path: string) => pathname === path;
+
+  // 인증 체크
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const response = await fetch('/api/auth/check');
+      if (response.ok) {
+        const data = await response.json();
+        if (data.isLoggedIn) {
+          setUser(data.user);
+          
+          // 관리자 권한 체크 (선택사항)
+          if (data.user.role !== 'admin' && data.user.email !== 'master@growsome.kr') {
+            console.log('관리자 권한이 없습니다:', data.user);
+            // alert('관리자만 접근 가능합니다.');
+            // router.push('/');
+            // return;
+          }
+        } else {
+          router.push('/login?redirect_to=' + encodeURIComponent(pathname));
+        }
+      } else {
+        router.push('/login?redirect_to=' + encodeURIComponent(pathname));
+      }
+    } catch (error) {
+      console.error('인증 체크 오류:', error);
+      router.push('/login?redirect_to=' + encodeURIComponent(pathname));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <LoadingContainer>
+        <LoadingSpinner>
+          <div>🚀</div>
+          <p>로딩 중...</p>
+        </LoadingSpinner>
+      </LoadingContainer>
+    );
+  }
+
+  if (!user) {
+    return null; // 리다이렉트 중
+  }
 
   return (
     <LayoutContainer>
@@ -27,6 +79,12 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             <NavLink href="/admin" $active={isActive('/admin')}>
               <NavIcon>📊</NavIcon>
               대시보드
+            </NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink href="/admin/analytics" $active={isActive('/admin/analytics')}>
+              <NavIcon>📊</NavIcon>
+              자동화 분석
             </NavLink>
           </NavItem>
           <NavItem>
@@ -141,6 +199,38 @@ const MainContent = styled.main`
   background: #f5f5f5;
   min-height: calc(100vh - 80px);
   padding: 2rem;
+`;
+
+// Loading Components
+const LoadingContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: #f5f5f5;
+`;
+
+const LoadingSpinner = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  
+  div {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    animation: spin 2s linear infinite;
+  }
+  
+  p {
+    color: #666;
+    font-size: 1.1rem;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
 `;
 
 export default AdminLayout; 

@@ -1,78 +1,279 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌱 Growsome - AI-Powered Content Platform
 
-## Getting Started
+A Next.js-based content platform with AI automation, advanced analytics, and comprehensive blog management system.
 
-First, run the development server:
+## 🚀 Features
+
+### Core Platform
+- **Next.js 14** with App Router
+- **PostgreSQL** database with **Prisma ORM**  
+- **GraphQL API** with Apollo Server
+- **JWT Authentication** with role-based access
+- **AWS S3** for file storage
+- **Styled Components** for styling
+
+### AI Automation System 🤖
+- **GPT-powered blog summarization**
+- **n8n workflow automation**
+- **Auto-publishing to blog**
+- **Smart content categorization**
+
+### Advanced Analytics 📊
+- **GA4 Enhanced Tracking** - User behavior, scroll depth, performance metrics
+- **Microsoft Clarity** integration
+- **Custom event tracking** for all user interactions
+- **Real-time analytics dashboard**
+
+### Blog Management 📝
+- **Rich text editor** with TipTap
+- **Category and tag management**
+- **SEO optimization**
+- **Comment system**
+- **Like/Share functionality**
+
+## 🏁 Getting Started
+
+### Prerequisites
+```bash
+Node.js 18+
+PostgreSQL 14+
+npm or yarn
+```
+
+### Installation
+```bash
+# Clone the repository
+git clone <repository-url>
+cd growsome
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your database and API keys
+
+# Set up database
+npm run db:generate
+npm run db:push
+npm run db:seed
+
+# Start development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to see the application.
+
+## 🤖 AI Blog Automation
+
+### Quick Test
+```bash
+# Test the complete automation pipeline
+npm run test:blog-automation
+
+# Or use the quick test script
+chmod +x quick-test.sh
+./quick-test.sh
+```
+
+### Setup AI Automation
+1. **Configure n8n workflow** (see `docs/AI_BLOG_AUTOMATION_GUIDE.md`)
+2. **Set OpenAI API key** in n8n credentials
+3. **Get JWT token** for API access:
+   ```bash
+   curl -X POST https://growsome.kr/api/auth/generate-token \
+     -H "Content-Type: application/json" \
+     -d '{"apiKey": "your-api-key", "purpose": "blog_automation"}'
+   ```
+
+### Automation Features
+- ✅ **RSS feed monitoring** - Auto-detect new content
+- ✅ **GPT summarization** - Convert to Korean blog posts  
+- ✅ **Auto-publishing** - Direct to Growsome blog
+- ✅ **GA4 tracking** - Monitor automation performance
+- ✅ **Error handling** - Retry logic and notifications
+
+## 📊 Analytics & Tracking
+
+### GA4 Enhanced Features
+```javascript
+import { useEnhancedGA4 } from '../hooks/useEnhancedGA4';
+
+// Track custom events
+const { trackButtonClick, trackFormSubmit } = useEnhancedGA4();
+
+// Use in components
+<button onClick={() => trackButtonClick('subscribe', 'header')}>
+  Subscribe
+</button>
+```
+
+### Available Tracking
+- **Page views** with user properties
+- **Scroll depth** (25%, 50%, 75%, 100%)
+- **Form interactions** (start, submit, errors)
+- **Content engagement** (shares, likes, comments)
+- **E-commerce events** (purchases, cart actions)
+- **Performance metrics** (Core Web Vitals)
+- **Error tracking** (JS errors, network failures)
+
+## 🗄️ Database Schema
+
+### Blog Tables
+- `blog_contents` - Blog posts and articles
+- `blog_categories` - Content categories
+- `blog_tags` - Tagging system
+- `blog_comments` - Comment threads
+- `blog_likes` - User engagement
+
+### User Management  
+- `user` - User accounts and profiles
+- `user_sessions` - Session management
+
+## 📚 API Endpoints
+
+### GraphQL API
+```graphql
+# Main endpoint
+POST /api/graphql
+
+# Example queries
+query {
+  contents(first: 10) {
+    id title slug contentBody
+    author { username }
+    category { name }
+  }
+}
+
+# Create content
+mutation {
+  createContent(input: {
+    title: "New Post"
+    contentBody: "Content here..."
+    authorId: 1
+  }) {
+    id slug title
+  }
+}
+```
+
+### REST Endpoints
+- `POST /api/auth/login` - User authentication
+- `POST /api/auth/generate-token` - API token generation
+- `GET /api/health` - Health check
+
+## 🛠️ Development Scripts
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Development
+npm run dev              # Start dev server
+npm run build           # Build for production
+npm run start           # Start production server
+
+# Database
+npm run db:generate     # Generate Prisma client
+npm run db:push         # Push schema to database  
+npm run db:migrate      # Create migration
+npm run db:seed         # Seed with sample data
+npm run db:studio       # Open Prisma Studio
+
+# Testing & Automation
+npm run test:blog-automation    # Test AI automation
+npm run blog:auto-upload        # Same as above
+./quick-test.sh                 # Quick system check
+
+# Linting
+npm run lint            # ESLint check
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🔧 Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
+```bash
+# Database
+DATABASE_URL="postgresql://..."
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Authentication  
+JWT_SECRET="your-secret-key"
 
-## Learn More
+# File Storage
+AWS_S3_BUCKET="your-bucket"
+AWS_ACCESS_KEY_ID="your-key"
+AWS_SECRET_ACCESS_KEY="your-secret"
 
-To learn more about Next.js, take a look at the following resources:
+# Analytics
+NEXT_PUBLIC_GA4_MEASUREMENT_ID="G-XXXXXXXXX"
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-## Microsoft Clarity Analytics
-
-이 프로젝트는 Microsoft Clarity를 사용하여 사용자 행동 분석을 수행합니다.
-
-### 설정
-
-1. **패키지 설치**: `@microsoft/clarity` 패키지가 설치되어 있습니다.
-2. **초기화**: `src/components/common/ClarityAnalytics.tsx`에서 Clarity가 초기화됩니다.
-3. **프로젝트 ID**: `sc5g8v1frb`가 사용됩니다.
-
-### 주요 기능
-
-- **자동 사용자 식별**: 로그인 상태에 따라 사용자를 자동으로 식별합니다.
-- **페이지 뷰 추적**: 모든 페이지 방문을 자동으로 추적합니다.
-- **커스텀 이벤트**: 버튼 클릭, 폼 제출 등 사용자 액션을 추적합니다.
-- **태그 설정**: 사용자 타입, 페이지 정보 등을 태그로 설정합니다.
-
-### 사용법
-
-```typescript
-import { clarityUtils } from '../utils/clarity';
-
-// 버튼 클릭 추적
-clarityUtils.trackButtonClick("button_name", "location");
-
-// 폼 제출 추적
-clarityUtils.trackFormSubmit("form_name", true);
-
-// 사용자 액션 추적
-clarityUtils.trackUserAction("action_name", { detail: "value" });
+# AI Automation
+N8N_API_KEY="your-n8n-key"
+OPENAI_API_KEY="sk-your-openai-key"
 ```
 
-### 대시보드
+### Key Configuration Files
+- `next.config.js` - Next.js configuration
+- `prisma/schema.prisma` - Database schema
+- `tailwind.config.ts` - Styling configuration
+- `.env` - Environment variables
 
-Clarity 데이터는 [Microsoft Clarity](https://clarity.microsoft.com/)에서 확인할 수 있습니다.
+## 📖 Documentation
 
-### 개인정보 보호
+- [`docs/GA4_TRACKING_GUIDE.md`](docs/GA4_TRACKING_GUIDE.md) - Complete analytics setup
+- [`docs/AI_BLOG_AUTOMATION_GUIDE.md`](docs/AI_BLOG_AUTOMATION_GUIDE.md) - AI automation setup
+- [`test-blog-automation.js`](test-blog-automation.js) - Automation test script
 
-- 사용자 ID는 해시화되어 전송됩니다.
-- GDPR 준수를 위해 쿠키 동의 기능이 포함되어 있습니다.
-- 필요시 `ClarityAnalytics.tsx`에서 `Clarity.consent(false)`로 추적을 비활성화할 수 있습니다.
+## 🚀 Deployment
+
+### Production Build
+```bash
+npm run build
+npm run start
+```
+
+### Environment Setup
+1. Set production environment variables
+2. Configure database connection
+3. Set up AWS S3 bucket
+4. Configure GA4 tracking
+5. Set up n8n automation server
+
+### Health Checks
+- `GET /api/health` - API health
+- `./quick-test.sh` - Full system test
+- GA4 Real-time reports - User activity
+
+## 🔍 Monitoring & Debugging
+
+### Logs
+- Server logs: Console output
+- GA4 events: Real-time dashboard  
+- Database queries: Prisma logging
+- Errors: Automatic GA4 error tracking
+
+### Debug Tools
+- Prisma Studio: Database GUI
+- GA4 DebugView: Event validation
+- Browser DevTools: Frontend debugging
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License.
+
+## 🆘 Support
+
+- **Issues**: GitHub Issues
+- **Documentation**: `/docs` folder  
+- **API Reference**: GraphQL Playground at `/api/graphql`
+- **Analytics**: GA4 Dashboard
+
+---
+
+**Made with ❤️ for content creators and AI enthusiasts**

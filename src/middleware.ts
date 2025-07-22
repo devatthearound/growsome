@@ -98,7 +98,7 @@ export const config = {
   matcher: [
     // 인증이 필요한 경로만 보호
     '/mypage/:path*',
-    '/admin/:path*',
+    // '/admin/:path*', // 임시로 주석 처리
     '/dashboard/:path*',
     // API 경로와 홈페이지는 보호하지 않음
     // '/api/:path*', '/courses', '/' 등은 제외
