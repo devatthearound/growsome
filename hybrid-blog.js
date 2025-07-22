@@ -250,13 +250,44 @@ URL: ${selectedItem.url}
       };
     }
 
-    const slug = parsedContent.title
-      .toLowerCase()
-      .replace(/[^a-z0-9가-힣\s-]/g, '')
-      .replace(/[\s]+/g, '-')
-      .replace(/-+/g, '-')
-      .replace(/^-|-$/g, '')
-      .substring(0, 60) + '-' + Date.now().toString().slice(-6);
+    // SEO 친화적 영문 슬러그 생성
+    const createSeoSlug = (title, originalTitle) => {
+      // 원본 영문 제목에서 키워드 추출
+      const titleWords = originalTitle.toLowerCase()
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .split(/\s+/)
+        .filter(word => word.length > 2)
+        .slice(0, 5);
+      
+      // 기본 영문 슬러그 생성
+      let baseSlug;
+      if (titleWords.length >= 3) {
+        baseSlug = titleWords.join('-');
+      } else {
+        // 한글 제목에서 영문 키워드 매핑
+        baseSlug = title
+          .replace(/스타트업/g, 'startup')
+          .replace(/이메일/g, 'email')
+          .replace(/AI|인공지능/g, 'ai')
+          .replace(/에이전트/g, 'agent')
+          .replace(/핵심/g, 'key')
+          .replace(/기술/g, 'tech')
+          .replace(/마케팅/g, 'marketing')
+          .replace(/비즈니스/g, 'business')
+          .replace(/데이터/g, 'data')
+          .replace(/분석/g, 'analytics')
+          .replace(/[^a-z0-9\s-]/g, '')
+          .split(/\s+/)
+          .filter(word => word.length > 0)
+          .slice(0, 4)
+          .join('-');
+      }
+      
+      const timestamp = Date.now().toString().slice(-6);
+      return `${baseSlug}-${timestamp}`.replace(/^-|-$/g, '');
+    };
+    
+    const slug = createSeoSlug(parsedContent.title, selectedItem.title);
 
     const blogPost = {
       title: parsedContent.title,
