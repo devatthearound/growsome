@@ -1,5 +1,5 @@
-import BlogWriter from '@/components/blog/blog-writer'
+import WriteClient from './WriteClient';
 
 export default function WritePage() {
-  return <BlogWriter mode="create" />
+  return <WriteClient />;
 }

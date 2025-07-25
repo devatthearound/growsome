@@ -296,16 +296,18 @@ const DiagnosisResultContent = () => {
   );
 };
 
-// 메인 컴포넌트 (Suspense로 감싸진 컴포넌트)
-const DiagnosisResult = () => {
+// 메인 컴포넌트 (Suspense로 감싸진 컴포넌트) - 더 확실하게 만들기
+export default function DiagnosisResult() {
   return (
-    <ThemeProvider theme={growsomeTheme}>
-      <Suspense fallback={<Loading />}>
-        <DiagnosisResultContent />
-      </Suspense>
-    </ThemeProvider>
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center">진단 결과 로딩중...</div>}>
+      <ThemeProvider theme={growsomeTheme}>
+        <Suspense fallback={<Loading />}>
+          <DiagnosisResultContent />
+        </Suspense>
+      </ThemeProvider>
+    </Suspense>
   );
-};
+}
 
 // Animations
 const bounce = keyframes`
@@ -629,5 +631,3 @@ const BackButton = styled.button`
     transform: translateY(-1px);
   }
 `;
-
-export default DiagnosisResult;

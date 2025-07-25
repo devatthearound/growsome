@@ -70,7 +70,7 @@ const GoogleAuthContent = () => {
   );
 };
 
-const GoogleAuthPage = () => {
+export default function GoogleAuthPage() {
   return (
     <Suspense fallback={
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
@@ -81,6 +81,4 @@ const GoogleAuthPage = () => {
       <GoogleAuthContent />
     </Suspense>
   );
-};
-
-export default GoogleAuthPage;
+}

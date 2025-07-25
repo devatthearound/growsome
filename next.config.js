@@ -46,12 +46,7 @@ const nextConfig = {
   compiler: {
     styledComponents: true
   },
-  
-  // 실험적 기능
-  experimental: {
-    esmExternals: 'loose',
-    serverComponentsExternalPackages: ['prisma']
-  }
+  serverExternalPackages: ['prisma'],
 }
 
 module.exports = nextConfig

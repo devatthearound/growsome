@@ -32,7 +32,7 @@ const plans: PaymentPlan[] = [
     name: '베이직 솔루션',
     price: 300000,
     originalPrice: 500000,
-    period: '2주',
+    period: '1주',
     monthlyPrice: 25000,
     description: '사업계획서 초안과 MVP 예시 아이디어를 통한 스타트업에 적합',
     features: [
@@ -63,7 +63,7 @@ const plans: PaymentPlan[] = [
     name: '프리미엄 솔루션',
     price: 9900000,
     originalPrice: 15000000,
-    period: '2주',
+    period: '4주',
     monthlyPrice: 825000,
     description: '프로젝트 제작까지 완료한 완전한 솔루션에 적합',
     features: [
@@ -477,11 +477,11 @@ const Content = styled.div`
   margin: 0 auto;
   padding: 2rem;
   display: grid;
-  grid-template-columns: 1fr 420px;
+  grid-template-columns: 1fr 350px;
   gap: 3rem;
   
   @media (max-width: 1200px) {
-    grid-template-columns: 1fr 380px;
+    grid-template-columns: 1fr 320px;
     gap: 2rem;
   }
   
@@ -538,9 +538,19 @@ const SectionTitle = styled.h2`
 `;
 
 const PlansGrid = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  padding-top: 1rem;
+  align-items: start;
+  
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const PlanSelectionCard = styled.div<{ $selected: boolean; $popular?: boolean }>`
@@ -551,7 +561,11 @@ const PlanSelectionCard = styled.div<{ $selected: boolean; $popular?: boolean }>
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   
   ${props => props.$selected && `
     border-color: #5d4ac7;
@@ -582,16 +596,16 @@ const PlanSelectionCard = styled.div<{ $selected: boolean; $popular?: boolean }>
 
 const PopularBadge = styled.div`
   position: absolute;
-  top: -8px;
+  top: -12px;
   right: 1rem;
   background: linear-gradient(135deg, #f59e0b, #f97316);
   color: white;
-  padding: 0.375rem 1rem;
-  border-radius: 16px;
+  padding: 0.5rem 1.25rem;
+  border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 700;
-  z-index: 1;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
   animation: pulse 2s ease-in-out infinite;
   
   @keyframes pulse {
@@ -680,6 +694,11 @@ const PlanFeatures = styled.ul`
   list-style: none;
   padding: 0;
   margin: 0;
+  flex-grow: 1;
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
 `;
 
 const FeatureItem = styled.li`

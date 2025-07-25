@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import styled, { ThemeProvider, keyframes } from 'styled-components';
 import { useRouter } from 'next/navigation';
 import { growsomeTheme } from '@/components/design-system/theme';
@@ -307,155 +307,157 @@ const TypeformSurvey = () => {
   const currentQ = questions[currentQuestion];
 
   return (
-    <ThemeProvider theme={growsomeTheme}>
-      <SurveyContainer>
-        {/* Progress Bar */}
-        <ProgressBarContainer>
-          <ProgressBar>
-            <ProgressFill $progress={progress} />
-          </ProgressBar>
-        </ProgressBarContainer>
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center">진단 페이지 로딩중...</div>}>
+      <ThemeProvider theme={growsomeTheme}>
+        <SurveyContainer>
+          {/* Progress Bar */}
+          <ProgressBarContainer>
+            <ProgressBar>
+              <ProgressFill $progress={progress} />
+            </ProgressBar>
+          </ProgressBarContainer>
 
-        {/* Main Content */}
-        <ContentContainer>
-          <Container>
-            <QuestionContainer 
-              $isAnimating={isAnimating}
-            >
-              {/* Question Number */}
-              <QuestionMeta>
-                <Typography.TextM500 color={growsomeTheme.color.Primary600}>
-                  {currentQuestion + 1} → {questions.length}
-                </Typography.TextM500>
-              </QuestionMeta>
+          {/* Main Content */}
+          <ContentContainer>
+            <Container>
+              <QuestionContainer 
+                $isAnimating={isAnimating}
+              >
+                {/* Question Number */}
+                <QuestionMeta>
+                  <Typography.TextM500 color={growsomeTheme.color.Primary600}>
+                    {currentQuestion + 1} → {questions.length}
+                  </Typography.TextM500>
+                </QuestionMeta>
 
-              {/* Question Header */}
-              <QuestionHeader>
-                <ColumnBox $gap={1} $ai="center">
-                  <Typography.DisplayS600 color={growsomeTheme.color.Black800} style={{textAlign: 'center', lineHeight: '1.2'}}>
-                    {currentQ.question}
-                  </Typography.DisplayS600>
-                  {currentQ.description && (
-                    <Typography.TextM400 color={growsomeTheme.color.Black600} style={{textAlign: 'center'}}>
-                      {currentQ.description}
-                    </Typography.TextM400>
-                  )}
-                </ColumnBox>
-              </QuestionHeader>
-
-              {/* Answer Options */}
-              <AnswerContainer>
-                {currentQ.type === 'choice' ? (
-                  // 선택형 질문
-                  <OptionsContainer>
-                    {currentQ.options?.map((option, index) => (
-                      <OptionCard
-                        key={option.value}
-                        $selected={answers[currentQ.id] === option.value}
-                        onClick={() => handleAnswer(option.value)}
-                        $delay={index * 100}
-                      >
-                        <OptionLabel>
-                          {String.fromCharCode(65 + index)}
-                        </OptionLabel>
-                        <OptionText>
-                          <Typography.TextM500 color={growsomeTheme.color.Black800}>
-                            {option.label}
-                          </Typography.TextM500>
-                        </OptionText>
-                        <OptionArrow $selected={answers[currentQ.id] === option.value}>
-                          →
-                        </OptionArrow>
-                      </OptionCard>
-                    ))}
-                  </OptionsContainer>
-                                ) : (
-                  // 입력형 질문
-                  <InputContainer>
-                    <InputField
-                      type={currentQ.type}
-                      placeholder={currentQ.placeholder}
-                      value={answers[currentQ.id] || ''}
-                      onChange={(e) => {
-                        handleAnswer(e.target.value);
-                        if (inputError) setInputError(false); // 입력 시 에러 상태 해제
-                      }}
-                      autoFocus
-                      $hasError={!!(inputError || (currentQ.id === 'email' && answers.email && !emailRegex.test(answers.email)))}
-                    />
-                    {(inputError || (currentQ.id === 'email' && answers.email && !emailRegex.test(answers.email))) && (
-                      <ErrorMessage>
-                        <Typography.TextS400 color={growsomeTheme.color.Red500}>
-                          {currentQ.id === 'email' && answers.email && !emailRegex.test(answers.email)
-                            ? '올바른 이메일 형식을 입력해주세요.'
-                            : '답변을 입력해주세요.'}
-                        </Typography.TextS400>
-                      </ErrorMessage>
+                {/* Question Header */}
+                <QuestionHeader>
+                  <ColumnBox $gap={1} $ai="center">
+                    <Typography.DisplayS600 color={growsomeTheme.color.Black800} style={{textAlign: 'center', lineHeight: '1.2'}}>
+                      {currentQ.question}
+                    </Typography.DisplayS600>
+                    {currentQ.description && (
+                      <Typography.TextM400 color={growsomeTheme.color.Black600} style={{textAlign: 'center'}}>
+                        {currentQ.description}
+                      </Typography.TextM400>
                     )}
-                    <InputHint>
-                      <Typography.TextS400 color={growsomeTheme.color.Black600}>
-                        Press <KeyboardKey>Enter</KeyboardKey> to continue
-                      </Typography.TextS400>
-                    </InputHint>
-                  </InputContainer>
+                  </ColumnBox>
+                </QuestionHeader>
+
+                {/* Answer Options */}
+                <AnswerContainer>
+                  {currentQ.type === 'choice' ? (
+                    // 선택형 질문
+                    <OptionsContainer>
+                      {currentQ.options?.map((option, index) => (
+                        <OptionCard
+                          key={option.value}
+                          $selected={answers[currentQ.id] === option.value}
+                          onClick={() => handleAnswer(option.value)}
+                          $delay={index * 100}
+                        >
+                          <OptionLabel>
+                            {String.fromCharCode(65 + index)}
+                          </OptionLabel>
+                          <OptionText>
+                            <Typography.TextM500 color={growsomeTheme.color.Black800}>
+                              {option.label}
+                            </Typography.TextM500>
+                          </OptionText>
+                          <OptionArrow $selected={answers[currentQ.id] === option.value}>
+                            →
+                          </OptionArrow>
+                        </OptionCard>
+                      ))}
+                    </OptionsContainer>
+                                  ) : (
+                    // 입력형 질문
+                    <InputContainer>
+                      <InputField
+                        type={currentQ.type}
+                        placeholder={currentQ.placeholder}
+                        value={answers[currentQ.id] || ''}
+                        onChange={(e) => {
+                          handleAnswer(e.target.value);
+                          if (inputError) setInputError(false); // 입력 시 에러 상태 해제
+                        }}
+                        autoFocus
+                        $hasError={!!(inputError || (currentQ.id === 'email' && answers.email && !emailRegex.test(answers.email)))}
+                      />
+                      {(inputError || (currentQ.id === 'email' && answers.email && !emailRegex.test(answers.email))) && (
+                        <ErrorMessage>
+                          <Typography.TextS400 color={growsomeTheme.color.Red500}>
+                            {currentQ.id === 'email' && answers.email && !emailRegex.test(answers.email)
+                              ? '올바른 이메일 형식을 입력해주세요.'
+                              : '답변을 입력해주세요.'}
+                          </Typography.TextS400>
+                        </ErrorMessage>
+                      )}
+                      <InputHint>
+                        <Typography.TextS400 color={growsomeTheme.color.Black600}>
+                          Press <KeyboardKey>Enter</KeyboardKey> to continue
+                        </Typography.TextS400>
+                      </InputHint>
+                    </InputContainer>
+                  )}
+                </AnswerContainer>
+
+                {/* Next Button for text inputs */}
+                {currentQ.type !== 'choice' && (
+                  <ButtonContainer>
+                    <GreenButton
+                      $size="large"
+                      onClick={() => {
+                        if (canProceed()) {
+                          nextQuestion();
+                        } else {
+                          setInputError(true);
+                          setTimeout(() => setInputError(false), 2000);
+                        }
+                      }}
+                      disabled={!canProceed()}
+                    >
+                      {loading ? '제출 중...' : 
+                       currentQuestion === questions.length - 1 ? '진단 완료하기 🎉' : '다음 질문'}
+                    </GreenButton>
+                  </ButtonContainer>
                 )}
-              </AnswerContainer>
+              </QuestionContainer>
+            </Container>
+          </ContentContainer>
 
-              {/* Next Button for text inputs */}
-              {currentQ.type !== 'choice' && (
-                <ButtonContainer>
-                  <GreenButton
-                    $size="large"
-                    onClick={() => {
-                      if (canProceed()) {
-                        nextQuestion();
-                      } else {
-                        setInputError(true);
-                        setTimeout(() => setInputError(false), 2000);
-                      }
-                    }}
-                    disabled={!canProceed()}
-                  >
-                    {loading ? '제출 중...' : 
-                     currentQuestion === questions.length - 1 ? '진단 완료하기 🎉' : '다음 질문'}
-                  </GreenButton>
-                </ButtonContainer>
-              )}
-            </QuestionContainer>
-          </Container>
-        </ContentContainer>
+          {/* Navigation */}
+          <NavigationContainer>
+            {currentQuestion > 0 && (
+              <BackButton onClick={prevQuestion}>
+                <BackIcon>←</BackIcon>
+                <Typography.TextM500 color={growsomeTheme.color.Black600}>
+                  이전
+                </Typography.TextM500>
+              </BackButton>
+            )}
+            
+            <div style={{flex: 1}} />
+            
+            <ProgressText>
+              <Typography.TextS400 color={growsomeTheme.color.Black600}>
+                {currentQuestion + 1} of {questions.length}
+              </Typography.TextS400>
+            </ProgressText>
+          </NavigationContainer>
 
-        {/* Navigation */}
-        <NavigationContainer>
-          {currentQuestion > 0 && (
-            <BackButton onClick={prevQuestion}>
-              <BackIcon>←</BackIcon>
-              <Typography.TextM500 color={growsomeTheme.color.Black600}>
-                이전
-              </Typography.TextM500>
-            </BackButton>
+          {/* Loading overlay */}
+          {loading && (
+            <LoadingOverlay>
+              <LoadingSpinner />
+              <Typography.TextL500 color={growsomeTheme.color.White} style={{marginTop: '1rem'}}>
+                진단 결과를 생성하고 있습니다...
+              </Typography.TextL500>
+            </LoadingOverlay>
           )}
-          
-          <div style={{flex: 1}} />
-          
-          <ProgressText>
-            <Typography.TextS400 color={growsomeTheme.color.Black600}>
-              {currentQuestion + 1} of {questions.length}
-            </Typography.TextS400>
-          </ProgressText>
-        </NavigationContainer>
-
-        {/* Loading overlay */}
-        {loading && (
-          <LoadingOverlay>
-            <LoadingSpinner />
-            <Typography.TextL500 color={growsomeTheme.color.White} style={{marginTop: '1rem'}}>
-              진단 결과를 생성하고 있습니다...
-            </Typography.TextL500>
-          </LoadingOverlay>
-        )}
-      </SurveyContainer>
-    </ThemeProvider>
+        </SurveyContainer>
+      </ThemeProvider>
+    </Suspense>
   );
 };
 

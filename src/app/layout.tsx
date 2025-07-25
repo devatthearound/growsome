@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import "./globals.css";
 import styled, { createGlobalStyle } from 'styled-components';
@@ -15,8 +15,8 @@ import { EmailProvider } from './contexts/EmailContext';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import ClarityAnalytics from '../components/common/ClarityAnalytics';
-import { GoogleAnalytics } from '../components/common/GoogleAnalytics';
-import { EnhancedGoogleAnalytics } from '../components/common/EnhancedGoogleAnalytics';
+import SafeGoogleAnalytics from '../components/common/SafeGoogleAnalytics';
+import SafeEnhancedGoogleAnalytics from '../components/common/SafeEnhancedGoogleAnalytics';
 import { ErrorTracker } from '../components/common/ErrorTracker';
 import AuthErrorBoundary from '../components/error/AuthErrorBoundary';
 import KakaoChatButton from './components/common/KakaoChatButton';
@@ -101,7 +101,7 @@ export default function RootLayout({
             })(window,document,'script','dataLayer','GTM-TNM368S3');
           `}
         </Script>
-        <GoogleAnalytics />
+        <SafeGoogleAnalytics />
       </head>
       <body suppressHydrationWarning={true}>
         <noscript>
@@ -115,7 +115,12 @@ export default function RootLayout({
         <StyledComponentsRegistry>
           <GlobalStyle />
           <ClarityAnalytics />
-          <EnhancedGoogleAnalytics />
+          <Suspense fallback={null}>
+            <SafeGoogleAnalytics />
+          </Suspense>
+          <Suspense fallback={null}>
+            <SafeEnhancedGoogleAnalytics />
+          </Suspense>
           <ErrorTracker />
           <AuthProvider>
             <CoupangApiProvider>
