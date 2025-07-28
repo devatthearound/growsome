@@ -37,20 +37,10 @@ const GoogleAuthContent = () => {
         if (hasValidToken) return;
 
         setStatus('인증 URL 요청 중...');
-        
-        // 타임아웃 설정 (10초)
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000);
-        
-        const response = await fetch(`/api/google-auth`, {
-          signal: controller.signal
-        });
-        
-        clearTimeout(timeoutId);
+        const response = await fetch(`/api/google-auth`);
         
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || '인증 URL을 가져오는데 실패했습니다');
+          throw new Error('인증 URL을 가져오는데 실패했습니다');
         }
         
         const { authUrl } = await response.json();
@@ -59,11 +49,7 @@ const GoogleAuthContent = () => {
         window.open(authUrl, '_blank');
       } catch (error) {
         console.error('인증 오류:', error);
-        if (error instanceof Error && error.name === 'AbortError') {
-          setStatus('서버 응답 시간이 초과되었습니다. 나중에 다시 시도해주세요.');
-        } else {
-          setStatus(`오류: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
-        }
+        setStatus('인증 프로세스 초기화 중 오류가 발생했습니다.');
       }
     };
 

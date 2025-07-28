@@ -7,35 +7,12 @@ import { withAuth, TokenPayload } from '@/lib/auth';
 // Environment variables should be set in your .env.local file
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID || '';
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || '';
-const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI || 'https://growsome.kr/google-auth/callback';
+const REDIRECT_URI = process.env.GOOGLE_REDIRECT_URI;
 const SCOPES = ['https://www.googleapis.com/auth/youtube.upload'];
-
-console.log('Google OAuth 설정:', {
-  hasClientId: !!CLIENT_ID,
-  hasClientSecret: !!CLIENT_SECRET,
-  redirectUri: REDIRECT_URI
-});
 
 // Get auth URL
 export async function GET(request: NextRequest) {
   try {
-    // 환경 변수 검증
-    if (!CLIENT_ID || CLIENT_ID === 'your_google_client_id_here') {
-      console.error('Google Client ID가 설정되지 않았습니다');
-      return NextResponse.json(
-        { message: 'Google OAuth 설정이 필요합니다.' },
-        { status: 500 }
-      );
-    }
-
-    if (!CLIENT_SECRET || CLIENT_SECRET === 'your_google_client_secret_here') {
-      console.error('Google Client Secret이 설정되지 않았습니다');
-      return NextResponse.json(
-        { message: 'Google OAuth 설정이 필요합니다.' },
-        { status: 500 }
-      );
-    }
-
     const oauth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, REDIRECT_URI);
     
     const authUrl = oauth2Client.generateAuthUrl({
@@ -44,15 +21,11 @@ export async function GET(request: NextRequest) {
       scope: SCOPES
     });
 
-    console.log('Auth URL 생성 성공:', authUrl.substring(0, 100) + '...');
     return NextResponse.json({ authUrl });
   } catch (error) {
     console.error('Error generating auth URL:', error);
     return NextResponse.json(
-      { 
-        message: '인증 URL 생성 중 오류가 발생했습니다.',
-        error: error instanceof Error ? error.message : '알 수 없는 오류'
-      },
+      { message: '인증 URL 생성 중 오류가 발생했습니다.' },
       { status: 500 }
     );
   }
