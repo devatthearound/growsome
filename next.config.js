@@ -1,6 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone', // ✅ 이 줄을 추가하세요
+  // output: 'standalone', // 주석 처리 - Docker에서 npm start 사용
   
   // 프리렌더링 오류 방지
   trailingSlash: false,
