@@ -137,14 +137,14 @@ const CategoriesPage = () => {
   };
 
   const MainPageContent = () => (
-    <PageContainer>
-      <Suspense fallback={<div>Loading...</div>}>
-        <BlogNavigation 
+      <PageContainer>
+        <Suspense fallback={<div>Loading...</div>}>
+          <BlogNavigation 
           categories={loading ? [] : categories}
-          onCategoryChange={() => {}}
-          onSearch={() => {}}
-        />
-      </Suspense>
+            onCategoryChange={() => {}}
+            onSearch={() => {}}
+          />
+        </Suspense>
       
       {loading ? (
         <LoadingContainer>
@@ -159,63 +159,63 @@ const CategoriesPage = () => {
           <RetryButton onClick={fetchCategories}>다시 시도</RetryButton>
         </ErrorContainer>
       ) : (
-        <MainContent>
-          <Header>
-            <Title>카테고리</Title>
-            <Subtitle>관심 있는 주제의 글들을 찾아보세요</Subtitle>
-          </Header>
+      <MainContent>
+        <Header>
+          <Title>카테고리</Title>
+          <Subtitle>관심 있는 주제의 글들을 찾아보세요</Subtitle>
+        </Header>
 
-          {categories.length === 0 ? (
-            <EmptyState>
-              <EmptyIcon>📝</EmptyIcon>
-              <EmptyTitle>카테고리가 없습니다</EmptyTitle>
-              <EmptyDescription>아직 생성된 카테고리가 없습니다.</EmptyDescription>
-            </EmptyState>
-          ) : (
-            <CategoriesGrid>
-              {categories.map((category, index) => {
-                const colors = getCategoryColor(index);
-                return (
-                  <CategoryCard
-                    key={category.id}
-                    as={motion.div}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ 
-                      scale: 1.02, 
-                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" 
-                    }}
-                    colors={colors}
-                  >
-                    <Link href={`/blog?category=${category.id}`}>
-                      <CategoryIcon>{getCategoryIcon(category.name)}</CategoryIcon>
-                      <CategoryName>{category.name}</CategoryName>
-                      {category.description && (
-                        <CategoryDescription>{category.description}</CategoryDescription>
-                      )}
-                      <CategoryStats>
-                        <PostCount>{category.contentCount}개의 포스트</PostCount>
-                        <ViewAllText>전체 보기 →</ViewAllText>
-                      </CategoryStats>
-                    </Link>
-                  </CategoryCard>
-                );
-              })}
-            </CategoriesGrid>
-          )}
+        {categories.length === 0 ? (
+          <EmptyState>
+            <EmptyIcon>📝</EmptyIcon>
+            <EmptyTitle>카테고리가 없습니다</EmptyTitle>
+            <EmptyDescription>아직 생성된 카테고리가 없습니다.</EmptyDescription>
+          </EmptyState>
+        ) : (
+          <CategoriesGrid>
+            {categories.map((category, index) => {
+              const colors = getCategoryColor(index);
+              return (
+                <CategoryCard
+                  key={category.id}
+                  as={motion.div}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ 
+                    scale: 1.02, 
+                    boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)" 
+                  }}
+                  colors={colors}
+                >
+                  <Link href={`/blog?category=${category.id}`}>
+                    <CategoryIcon>{getCategoryIcon(category.name)}</CategoryIcon>
+                    <CategoryName>{category.name}</CategoryName>
+                    {category.description && (
+                      <CategoryDescription>{category.description}</CategoryDescription>
+                    )}
+                    <CategoryStats>
+                      <PostCount>{category.contentCount}개의 포스트</PostCount>
+                      <ViewAllText>전체 보기 →</ViewAllText>
+                    </CategoryStats>
+                  </Link>
+                </CategoryCard>
+              );
+            })}
+          </CategoriesGrid>
+        )}
 
-          <CallToAction>
-            <CTATitle>더 많은 콘텐츠를 찾고 계신가요?</CTATitle>
-            <CTADescription>
-              새로운 포스트가 정기적으로 업데이트됩니다. 
-              관심 있는 카테고리를 팔로우하고 최신 소식을 받아보세요.
-            </CTADescription>
-            <CTAButton href="/blog">
-              모든 포스트 보기
-            </CTAButton>
-          </CallToAction>
-        </MainContent>
+        <CallToAction>
+          <CTATitle>더 많은 콘텐츠를 찾고 계신가요?</CTATitle>
+          <CTADescription>
+            새로운 포스트가 정기적으로 업데이트됩니다. 
+            관심 있는 카테고리를 팔로우하고 최신 소식을 받아보세요.
+          </CTADescription>
+          <CTAButton href="/blog">
+            모든 포스트 보기
+          </CTAButton>
+        </CallToAction>
+      </MainContent>
       )}
     </PageContainer>
   );

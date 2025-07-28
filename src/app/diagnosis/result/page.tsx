@@ -300,11 +300,11 @@ const DiagnosisResultContent = () => {
 export default function DiagnosisResult() {
   return (
     <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center">진단 결과 로딩중...</div>}>
-      <ThemeProvider theme={growsomeTheme}>
-        <Suspense fallback={<Loading />}>
-          <DiagnosisResultContent />
-        </Suspense>
-      </ThemeProvider>
+    <ThemeProvider theme={growsomeTheme}>
+      <Suspense fallback={<Loading />}>
+        <DiagnosisResultContent />
+      </Suspense>
+    </ThemeProvider>
     </Suspense>
   );
 }

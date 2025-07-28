@@ -82,68 +82,68 @@ const Store = () => {
 
   return (
     <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center">스토어 페이지 로딩중...</div>}>
-      <StoreSection id="store">
-        <Container>
-          <SectionHeader
-            as={motion.div}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-            transition={{ duration: 0.6 }}
-          >
-            <SectionTag>Store</SectionTag>
-            <h2>AI 에셋 스토어</h2>
-            <Description>AI로 제작된 고퀄리티 디자인 에셋을 제공합니다</Description>
-          </SectionHeader>
+    <StoreSection id="store">
+      <Container>
+        <SectionHeader
+          as={motion.div}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeIn}
+          transition={{ duration: 0.6 }}
+        >
+          <SectionTag>Store</SectionTag>
+          <h2>AI 에셋 스토어</h2>
+          <Description>AI로 제작된 고퀄리티 디자인 에셋을 제공합니다</Description>
+        </SectionHeader>
 
-          <ProductGrid>
-            {products.map((product, index) => (
-              <ProductCard
-                key={product.id}
-                as={motion.div}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-                variants={fadeIn}
-                transition={{ delay: index * 0.2 }}
-              >
-                <ProductImage onClick={() => handleDetailNavigation(product.id)}>
-                  <Image 
-                    src={product.image || '/default-image.jpg'} 
-                    alt={product.title || 'Product'} 
-                    width={300}
-                    height={200}
-                  />
-                </ProductImage>
-                <ProductInfo>
-                  <TagList>
-                    {product.tags.map((tag, index) => (
-                      <Tag key={index}>{tag}</Tag>
-                    ))}
-                  </TagList>
-                  <ProductTitle onClick={() => handleDetailNavigation(product.id)}>
-                    {product.title}
-                  </ProductTitle>
-                </ProductInfo>
-                <ProductFooter>
-                  <PriceWrapper>
-                    <OriginalPrice>{product.originalPrice?.toLocaleString() || 'N/A'}원</OriginalPrice>
-                    <Price>{product.price.toLocaleString()}원</Price>
-                  </PriceWrapper>
-                  <PurchaseButton onClick={() => handlePurchase(product.id)}>
-                    구매하기
-                  </PurchaseButton>
-                </ProductFooter>
-              </ProductCard>
-            ))}
-          </ProductGrid>
+        <ProductGrid>
+          {products.map((product, index) => (
+            <ProductCard
+              key={product.id}
+              as={motion.div}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              variants={fadeIn}
+              transition={{ delay: index * 0.2 }}
+            >
+              <ProductImage onClick={() => handleDetailNavigation(product.id)}>
+                <Image 
+                  src={product.image || '/default-image.jpg'} 
+                  alt={product.title || 'Product'} 
+                  width={300}
+                  height={200}
+                />
+              </ProductImage>
+              <ProductInfo>
+                <TagList>
+                  {product.tags.map((tag, index) => (
+                    <Tag key={index}>{tag}</Tag>
+                  ))}
+                </TagList>
+                <ProductTitle onClick={() => handleDetailNavigation(product.id)}>
+                  {product.title}
+                </ProductTitle>
+              </ProductInfo>
+              <ProductFooter>
+                <PriceWrapper>
+                  <OriginalPrice>{product.originalPrice?.toLocaleString() || 'N/A'}원</OriginalPrice>
+                  <Price>{product.price.toLocaleString()}원</Price>
+                </PriceWrapper>
+                <PurchaseButton onClick={() => handlePurchase(product.id)}>
+                  구매하기
+                </PurchaseButton>
+              </ProductFooter>
+            </ProductCard>
+          ))}
+        </ProductGrid>
 
-          <ViewAllButton href="/store">
-            전체 에셋 보기 <FontAwesomeIcon icon={faArrowRight} />
-          </ViewAllButton>
-        </Container>
-      </StoreSection>
+        <ViewAllButton href="/store">
+          전체 에셋 보기 <FontAwesomeIcon icon={faArrowRight} />
+        </ViewAllButton>
+      </Container>
+    </StoreSection>
     </Suspense>
   );
 };
