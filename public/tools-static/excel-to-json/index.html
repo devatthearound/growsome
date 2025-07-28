@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel to JSON Converter</title>
+    
+    <!-- React -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- XLSX -->
+    <script src="https://unpkg.com/xlsx/dist/xlsx.full.min.js"></script>
+    
+    <!-- react-beautiful-dnd -->
+    <script src="https://unpkg.com/react-beautiful-dnd@13.1.1/dist/react-beautiful-dnd.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* Styles optimized for iframe embedding */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        /* Hide navbar when embedded */
+        .navbar {
+            display: none;
+        }
+
+        .container {
+            padding: 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f9f9f9;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .title {
+            margin: 0 0 20px 0;
+            font-size: 1.5rem;
+            color: #514fe4;
+        }
+
+        .actionBar {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .fileInputWrapper {
+            position: relative;
+        }
+
+        .fileInputLabel {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #514fe4;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .fileInputLabel:hover {
+            background-color: #403bb3;
+        }
+
+        .fileInput {
+            position: absolute;
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .downloadButtons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        .buttonDownload {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .buttonDownload:hover {
+            background-color: #218838;
+        }
+
+        .buttonDownloadPath {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .buttonDownloadPath:hover {
+            background-color: #138496;
+        }
+
+        .panels {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            min-height: 0;
+            margin-bottom: 20px;
+            width: 100%;
+            max-width: 1200px;
+            box-sizing: border-box;
+        }
+
+        .panel {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .panel h3 {
+            padding: 15px;
+            margin: 0;
+            border-bottom: 1px solid #ddd;
+            background-color: #f1f1f1;
+            font-size: 1rem;
+        }
+
+        .panelContent {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+
+        .jsonPreview pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            background-color: #f8f8f8;
+            padding: 15px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .columnTree {
+            min-height: 200px;
+        }
+
+        .columnItem {
+            margin-bottom: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .columnInputWrapper {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
+
+        .dragHandle {
+            margin-right: 10px;
+            cursor: grab;
+            color: #666;
+        }
+
+        .inputContainer {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            position: relative;
+        }
+
+        .columnInput {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .undoIconContainer {
+            margin-left: 8px;
+        }
+
+        .undoIcon {
+            cursor: pointer;
+            color: #999;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .undoIcon.visible {
+            opacity: 1;
+        }
+
+        .undoIcon:hover {
+            color: #514fe4;
+        }
+
+        .columnChildren {
+            margin-left: 20px;
+            border-left: 2px solid #e0e0e0;
+            padding-left: 10px;
+        }
+
+        .mergeMode {
+            background-color: #fff3cd !important;
+            border-color: #ffeaa7 !important;
+        }
+
+        .editorPanel {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .jsonPreview {
+            flex: 1;
+            min-width: 400px;
+        }
+
+        .spinner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .spinner-overlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #514fe4;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .panels {
+                flex-direction: column;
+            }
+            
+            .actionBar {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .downloadButtons {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="content">
+            <div class="logo">
+                <a href="https://growsome.kr" target="_blank">Growsome</a>
+                <span>Easy to JSON</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        const { DragDropContext, Droppable, Draggable } = window.ReactBeautifulDnd;
+
+        // DebouncedInput 컴포넌트
+        const DebouncedInput = ({ value, onChange, debounceDelay = 500, className, placeholder, style }) => {
+            const [localValue, setLocalValue] = useState(value);
+
+            useEffect(() => {
+                const handler = setTimeout(() => {
+                    const trimmed = localValue.trim();
+                    if (trimmed !== value) {
+                        onChange(trimmed);
+                    }
+                }, debounceDelay);
+
+                return () => clearTimeout(handler);
+            }, [localValue, debounceDelay, onChange, value]);
+
+            useEffect(() => {
+                setLocalValue(value);
+            }, [value]);
+
+            return (
+                <input
+                    type="text"
+                    value={localValue}
+                    onChange={(e) => setLocalValue(e.target.value)}
+                    placeholder={placeholder}
+                    className={className}
+                    style={style}
+                />
+            );
+        };
+
+        // ColumnTree 컴포넌트
+        const ColumnTree = ({ columns, parentDroppableId, onLabelChange }) => {
+            const [dragOverId, setDragOverId] = useState(null);
+            const [dragStartX, setDragStartX] = useState(null);
+            const [currentDragId, setCurrentDragId] = useState(null);
+
+            return (
+                <Droppable 
+                    droppableId={parentDroppableId} 
+                    type="COLUMN"
+                >
+                    {(provided) => (
+                        <div 
+                            ref={provided.innerRef} 
+                            {...provided.droppableProps} 
+                            className="columnTree"
+                        >
+                            {columns.map((col, index) => (
+                                <Draggable 
+                                    key={col.original}
+                                    draggableId={col.original} 
+                                    index={index}
+                                >
+                                    {(provided, snapshot) => {
+                                        const isMergeMode = dragStartX && 
+                                            currentDragId && 
+                                            (col.original === dragOverId || col.original === currentDragId);
+
+                                        return (
+                                            <div 
+                                                ref={provided.innerRef} 
+                                                {...provided.draggableProps} 
+                                                className={`columnItem ${isMergeMode ? 'mergeMode' : ''}`}
+                                                onDragStart={(e) => {
+                                                    setDragStartX(e.clientX);
+                                                    setCurrentDragId(col.original);
+                                                }}
+                                                onDragOver={(e) => {
+                                                    if (currentDragId && currentDragId !== col.original) {
+                                                        const deltaX = e.clientX - dragStartX;
+                                                        if (deltaX > 30) {
+                                                            setDragOverId(col.original);
+                                                        } else {
+                                                            setDragOverId(null);
+                                                        }
+                                                    }
+                                                }}
+                                                onDragEnd={() => {
+                                                    setDragStartX(null);
+                                                    setCurrentDragId(null);
+                                                    setDragOverId(null);
+                                                }}
+                                            >
+                                                <div className={`columnInputWrapper ${isMergeMode ? 'mergeMode' : ''}`}>
+                                                    <span 
+                                                        {...provided.dragHandleProps} 
+                                                        className="dragHandle"
+                                                    >
+                                                        ☰
+                                                    </span>
+                                                    <div className="inputContainer">
+                                                        <DebouncedInput
+                                                            value={col.label}
+                                                            onChange={(newVal) => onLabelChange(col.original, newVal)}
+                                                            className="columnInput"
+                                                            placeholder="Enter column name"
+                                                            title={col.original}
+                                                        />
+                                                        <div className="undoIconContainer">
+                                                            <i 
+                                                                className={`fas fa-undo undoIcon ${col.label !== col.original ? 'visible' : ''}`}
+                                                                onClick={() => onLabelChange(col.original, col.original)}
+                                                                title={`Restore to original: ${col.original}`}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {col.children.length > 0 && (
+                                                    <div className="columnChildren">
+                                                        <ColumnTree
+                                                            columns={col.children}
+                                                            parentDroppableId={`children-${col.original}`}
+                                                            onLabelChange={onLabelChange}
+                                                        />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    }}
+                                </Draggable>
+                            ))}
+                            {provided.placeholder}
+                        </div>
+                    )}
+                </Droppable>
+            );
+        };
+
+        // 헬퍼 함수들
+        const removeColumnFromTree = (cols, parentId, index) => {
+            if (parentId === "") {
+                const newCols = Array.from(cols);
+                const removed = newCols.splice(index, 1)[0];
+                return { newColumns: newCols, removed };
+            }
+            let removed = null;
+            const helper = (arr) =>
+                arr.map((col) => {
+                    if (col.id === parentId && removed === null) {
+                        const newChildren = Array.from(col.children);
+                        removed = newChildren.splice(index, 1)[0];
+                        return { ...col, children: newChildren };
+                    } else if (col.children.length > 0) {
+                        return { ...col, children: helper(col.children) };
+                    }
+                    return col;
+                });
+            const newCols = helper(cols);
+            return { newColumns: newCols, removed };
+        };
+
+        const insertColumnIntoTree = (cols, parentId, index, columnToInsert) => {
+            if (parentId === "") {
+                const newCols = Array.from(cols);
+                newCols.splice(index, 0, columnToInsert);
+                return newCols;
+            }
+            const helper = (arr) =>
+                arr.map((col) => {
+                    if (col.id === parentId) {
+                        const newChildren = Array.from(col.children);
+                        newChildren.splice(index, 0, columnToInsert);
+                        return { ...col, children: newChildren };
+                    } else if (col.children.length > 0) {
+                        return { ...col, children: helper(col.children) };
+                    }
+                    return col;
+                });
+            return helper(cols);
+        };
+
+        // ExcelToJson 메인 컴포넌트
+        const ExcelToJson = () => {
+            const [jsonData, setJsonData] = useState(null);
+            const [columns, setColumns] = useState([]);
+            const [dragOverId, setDragOverId] = useState(null);
+            const [dragStartX, setDragStartX] = useState(null);
+            const [currentDragId, setCurrentDragId] = useState(null);
+            const [isUpdating, setIsUpdating] = useState(false);
+            const updateTimeoutRef = useRef(null);
+
+            // 디바운스된 JSON 업데이트 함수
+            const debouncedUpdateJson = () => {
+                if (updateTimeoutRef.current) {
+                    clearTimeout(updateTimeoutRef.current);
+                }
+                setIsUpdating(true);
+                updateTimeoutRef.current = setTimeout(() => {
+                    setIsUpdating(false);
+                }, 500);
+            };
+
+            const detectFileType = (filename) => {
+                const extension = filename.toLowerCase().split('.').pop();
+                const excelTypes = ['xlsx', 'xls'];
+                const csvTypes = ['csv'];
+                
+                if (excelTypes.includes(extension)) return 'excel';
+                if (csvTypes.includes(extension)) return 'csv';
+                return null;
+            };
+
+            const parseCSV = (text) => {
+                const lines = text.split(/\r\n|\n/);
+                const headers = lines[0].split(',').map(header => header.trim());
+                const result = [];
+
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    
+                    const currentLine = lines[i].split(',').map(field => field.trim());
+                    const obj = {};
+                    
+                    headers.forEach((header, index) => {
+                        const value = currentLine[index];
+                        if (!isNaN(value) && value.trim() !== '') {
+                            obj[header] = Number(value);
+                        } else {
+                            obj[header] = value;
+                        }
+                    });
+                    
+                    result.push(obj);
+                }
+
+                return result;
+            };
+
+            const handleFileUpload = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                const fileType = detectFileType(file.name);
+                if (!fileType) {
+                    alert('지원하지 않는 파일 형식입니다. Excel(.xlsx, .xls) 또는 CSV(.csv) 파일을 업로드해주세요.');
+                    return;
+                }
+
+                const reader = new FileReader();
+                
+                reader.onload = (e) => {
+                    let json;
+                    
+                    if (fileType === 'excel') {
+                        const data = e.target.result;
+                        const workbook = XLSX.read(data, { type: "array" });
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        json = XLSX.utils.sheet_to_json(worksheet);
+                    } else if (fileType === 'csv') {
+                        const text = e.target.result;
+                        json = parseCSV(text);
+                    }
+
+                    if (json && json.length > 0) {
+                        setJsonData(json);
+                        const keys = Object.keys(json[0]);
+                        const initialColumns = keys.map((key) => ({
+                            id: key,
+                            original: key,
+                            label: key,
+                            type: "primitive",
+                            children: [],
+                        }));
+                        setColumns(initialColumns);
+                    } else {
+                        alert('데이터를 읽을 수 없습니다. 파일을 확인해주세요.');
+                    }
+                };
+
+                if (fileType === 'excel') {
+                    reader.readAsArrayBuffer(file);
+                } else {
+                    reader.readAsText(file);
+                }
+            };
+
+            const handleColumnLabelChange = (id, newLabel) => {
+                const updateLabels = (cols) =>
+                    cols.map((col) => ({
+                        ...col,
+                        label: col.original === id ? newLabel : col.label,
+                        children: col.children.length > 0 ? updateLabels(col.children) : [],
+                    }));
+                setColumns(updateLabels(columns));
+                debouncedUpdateJson();
+            };
+
+            const onDragEnd = (result) => {
+                if (!result.destination) return;
+
+                const { source, destination, draggableId } = result;
+                
+                if (dragOverId && dragStartX) {
+                    const targetColumn = columns.find(col => col.original === dragOverId);
+                    const sourceCol = columns.find(col => col.original === draggableId);
+                    
+                    if (sourceCol && targetColumn) {
+                        const newObjectKey = `${sourceCol.label}_${targetColumn.label}`;
+                        const newColumn = {
+                            id: newObjectKey,
+                            original: newObjectKey,
+                            label: newObjectKey,
+                            type: "object",
+                            children: [
+                                { ...sourceCol, children: [] },
+                                { ...targetColumn, children: [] }
+                            ]
+                        };
+
+                        const newColumns = columns.filter(
+                            col => col.original !== sourceCol.original && 
+                                  col.original !== targetColumn.original
+                        );
+                        
+                        newColumns.splice(destination.index, 0, newColumn);
+                        setColumns(newColumns);
+                    }
+                } else {
+                    let newColumns = Array.from(columns);
+                    const [removed] = newColumns.splice(source.index, 1);
+                    newColumns.splice(destination.index, 0, removed);
+                    setColumns(newColumns);
+                }
+                
+                setDragStartX(null);
+                setCurrentDragId(null);
+                setDragOverId(null);
+            };
+
+            const processColumn = (col, row) => {
+                if (col.type === "primitive") {
+                    return row[col.original];
+                } else if (col.type === "object") {
+                    const obj = {};
+                    col.children.forEach((child) => {
+                        obj[child.label] = processColumn(child, row);
+                    });
+                    return obj;
+                }
+                return null;
+            };
+
+            const getOrderedJsonData = () => {
+                if (!jsonData) return null;
+                return jsonData.map((row) => {
+                    const result = {};
+                    columns.forEach((col) => {
+                        result[col.label] = processColumn(col, row);
+                    });
+                    return result;
+                });
+            };
+
+            const handleDownload = () => {
+                const orderedData = getOrderedJsonData();
+                if (!orderedData) return;
+                const jsonString = JSON.stringify(orderedData, null, 2);
+                const blob = new Blob([jsonString], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "converted.json";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            };
+
+            const handleDownloadToPath = async () => {
+                const orderedData = getOrderedJsonData();
+                if (!orderedData) return;
+                const jsonString = JSON.stringify(orderedData, null, 2);
+                if ("showSaveFilePicker" in window) {
+                    try {
+                        const opts = {
+                            suggestedName: "converted.json",
+                            types: [
+                                {
+                                    description: "JSON Files",
+                                    accept: { "application/json": [".json"] },
+                                },
+                            ],
+                        };
+                        const handle = await window.showSaveFilePicker(opts);
+                        const writable = await handle.createWritable();
+                        await writable.write(jsonString);
+                        await writable.close();
+                    } catch (error) {
+                        console.error(error);
+                    }
+                } else {
+                    alert("File System Access API is not supported in this browser.");
+                }
+            };
+
+            useEffect(() => {
+                return () => {
+                    if (updateTimeoutRef.current) {
+                        clearTimeout(updateTimeoutRef.current);
+                    }
+                };
+            }, []);
+
+            return (
+                <div className="container">
+                    <h2 className="title">Excel/CSV to JSON Converter</h2>
+                    <div className="actionBar">
+                        <div className="fileInputWrapper">
+                            <label htmlFor="fileInput" className="fileInputLabel">
+                                파일 선택
+                            </label>
+                            <input
+                                id="fileInput"
+                                type="file"
+                                accept=".xlsx,.xls,.csv"
+                                onChange={handleFileUpload}
+                                className="fileInput"
+                            />
+                        </div>
+                        {jsonData && (
+                            <div className="downloadButtons">
+                                <button onClick={handleDownload} className="button buttonDownload">
+                                    JSON 다운로드
+                                </button>
+                                <button onClick={handleDownloadToPath} className="button buttonDownloadPath">
+                                    다른 이름으로 저장
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                    {jsonData && (
+                        <div className="panels">
+                            <div className="panel editorPanel">
+                                <h3>컬럼 편집</h3>
+                                <div className="panelContent">
+                                    <DragDropContext onDragEnd={onDragEnd}>
+                                        <ColumnTree
+                                            columns={columns}
+                                            parentDroppableId="root"
+                                            onLabelChange={handleColumnLabelChange}
+                                        />
+                                    </DragDropContext>
+                                </div>
+                            </div>
+                            <div className="panel jsonPreview">
+                                <h3>JSON 미리보기</h3>
+                                <div className="panelContent">
+                                    <div className={`spinner-overlay ${isUpdating ? 'visible' : ''}`}>
+                                        <div className="spinner"></div>
+                                    </div>
+                                    <pre>{JSON.stringify(getOrderedJsonData(), null, 2)}</pre>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // App 컴포넌트
+        const App = () => {
+            return (
+                <div className="App">
+                    <ExcelToJson />
+                </div>
+            );
+        };
+
+        // 렌더링
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

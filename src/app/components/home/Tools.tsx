@@ -7,7 +7,7 @@ import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faRocket } from '@fortawesome/free-solid-svg-icons';
 
-const ToyProjects = () => {
+const tools = () => {
   const fadeIn = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 }
@@ -24,7 +24,7 @@ const ToyProjects = () => {
         '마케팅 최적화',
         '수익 분석 대시보드'
       ],
-      path: '/toyprojects/affili-smart',
+      path: '/tools/affili-smart',
       tag: '수익화',
       status: 'beta'
     },
@@ -38,7 +38,7 @@ const ToyProjects = () => {
         '목표 설정 및 추적',
         '생산성 분석'
       ],
-      path: '/toyprojects/time-block',
+      path: '/tools/time-block',
       tag: '생산성',
       status: 'alpha'
     },
@@ -52,7 +52,7 @@ const ToyProjects = () => {
         'SEO 최적화',
         '성과 분석'
       ],
-      path: '/toyprojects/blog-auto',
+      path: '/tools/blog-auto',
       tag: '자동화',
       status: 'development'
     }
@@ -120,7 +120,7 @@ const ToyProjects = () => {
   );
 };
 
-// 스타일 컴포넌트들을 pages/ToyProjects.js와 동일하게 수정
+// 스타일 컴포넌트들을 pages/tools.js와 동일하게 수정
 const PageContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
@@ -259,4 +259,4 @@ const TryButton = styled.div`
   }
 `;
 
-export default ToyProjects; 
+export default tools; 

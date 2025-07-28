@@ -24,27 +24,57 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
   const checkAuth = async () => {
     try {
-      const response = await fetch('/api/auth/check');
-      if (response.ok) {
-        const data = await response.json();
-        if (data.isLoggedIn) {
-          setUser(data.user);
-          
-          // 관리자 권한 체크 (선택사항)
-          if (data.user.role !== 'admin' && data.user.email !== 'master@growsome.kr') {
-            console.log('관리자 권한이 없습니다:', data.user);
-            // alert('관리자만 접근 가능합니다.');
-            // router.push('/');
-            // return;
-          }
-        } else {
-          router.push('/login?redirect_to=' + encodeURIComponent(pathname));
-        }
-      } else {
+      console.log('🔍 Admin 인증 체크 시작...', pathname);
+      
+      // 1. 기본 인증 체크
+      console.log('📡 기본 인증 API 호출...');
+      const authResponse = await fetch('/api/auth/check');
+      console.log('📡 Auth response status:', authResponse.status);
+      
+      if (!authResponse.ok) {
+        console.log('❌ 기본 인증 실패, 로그인 페이지로 이동');
         router.push('/login?redirect_to=' + encodeURIComponent(pathname));
+        return;
       }
+
+      const authData = await authResponse.json();
+      console.log('📊 Auth 데이터:', authData);
+      
+      if (!authData.isLoggedIn) {
+        console.log('❌ 로그인되지 않음, 로그인 페이지로 이동');
+        router.push('/login?redirect_to=' + encodeURIComponent(pathname));
+        return;
+      }
+
+      // 2. Admin 권한 체크
+      console.log('🛡️ Admin 권한 체크 시작...');
+      const adminResponse = await fetch('/api/auth/admin-check');
+      console.log('🛡️ Admin response status:', adminResponse.status);
+      
+      if (!adminResponse.ok) {
+        const adminData = await adminResponse.json();
+        console.log('❌ Admin 권한 체크 실패:', adminData.message);
+        alert('관리자만 접근 가능합니다.');
+        router.push('/');
+        return;
+      }
+
+      const adminData = await adminResponse.json();
+      console.log('📊 Admin 데이터:', adminData);
+      
+      if (!adminData.isAdmin) {
+        console.log('❌ Admin 권한 없음:', adminData.user);
+        alert('관리자만 접근 가능합니다.');
+        router.push('/');
+        return;
+      }
+
+      // 3. 모든 검증 통과
+      setUser(adminData.user);
+      console.log('✅ Admin 접근 승인:', adminData.user.email);
+
     } catch (error) {
-      console.error('인증 체크 오류:', error);
+      console.error('❌ 인증 체크 오류:', error);
       router.push('/login?redirect_to=' + encodeURIComponent(pathname));
     } finally {
       setIsLoading(false);
@@ -91,6 +121,12 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             <NavLink href="/admin/blog" $active={isActive('/admin/blog')}>
               <NavIcon>📝</NavIcon>
               블로그 관리
+            </NavLink>
+          </NavItem>
+          <NavItem>
+            <NavLink href="/admin/qa" $active={isActive('/admin/qa')}>
+              <NavIcon>📋</NavIcon>
+              QA 관리
             </NavLink>
           </NavItem>
           <NavItem>

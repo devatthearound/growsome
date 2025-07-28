@@ -111,7 +111,7 @@ const Solutions = () => {
               <SolutionDescription>
                 그로우썸은 AI 기반 비즈니스를 운영하는 사람들과 함께 성장할 수 있는 네트워크입니다. 함께 기여하고 협업하면서 가치를 나누는 구조를 만들어갑니다. 자신의 브랜드를 알리고, 실제 고객과 연결될 수 있는 기회를 찾고 있다면 함께하세요.
               </SolutionDescription>
-              {/*<LearnMoreButton as={Link} href="/toyprojects">
+              {/*<LearnMoreButton as={Link} href="/tools">
                 AI 협업 기회 살펴보기
               </LearnMoreButton>*/}
             </SolutionItem>

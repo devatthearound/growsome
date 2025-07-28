@@ -31,11 +31,10 @@ export async function GET(request: NextRequest) {
   }
 }
 
-
 /**
- * 현재 로그인한 사용자의 정보를 반환하는 API
+ * 구글 인증 코드를 토큰으로 교환하는 API
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   return withAuth(request, exchangeCodeForTokens);
 }
 

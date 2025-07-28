@@ -267,4 +267,31 @@ model UserCourseProgress {
   @@index([isCompleted], map: "idx_user_course_progress_completed")
 }
 
+// QA Issues 모델
+model QAIssue {
+  id              Int       @id @default(autoincrement())
+  issueNumber     String    @unique @map("issue_number") @db.VarChar(20)
+  url             String    @db.VarChar(500)
+  page            String?   @db.VarChar(255)
+  location        String    @db.VarChar(255)
+  category        String    @db.VarChar(20) // error, not_applied, request
+  description     String    @db.Text
+  status          String    @default("open") @db.VarChar(20) // open, in_progress, fixed, confirmed
+  priority        String    @default("P2") @db.VarChar(5) // P1, P2, P3
+  assignee        String?   @db.VarChar(100)
+  createdBy       String    @map("created_by") @db.VarChar(100)
+  screenshotUrl   String?   @map("screenshot_url") @db.VarChar(500)
+  
+  // 타임스탬프
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  @@map("qa_issues")
+  @@index([status], map: "idx_qa_issues_status")
+  @@index([category], map: "idx_qa_issues_category")
+  @@index([priority], map: "idx_qa_issues_priority")
+  @@index([assignee], map: "idx_qa_issues_assignee")
+  @@index([createdAt], map: "idx_qa_issues_created")
+}
+
 

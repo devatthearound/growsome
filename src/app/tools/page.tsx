@@ -259,7 +259,7 @@ interface Project {
   updated_at: string;
 }
 
-const ToyProjects = () => {
+const tools = () => {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -267,7 +267,7 @@ const ToyProjects = () => {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch('/api/toyprojects');
+        const response = await fetch('/api/tools');
         const data = await response.json();
         
         if (!data.success) {
@@ -354,4 +354,4 @@ const ToyProjects = () => {
   );
 };
 
-export default ToyProjects;
+export default tools;

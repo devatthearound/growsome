@@ -26,9 +26,9 @@ collections:
       - {label: "Image", name: "image", widget: "image"}
       - {label: "Tags", name: "tags", widget: "list", required: false}
 
-  - name: "toyprojects"
+  - name: "tools"
     label: "Toy Projects"
-    folder: "content/toyprojects"
+    folder: "content/tools"
     create: true
     fields:
       - {label: "Title", name: "title", widget: "string"}

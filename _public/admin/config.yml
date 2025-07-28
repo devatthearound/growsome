@@ -43,9 +43,9 @@ collections:
       - {label: "Technologies", name: "technologies", widget: "list"}
       - {label: "Body", name: "body", widget: "markdown"}
 
-  - name: "toyprojects"
+  - name: "tools"
     label: "Toy Projects"
-    folder: "content/toyprojects"
+    folder: "content/tools"
     create: true
     fields:
       - {label: "Title", name: "title", widget: "string"}

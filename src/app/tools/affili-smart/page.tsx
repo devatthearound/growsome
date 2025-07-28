@@ -391,7 +391,7 @@ const AffiliSmart = () => {
     <StyledContainer>
       <Navigation>
         <NavItem>
-          <NavLink href="/toyprojects">
+          <NavLink href="/tools">
             <FontAwesomeIcon icon={faArrowLeft} /> 돌아가기
           </NavLink>
         </NavItem>

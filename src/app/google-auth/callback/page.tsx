@@ -13,6 +13,8 @@ const GoogleAuthCallbackPage = () => {
         const code = urlParams.get('code');
         const state = urlParams.get('state');
         
+        console.log('구글 인증 콜백 처리:', { code: !!code, state });
+        
         if (!code) {
           throw new Error('인증 코드가 없습니다.');
         }
@@ -31,8 +33,18 @@ const GoogleAuthCallbackPage = () => {
         }
 
         setStatus('인증 성공! 리디렉션 중...');
-        window.location.href = `coupas-auth://google-auth/success`;
-        setStatus('인증이 완료되었습니다. 이 창은 닫으셔도 됩니다.');
+        
+        // Coupas 앱으로 리다이렉트 시도
+        try {
+          window.location.href = `coupas-auth://google-auth/success`;
+          
+          // 2초 후에도 페이지가 그대로라면 앱이 설치되지 않은 것
+          setTimeout(() => {
+            setStatus('인증이 완료되었습니다. Coupas 앱으로 돌아가서 확인해주세요.');
+          }, 2000);
+        } catch (error) {
+          setStatus('인증이 완료되었습니다. Coupas 앱으로 돌아가서 확인해주세요.');
+        }
       } catch (error) {
         setStatus(`인증 실패: ${error instanceof Error ? error.message : '알 수 없는 오류'}`);
       }
