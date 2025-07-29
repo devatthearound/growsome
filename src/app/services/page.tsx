@@ -35,6 +35,17 @@ const DiagnosisButton = styled(GreenButton)`
   }
 `;
 
+// 모바일 최적화된 진단 버튼
+const MobileDiagnosisButton = styled(DiagnosisButton)`
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 1rem !important;
+    padding: 1rem 1.5rem !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+`;
+
 // Services Page Component
 const Services = () => {
   const router = useRouter();
@@ -172,29 +183,29 @@ const Services = () => {
           <HeroBackground />
           <Container>
             <HeroContent>
-              <ColumnBox $gap={4} $ai="center">
-                <ColumnBox $gap={3} $ai="center">
-                  <HeroTitle>
-                    <Typography.DisplayXL700 color={growsomeTheme.color.White} style={{textAlign: 'center', lineHeight: '1.1'}}>
-                      <span style={{display: 'block', marginBottom: '1rem'}}>🚀 잘 만든 홈페이지 하나로</span>
-                      <GradientText>광고도, 데이터도 모두 10배 성장</GradientText>
-                    </Typography.DisplayXL700>
-                  </HeroTitle>
-                  
-                  <HeroSubtitle>
-                    <Typography.TextXL500 color={growsomeTheme.color.White} style={{textAlign: 'center', opacity: 0.9}}>
-                      AI 시대, 타겟별 맞춤형 비즈니스 성장 엔진
-                    </Typography.TextXL500>
-                    <Typography.TextL400 color={growsomeTheme.color.White} style={{textAlign: 'center', opacity: 0.8}}>
-                      예비 1인 창업가부터 100억 매출 기업까지 - 10배 성장 보장
-                    </Typography.TextL400>
-                  </HeroSubtitle>
-                </ColumnBox>
+            <ColumnBox $gap={4} $ai="center">
+            <ColumnBox $gap={3} $ai="center">
+            <HeroTitle>
+            <HeroMainTitle color={growsomeTheme.color.White}>
+            <span style={{display: 'block', marginBottom: '1rem'}}>🚀 잘 만든 홈페이지 하나로</span>
+            <GradientText>광고도, 데이터도 모두 10배 성장</GradientText>
+            </HeroMainTitle>
+            </HeroTitle>
+            
+            <HeroSubtitle>
+            <HeroSubText color={growsomeTheme.color.White} style={{textAlign: 'center', opacity: 0.9}}>
+            AI 시대, 타겟별 맞춤형 비즈니스 성장 엔진
+            </HeroSubText>
+            <HeroDescText color={growsomeTheme.color.White} style={{textAlign: 'center', opacity: 0.8}}>
+            예비 1인 창업가부터 100억 매출 기업까지 - 10배 성장 보장
+            </HeroDescText>
+            </HeroSubtitle>
+            </ColumnBox>
 
                 <CTAButtonsHero>
-                  <DiagnosisButton $size="large" onClick={handleFreeDiagnosisClick}>
+                  <MobileDiagnosisButton $size="large" onClick={handleFreeDiagnosisClick}>
                     💡 무료 10배 성장 진단 (5분 완료)
-                  </DiagnosisButton>
+                  </MobileDiagnosisButton>
 
                 </CTAButtonsHero>
 
@@ -223,7 +234,8 @@ const Services = () => {
 
         {/* Portfolio Section */}
         <PortfolioSection>
-          <Typography.DisplayL600 style={{textAlign:'center', marginBottom:'2rem', fontWeight: 700, color: growsomeTheme.color.Black800}}>우리가 만든 결과물</Typography.DisplayL600>
+          <Container>
+            <PortfolioTitle style={{textAlign:'center', marginBottom:'2rem', fontWeight: 700, color: growsomeTheme.color.Black800}}>우리가 만든 결과물</PortfolioTitle>
           <PortfolioGrid>
             {portfolioPreview.map((item) => (
               <Link key={item.id} href={`/portfolio/${item.id}`} style={{textDecoration: 'none'}}>
@@ -239,11 +251,12 @@ const Services = () => {
               </Link>
             ))}
           </PortfolioGrid>
-          <div style={{textAlign:'center', marginTop:'2rem'}}>
-            <Link href="/portfolio">
-              <SecondaryButton $color="customPurple" $size="medium">포트폴리오 전체보기</SecondaryButton>
-            </Link>
-          </div>
+            <div style={{textAlign:'center', marginTop:'2rem'}}>
+              <Link href="/portfolio">
+                <SecondaryButton $color="customPurple" $size="medium">포트폴리오 전체보기</SecondaryButton>
+              </Link>
+            </div>
+          </Container>
         </PortfolioSection>
 
         {/* Problems Section */}
@@ -251,9 +264,9 @@ const Services = () => {
           <Container>
             <ColumnBox $gap={4} $ai="center">
               <SectionHeader>
-                <Typography.DisplayL600 style={{textAlign: 'center', marginBottom: '2rem'}}>
-                  <span style={{color: growsomeTheme.color.Red500}}>⚠️</span> 아직도 이런 고민 하고 계신가요?
-                </Typography.DisplayL600>
+              <ProblemsTitle style={{textAlign: 'center', marginBottom: '2rem'}}>
+              <span style={{color: growsomeTheme.color.Red500}}>⚠️</span> 아직도 이런 고민 하고 계신가요?
+              </ProblemsTitle>
               </SectionHeader>
               
               <ProblemsGrid>
@@ -288,10 +301,10 @@ const Services = () => {
         <SolutionSection>
           <Container>
             <ColumnBox $gap={4} $ai="center">
-              <SectionBadge style={{justifyContent:'center', display:'flex', margin:'0 auto 1.5rem auto'}}>
-                <span style={{fontSize: '2.5rem'}}>✨</span>
-                <Typography.DisplayL700 style={{fontSize:'2.2rem', fontWeight:800, color: growsomeTheme.color.Black800, textAlign:'center', marginLeft:'0.5rem'}}>그로우썸 10배 성장 모델!</Typography.DisplayL700>
-              </SectionBadge>
+              <MobileSectionBadge style={{justifyContent:'center', display:'flex', margin:'0 auto 1.5rem auto'}}>
+              <BadgeIcon>✨</BadgeIcon>
+              <SolutionBadgeTitle style={{fontWeight:800, color: growsomeTheme.color.Black800, textAlign:'center', marginLeft:'0.5rem'}}>그로우썸 10배 성장 모델!</SolutionBadgeTitle>
+              </MobileSectionBadge>
               
               <SolutionsGrid>
                 {solutions.map((solution, index) => (
@@ -326,9 +339,9 @@ const Services = () => {
           <Container>
             <ColumnBox $ai="center" $gap={4}>
               <SectionTitleWrapper>
-                <Typography.DisplayL600 style={{textAlign: 'center'}}>
+                <TargetSectionTitle style={{textAlign: 'center'}}>
                   🎯 당신의 비즈니스 단계는?
-                </Typography.DisplayL600>
+                </TargetSectionTitle>
               </SectionTitleWrapper>
               
               <TargetGrid>
@@ -429,9 +442,9 @@ const Services = () => {
               </UrgencyCard> */}
 
               <CTAButtons>
-                <DiagnosisButton $size="large" onClick={handleFreeDiagnosisClick}>
-                  💡 지금 무료 진단 받기 (5분 완료)
-                </DiagnosisButton>
+              <MobileDiagnosisButton $size="large" onClick={handleFreeDiagnosisClick}>
+              💡 지금 무료 진단 받기 (5분 완료)
+              </MobileDiagnosisButton>
                 <Typography.TextS400 color={growsomeTheme.color.Black600} style={{textAlign: 'center'}}>
                   * 진단 결과는 24시간 내 개별 연락드립니다
                 </Typography.TextS400>
@@ -443,7 +456,7 @@ const Services = () => {
         {/* Final Message Section */}
         <FinalSection>
           <Container>
-            <Typography.DisplayM600 style={{
+            <FinalMessage style={{
               color: '#fff',
               textAlign: 'center',
               lineHeight: '1.7',
@@ -459,7 +472,7 @@ const Services = () => {
               당신은 AI와 스타트업 경험이 결합된<br />
               진짜 성장 엔진을 얻으세요.<br /><br />
               <span style={{color: '#22FF5F', fontWeight:700}}>선택은 당신의 몫입니다.<br />그로우썸은 준비되어 있습니다.</span>
-            </Typography.DisplayM600>
+            </FinalMessage>
           </Container>
         </FinalSection>
 
@@ -542,6 +555,42 @@ const HeroContent = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   text-align: center;
+  padding: 0 ${growsomeTheme.spacing.lg};
+  
+  @media ${growsomeTheme.device.mobile} {
+    padding: 0 ${growsomeTheme.spacing.md};
+  }
+`;
+
+// 모바일 최적화된 히어로 텍스트 컴포넌트들
+const HeroMainTitle = styled(Typography.DisplayXL700)`
+  text-align: center;
+  line-height: 1.1;
+  
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 2rem !important;
+    line-height: 1.2;
+  }
+  
+  @media ${growsomeTheme.device.tablet} {
+    font-size: 2.5rem !important;
+  }
+`;
+
+const HeroSubText = styled(Typography.TextXL500)`
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 1.1rem !important;
+  }
+  
+  @media ${growsomeTheme.device.tablet} {
+    font-size: 1.25rem !important;
+  }
+`;
+
+const HeroDescText = styled(Typography.TextL400)`
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 1rem !important;
+  }
 `;
 
 const HeroTitle = styled.div`
@@ -577,13 +626,19 @@ const CTAButtonsHero = styled.div`
 const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: ${growsomeTheme.spacing.lg};
+  gap: ${growsomeTheme.spacing.md};
   max-width: 600px;
   margin: 0 auto;
+  
+  @media ${growsomeTheme.device.mobile} {
+    gap: ${growsomeTheme.spacing.sm};
+    max-width: 100%;
+  }
   
   @media ${growsomeTheme.device.tablet} {
     grid-template-columns: repeat(4, 1fr);
     max-width: 800px;
+    gap: ${growsomeTheme.spacing.lg};
   }
   
   @media ${growsomeTheme.device.pc} {
@@ -598,6 +653,10 @@ const StatCard = styled.div`
   padding: ${growsomeTheme.spacing.xl};
   border-radius: ${growsomeTheme.radius.radius2};
   text-align: center;
+  
+  @media ${growsomeTheme.device.mobile} {
+    padding: ${growsomeTheme.spacing.lg};
+  }
 `;
 
 const StatNumber = styled.div`
@@ -605,16 +664,48 @@ const StatNumber = styled.div`
   font-weight: ${growsomeTheme.fontWeight.Bold};
   color: ${growsomeTheme.color.Green400};
   margin-bottom: ${growsomeTheme.spacing.sm};
+  
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 1.5rem;
+  }
 `;
 
 const StatLabel = styled.div`
   font-size: ${growsomeTheme.fontSize.TextS};
   opacity: 0.8;
+  
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 0.8rem;
+  }
 `;
 
 const ProblemsSection = styled.section`
   padding: ${growsomeTheme.spacing["4xl"]} 0;
   background: ${growsomeTheme.color.White};
+  
+  @media ${growsomeTheme.device.mobile} {
+    padding: ${growsomeTheme.spacing["2xl"]} 0;
+  }
+`;
+
+const ProblemsTitle = styled(Typography.DisplayL600)`
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 1.5rem !important;
+  }
+  
+  @media ${growsomeTheme.device.tablet} {
+    font-size: 2rem !important;
+  }
+`;
+
+const PortfolioTitle = styled(Typography.DisplayL600)`
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 1.5rem !important;
+  }
+  
+  @media ${growsomeTheme.device.tablet} {
+    font-size: 2rem !important;
+  }
 `;
 
 const SectionHeader = styled.div`
@@ -641,6 +732,15 @@ const ProblemCard = styled.div`
   box-shadow: ${growsomeTheme.shadow.Elevation1};
   border: 1px solid ${growsomeTheme.color.Gray200};
   text-align: left;
+  
+  @media ${growsomeTheme.device.mobile} {
+    padding: ${growsomeTheme.spacing.lg};
+    gap: ${growsomeTheme.spacing.md};
+    
+    .Typography.TextL400 {
+      font-size: 1rem !important;
+    }
+  }
 `;
 
 const ProblemIcon = styled.div`
@@ -677,6 +777,10 @@ const WarningIcon = styled.div`
 const SolutionSection = styled.section`
   padding: ${growsomeTheme.spacing["4xl"]} 0;
   background: ${growsomeTheme.color.Gray50};
+  
+  @media ${growsomeTheme.device.mobile} {
+    padding: ${growsomeTheme.spacing["2xl"]} 0;
+  }
 `;
 
 const SectionBadge = styled.div`
@@ -688,6 +792,40 @@ const SectionBadge = styled.div`
   padding: ${growsomeTheme.spacing.sm} ${growsomeTheme.spacing.lg};
   border-radius: ${growsomeTheme.radius.radius5};
   margin-bottom: ${growsomeTheme.spacing.xl};
+`;
+
+const SolutionBadgeTitle = styled(Typography.DisplayL700)`
+  font-size: 2.2rem;
+  
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 1.2rem !important;
+    line-height: 1.3;
+  }
+  
+  @media ${growsomeTheme.device.tablet} {
+    font-size: 1.8rem !important;
+  }
+`;
+
+const MobileSectionBadge = styled(SectionBadge)`
+  @media ${growsomeTheme.device.mobile} {
+    padding: ${growsomeTheme.spacing.md} ${growsomeTheme.spacing.lg};
+    flex-direction: row;
+    align-items: center;
+    gap: ${growsomeTheme.spacing.sm};
+    margin: 0 auto 1rem auto;
+    background: ${growsomeTheme.color.Primary50};
+    border: 1px solid ${growsomeTheme.color.Primary200};
+    border-radius: ${growsomeTheme.radius.radius3};
+  }
+`;
+
+const BadgeIcon = styled.span`
+  font-size: 2.5rem;
+  
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 1.8rem;
+  }
 `;
 
 const SolutionsGrid = styled.div`
@@ -719,12 +857,21 @@ const SolutionCard = styled.div`
     transform: translateY(-4px);
     box-shadow: ${growsomeTheme.shadow.Elevation2};
   }
+  
+  @media ${growsomeTheme.device.mobile} {
+    padding: ${growsomeTheme.spacing.lg};
+  }
 `;
 
 const SolutionIcon = styled.div`
   font-size: 3rem;
   margin-bottom: ${growsomeTheme.spacing.lg};
   animation: ${float} 3s ease-in-out infinite;
+  
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 2.5rem;
+    margin-bottom: ${growsomeTheme.spacing.md};
+  }
 `;
 
 const SolutionCTA = styled.div`
@@ -735,6 +882,20 @@ const SolutionCTA = styled.div`
 const TargetSection = styled.section`
   padding: ${growsomeTheme.spacing["4xl"]} 0;
   background: ${growsomeTheme.color.White};
+  
+  @media ${growsomeTheme.device.mobile} {
+    padding: ${growsomeTheme.spacing["2xl"]} 0;
+  }
+`;
+
+const TargetSectionTitle = styled(Typography.DisplayL600)`
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 1.5rem !important;
+  }
+  
+  @media ${growsomeTheme.device.tablet} {
+    font-size: 2rem !important;
+  }
 `;
 
 const SectionTitleWrapper = styled.div`
@@ -770,6 +931,11 @@ const TargetCard = styled(Card)`
   min-width: 0;
   max-width: 420px;
   margin: 0 auto;
+  
+  @media ${growsomeTheme.device.mobile} {
+    padding: 1rem;
+    gap: 0.8rem;
+  }
 `;
 const CardHeader = styled.div`
   display: flex;
@@ -788,6 +954,10 @@ const CardTitle = styled.div`
   font-size: 1.25rem;
   font-weight: 800;
   color: ${growsomeTheme.color.Black800};
+  
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 1.1rem;
+  }
 `;
 const FeaturesList = styled.ul`
   list-style: none;
@@ -799,6 +969,10 @@ const FeatureItem = styled.li`
   color: ${growsomeTheme.color.Black700};
   font-weight: 500;
   display: flex; align-items: flex-start; gap: 0.5rem;
+  
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 0.95rem;
+  }
 `;
 const FeatureCheck = styled.span`
   color: ${growsomeTheme.color.GreenSafe500};
@@ -811,16 +985,28 @@ const RoiHighlight = styled.div`
   color: ${growsomeTheme.color.Primary500};
   margin: 0.7rem 0 0.2rem 0;
   letter-spacing: -1px;
+  
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 1.6rem;
+  }
 `;
 const RoiSub = styled.div`
   font-size: 1.1rem;
   color: ${growsomeTheme.color.Black600};
   margin-bottom: 0.5rem;
+  
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 0.9rem;
+  }
 `;
 
 const DiagnosisSection = styled.section`
   padding: ${growsomeTheme.spacing["4xl"]} 0;
   background: ${growsomeTheme.color.Gray50};
+  
+  @media ${growsomeTheme.device.mobile} {
+    padding: ${growsomeTheme.spacing["2xl"]} 0;
+  }
 `;
 
 const SectionHeaderDiagnosis = styled.div`
@@ -856,6 +1042,13 @@ const FeatureCard = styled.div`
     transform: translateY(-2px);
     box-shadow: ${growsomeTheme.shadow.Elevation1};
   }
+  
+  @media ${growsomeTheme.device.mobile} {
+    padding: ${growsomeTheme.spacing.lg};
+    gap: ${growsomeTheme.spacing.md};
+    flex-direction: column;
+    text-align: center;
+  }
 `;
 
 const FeatureIcon = styled.div`
@@ -864,6 +1057,12 @@ const FeatureIcon = styled.div`
   padding: ${growsomeTheme.spacing.md};
   border-radius: ${growsomeTheme.radius.radius2};
   flex-shrink: 0;
+  
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 2rem;
+    padding: ${growsomeTheme.spacing.sm};
+    align-self: center;
+  }
 `;
 
 const FeatureContent = styled.div`
@@ -933,13 +1132,27 @@ const FinalSection = styled.section`
     bottom: 0;
     background: radial-gradient(circle at 50% 50%, rgba(81, 79, 228, 0.1) 0%, transparent 70%);
   }
+  
+  @media ${growsomeTheme.device.mobile} {
+    padding: ${growsomeTheme.spacing["2xl"]} 0;
+  }
 `;
 
-const FinalMessage = styled.div`
+const FinalMessage = styled(Typography.DisplayM600)`
   position: relative;
   z-index: 2;
   max-width: 800px;
   margin: 0 auto;
+  
+  @media ${growsomeTheme.device.mobile} {
+    font-size: 1.1rem !important;
+    line-height: 1.6;
+    padding: 0 ${growsomeTheme.spacing.md};
+  }
+  
+  @media ${growsomeTheme.device.tablet} {
+    font-size: 1.3rem !important;
+  }
 `;
 
 const MessageHighlight = styled.strong`
@@ -956,6 +1169,10 @@ const FinalCTA = styled.strong`
 const PortfolioSection = styled.section`
   background: ${growsomeTheme.color.Gray50};
   padding: 80px 0 100px 0;
+  
+  @media ${growsomeTheme.device.mobile} {
+    padding: 40px 0 60px 0;
+  }
 `;
 const PortfolioGrid = styled.div`
   display: grid;
@@ -963,6 +1180,12 @@ const PortfolioGrid = styled.div`
   gap: 2rem;
   max-width: 1200px;
   margin: 0 auto;
+  
+  @media ${growsomeTheme.device.mobile} {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 0 ${growsomeTheme.spacing.md};
+  }
 `;
 const PortfolioCard = styled.div`
   background: #fff;
@@ -989,6 +1212,10 @@ const PortfolioInfo = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+  
+  @media ${growsomeTheme.device.mobile} {
+    padding: 1.5rem 1rem 1rem 1rem;
+  }
 `;
 
 // styled-components for FOMO modal - 브라우저 하단 고정, 딤드 없음
