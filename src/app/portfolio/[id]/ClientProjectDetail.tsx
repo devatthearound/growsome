@@ -19,9 +19,7 @@ export default function ClientProjectDetail({ project }: ProjectDetailProps) {
 
     return (
         <ProjectDetailPage>
-            <Hero
-                bgColor={project.bgColor || '#514FE4'}
-            >
+            <Hero $bgColor={project.bgColor || '#514FE4'}>
                 <HeroContent>
                     <ProjectTitle>{project.title}</ProjectTitle>
                     <ProjectDescription>{project.description}</ProjectDescription>
@@ -42,17 +40,16 @@ export default function ClientProjectDetail({ project }: ProjectDetailProps) {
                 </HeroContent>
             </Hero>
 
-            <MainImageWrapper bgColor={project.imageBgColor || '#FFFFFF'}>
+            <MainImageWrapper $bgColor={project.imageBgColor || '#FFFFFF'}>
                 {project.images && project.images.length > 0 ? (
                     project.images.map((image: string, index: number) => (
                         <Image 
                             key={index}
                             src={image}
                             alt={`${project.title} image ${index + 1}`}
-                            layout="responsive"
                             width={1600}
                             height={1000}
-                            style={{ objectFit: 'cover' }}
+                            style={{ objectFit: 'cover', width: '100%', height: 'auto' }}
                             priority
                         />
                     ))
@@ -97,8 +94,6 @@ export default function ClientProjectDetail({ project }: ProjectDetailProps) {
                 </ProjectLink>
             )}
             </ContentSection>
-
-
         </ProjectDetailPage>
     );
 }
@@ -107,8 +102,9 @@ const ProjectDetailPage = styled.div`
     background: #f8f9fa;
 `;
 
-const Hero = styled.div<{ bgColor: string }>`
-    background: ${({ bgColor }) => bgColor};
+// bgColor를 $bgColor로 변경하여 transient prop으로 만들기
+const Hero = styled.div<{ $bgColor: string }>`
+    background: ${({ $bgColor }) => $bgColor};
     color: white;
     padding: 120px 0 60px;
 `;
@@ -149,7 +145,8 @@ const MetaValue = styled.div`
     font-weight: 500;
 `;
 
-const MainImageWrapper = styled.div<{ bgColor: string }>`
+// bgColor를 $bgColor로 변경하여 transient prop으로 만들기
+const MainImageWrapper = styled.div<{ $bgColor: string }>`
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -158,7 +155,7 @@ const MainImageWrapper = styled.div<{ bgColor: string }>`
     height: auto;
     position: relative;
     margin: 0 auto;
-    background-color: ${({ bgColor }) => bgColor};
+    background-color: ${({ $bgColor }) => $bgColor};
 `;
 
 const ContentSection = styled.div`
@@ -201,9 +198,9 @@ const FeatureIcon = styled.div`
 `;
 
 const FeatureTitle = styled.h3`
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     font-weight: 600;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 `;
 
 const FeatureDescription = styled.p`
@@ -211,34 +208,18 @@ const FeatureDescription = styled.p`
     line-height: 1.6;
 `;
 
-const ImageGallery = styled.div`
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 2rem;
-    margin-top: 3rem;
-`;
-
-const GalleryImageWrapper = styled.div`
-    position: relative;
-    width: 100%;
-    height: 300px;
-    border-radius: 8px;
-    overflow: hidden;
-`;
-
 const ProjectLink = styled.a`
     display: inline-block;
-    margin-top: 2rem;
-    padding: 1rem 2rem;
     background: #514FE4;
     color: white;
+    padding: 1rem 2rem;
+    border-radius: 10px;
     text-decoration: none;
-    border-radius: 8px;
-    font-weight: 500;
-    transition: all 0.3s ease;
+    font-weight: 600;
+    margin-top: 2rem;
+    transition: background 0.3s ease;
 
     &:hover {
-        background: #4340c0;
-        transform: translateY(-2px);
+        background: #3f3d9e;
     }
 `; 

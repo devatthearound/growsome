@@ -3,7 +3,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import styled, { keyframes, createGlobalStyle } from 'styled-components';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCheck, faRocket, faClock, faUsers, faLightbulb, faChartLine, faComments, faFileAlt, faPlay, faLock } from '@fortawesome/free-solid-svg-icons';
+import { faCheck, faRocket, faClock, faUsers, faLightbulb, faChartLine, faComments, faFileAlt, faPlay, faLock, faTrophy } from '@fortawesome/free-solid-svg-icons';
 import { motion } from 'framer-motion';
 import { Check, X, TrendingUp, CheckCircle, Clock, AlertTriangle, ArrowRight, Smile, Frown, HelpCircle, Wallet, Users, FileCheck, Rocket } from 'lucide-react';
 import Link from 'next/link';
@@ -527,42 +527,6 @@ const SaleBadge = styled.span`
   display: inline-block;
 `;
 
-const Hero = () => (
-  <HeroContainer>
-    <CanvasContainer>
-      {/* Canvas content */}
-    </CanvasContainer>
-    <HeroContent>
-      <SaleBadge>2차 특가 진행중</SaleBadge>
-      <Title
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-      >
-        <span>Growsome</span><br />AI 사업계획서 작성<br />완성 솔루션
-      </Title>
-      <Subtitle
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-      >
-        사업전략 전문가와 AI가 함께하는<br />2주 완성 사업계획서 + MVP 패키지
-      </Subtitle>
-      <Link href="/courses" passHref>
-        <HeroButton
-          as="button"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
-          onClick={() => {}}
-        >
-          사업계획서 작성 패키지 시작하기
-          <ArrowRight size={20} />
-        </HeroButton>
-      </Link>
-    </HeroContent>
-  </HeroContainer>
-);
 
 const StatsSection = styled.section`
   padding: 60px 0;
@@ -1932,6 +1896,281 @@ const FinalCTAButton = styled(HeroButton).withConfig({
   }
 `;
 
+// Class Section Components
+const ClassSection = styled.section`
+  padding: 80px 0;
+  background: #FAFAFA;
+`;
+
+const ClassContainer = styled.div`
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+`;
+
+const ClassTitle = styled.h2`
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 20px;
+  color: ${colors.primary};
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+`;
+
+const ClassDescription = styled.p`
+  font-size: 1.1rem;
+  text-align: center;
+  margin-bottom: 50px;
+  color: ${colors.text.secondary};
+  line-height: 1.6;
+`;
+
+const CourseGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
+  margin-top: 40px;
+`;
+
+const CourseCard = styled.div`
+  background: white;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  border: 1px solid #f0f0f0;
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+  }
+`;
+
+const CourseHeader = styled.div`
+  margin-bottom: 20px;
+`;
+
+const ClassCourseTitle = styled.h3`
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: ${colors.primary};
+`;
+
+const ClassCourseDescription = styled.p`
+  font-size: 0.95rem;
+  color: ${colors.text.secondary};
+  line-height: 1.5;
+  margin-bottom: 15px;
+`;
+
+const CourseMeta = styled.div`
+  display: flex;
+  gap: 15px;
+  margin-bottom: 20px;
+`;
+
+const MetaItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.9rem;
+  color: ${colors.text.secondary};
+`;
+
+const PriceSection = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
+const ClassPrice = styled.div`
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: ${colors.accent};
+`;
+
+const ClassOriginalPrice = styled.div`
+  font-size: 1rem;
+  color: ${colors.text.secondary};
+  text-decoration: line-through;
+  margin-bottom: 5px;
+`;
+
+const ClassDiscountBadge = styled.span`
+  background: #FF6B6B;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+`;
+
+const ClassCourseButton = styled.button`
+  background: ${colors.gradient.accent};
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(92, 89, 232, 0.3);
+  }
+`;
+
+const ClassFeatureList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 20px 0;
+`;
+
+const ClassFeatureItem = styled.li`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: ${colors.text.secondary};
+`;
+
+const ClassCheckIcon = styled.span`
+  color: #4CAF50;
+  font-size: 0.8rem;
+`;
+
+const Class = () => {
+  const courses = [
+    {
+      id: 1,
+      title: "AI 기초 마스터 과정",
+      description: "ChatGPT와 AI 도구 활용의 기초부터 실전까지",
+      level: "입문",
+      duration: "4주",
+      price: "99,000원",
+      originalPrice: "198,000원",
+      color: "#3B82F6",
+      features: [
+        "실습 자료 제공",
+        "수료증 발급",
+        "커뮤니티 접근 권한",
+        "1:1 질문 답변",
+        "5만원 상당 유료 AI 프로그램 무료 제공"
+      ]
+    },
+    {
+      id: 2,
+      title: "AI 프롬프트 엔지니어링 심화",
+      description: "고급 프롬프트 작성법과 AI 모델 자동화 실전",
+      level: "중급",
+      duration: "6주",
+      price: "890,000원",
+      originalPrice: "1,500,000원",
+      color: "#F59E0B",
+      features: [
+        "실전 프로젝트 피드백",
+        "고급 실습 자료",
+        "전문가 멘토링",
+        "프로젝트 리뷰",
+        "80만원 상당 유료 AI 프로그램 무료 제공"
+      ]
+    },
+    {
+      id: 3,
+      title: "AI 비즈니스 전략 과정",
+      description: "AI를 활용한 BM 설계부터 투자·매각 전략까지",
+      level: "고급",
+      duration: "8주",
+      price: "2,490,000원",
+      originalPrice: "3,500,000원",
+      color: "#EF4444",
+      features: [
+        "AI 기반 BM 설계 워크숍",
+        "투자 유치 전략 및 피칭 시뮬레이션",
+        "실전 사례 분석",
+        "네트워킹 이벤트",
+        "600만원 상당 유료 AI 개발 무료 제공"
+      ]
+    }
+  ];
+
+  return (
+    <ClassSection>
+      <ClassContainer>
+        <ClassTitle>AI 사업 교육 과정</ClassTitle>
+        <ClassDescription>
+          100만 원 상당 유료 AI 툴까지 무료 제공!<br />
+          단 1만 원 강의 결제로 시작하는<br />
+          체계적이고 실전 중심의 AI 비즈니스 교육<br /><br />
+          기초 → 개발 → 사업화까지<br />
+          단계별 커리큘럼으로<br />
+          당신의 AI 실행력과 수익화 역량을 완성하세요.
+        </ClassDescription>
+        
+        <CourseGrid>
+          {courses.map(course => (
+            <CourseCard key={course.id}>
+              <CourseHeader>
+                <div style={{ 
+                  width: '20px', 
+                  height: '20px', 
+                  backgroundColor: course.color, 
+                  borderRadius: '50%', 
+                  marginBottom: '10px' 
+                }}></div>
+                <ClassCourseTitle>{course.title}</ClassCourseTitle>
+                <ClassCourseDescription>{course.description}</ClassCourseDescription>
+                <CourseMeta>
+                  <MetaItem>
+                    <FontAwesomeIcon icon={faUsers} />
+                    난이도: {course.level}
+                  </MetaItem>
+                  <MetaItem>
+                    <FontAwesomeIcon icon={faClock} />
+                    기간: {course.duration}
+                  </MetaItem>
+                </CourseMeta>
+              </CourseHeader>
+              
+              <PriceSection>
+                <div>
+                  <ClassOriginalPrice>정가: {course.originalPrice}</ClassOriginalPrice>
+                  <ClassPrice>할인가: {course.price}</ClassPrice>
+                </div>
+              </PriceSection>
+              
+              <div style={{ marginBottom: '20px' }}>
+                <h4 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '10px' }}>📦 포함 혜택</h4>
+                <ClassFeatureList>
+                  {course.features.map((feature, index) => (
+                    <ClassFeatureItem key={index}>
+                      <ClassCheckIcon>
+                        <FontAwesomeIcon icon={faCheck} />
+                      </ClassCheckIcon>
+                      {feature}
+                    </ClassFeatureItem>
+                  ))}
+                </ClassFeatureList>
+              </div>
+              
+              <ClassCourseButton style={{ backgroundColor: course.color }}>
+                수강 신청하기
+              </ClassCourseButton>
+            </CourseCard>
+          ))}
+        </CourseGrid>
+      </ClassContainer>
+    </ClassSection>
+  );
+};
+
 const FinalCTA = () => (
   <FinalCTASection>
     <FinalCTATitle>
@@ -1946,7 +2185,7 @@ const FinalCTA = () => (
         transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
         onClick={() => {}}
       >
-        사업계획서 작성 패키지 시작하기
+        1만원 사업계획서 작성 패키지 시작하기
         <ArrowRight size={20} />
       </FinalCTAButton>
     </Link>
@@ -1988,15 +2227,15 @@ const ProductLanding = () => {
   return (
     <ProductPage>
       <GlobalStyleWrapper />
-      <Hero />
       <PainPoints />
       <Hook />
       <CoursePreviewTable />
-      <WhyGrowsome />
+      <Class />
+{/*   <WhyGrowsome />
       <Timeline />
       <PostPurchase />
-      <Coupon />
-      <PriceIncrease />
+       <Coupon />
+      <PriceIncrease />*/}
       <FinalCTA />
     </ProductPage>
   );

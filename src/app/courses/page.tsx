@@ -106,9 +106,25 @@ const CoursesPage = () => {
       const data = await response.json();
       
       if (data.success && data.courses.length > 0) {
-        setCourses(data.courses);
-        setSelectedCourse(data.courses[0]);
+        // API에서 받은 데이터를 Course 인터페이스에 맞게 변환
+        const formattedCourses: Course[] = data.courses.map((course: any) => ({
+          id: course.id,
+          title: course.title,
+          slug: course.slug,
+          description: course.description,
+          vimeoId: course.vimeoId,
+          vimeoUrl: course.vimeoUrl,
+          thumbnailUrl: course.thumbnailUrl,
+          duration: course.duration,
+          level: course.level,
+          isPublic: course.isPublic,
+          isPremium: course.isPremium
+        }));
+        
+        setCourses(formattedCourses);
+        setSelectedCourse(formattedCourses[0]);
       } else {
+        console.log('API에서 강의 데이터를 가져올 수 없습니다. 테스트 데이터를 사용합니다.');
         const testCourses: Course[] = [
           {
             id: 1,
@@ -142,6 +158,37 @@ const CoursesPage = () => {
       }
     } catch (error) {
       console.error('강의 데이터 로드 오류:', error);
+      // 에러 발생 시에도 테스트 데이터 사용
+      const testCourses: Course[] = [
+        {
+          id: 1,
+          title: '1강 흑수저 - AI 사업계획서 기초',
+          slug: '1-black-spoon',
+          description: 'AI 사업계획서 작성의 첫 번째 강의입니다. 기본 개념과 시작 방법을 배웁니다.',
+          vimeoId: '1027151927',
+          vimeoUrl: 'https://player.vimeo.com/video/1027151927?badge=0&autopause=0&player_id=0&app_id=58479',
+          thumbnailUrl: '',
+          duration: 1800,
+          level: '초급',
+          isPublic: true,
+          isPremium: true
+        },
+        {
+          id: 2,
+          title: '2강 시장 분석 및 경쟁사 리서치',
+          slug: '2-market-analysis',
+          description: 'AI를 활용한 체계적인 시장 분석 방법론을 학습합니다.',
+          vimeoId: '1027151928',
+          vimeoUrl: 'https://player.vimeo.com/video/1027151928',
+          thumbnailUrl: '',
+          duration: 2100,
+          level: '중급',
+          isPublic: false,
+          isPremium: true
+        }
+      ];
+      setCourses(testCourses);
+      setSelectedCourse(testCourses[0]);
     } finally {
       setLoading(false);
     }
@@ -344,7 +391,7 @@ const CoursesPage = () => {
                     </LockedCourseMessage>
                     <PrimaryButton $size="medium" onClick={() => handleLockedCourseClick(courses[1])}>
                       <Zap size={16} />
-                      지금 결제하고 모든 강의 시청하기
+                      지금 1만원 결제하고 모든 강의 시청하기
                     </PrimaryButton>
                   </LockedCourseCTA>
                 )}
@@ -358,7 +405,7 @@ const CoursesPage = () => {
                     </LockedCourseMessage>
                     <PrimaryButton $size="medium" onClick={() => handleLockedCourseClick(selectedCourse)}>
                       <Zap size={16} />
-                      지금 결제하고 모든 강의 시청하기
+                      지금 1만원 결제하고 모든 강의 시청하기
                     </PrimaryButton>
                   </LockedCourseCTA>
                 )}

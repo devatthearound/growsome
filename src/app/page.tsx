@@ -6,6 +6,8 @@ import Hero from './components/home/Hero';
 import Partner from './components/home/Partner';
 import Letters from './components/home/Letters';
 import Solutions from './components/home/Solutions';
+import Tools from './components/home/Tools';
+import Portfolio from './components/home/Portfolio';
 import Newsletters from './components/home/Newsletters';
 import Blog from './components/home/Blog';
 import JoinUs from './components/home/JoinUs';
@@ -17,7 +19,8 @@ const Home = () => {
       <Partner />
       <Letters />
       <Solutions />
-      <Blog />
+      <Tools />
+      <Portfolio />
       {/*<Newsletters />*/}
       <JoinUs />
     </HomeContainer>

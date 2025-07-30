@@ -178,7 +178,7 @@ const Class = () => {
 
   return (
     <ClassPage>
-      <HeroSection>
+{/*      <HeroSection>
         <HeroContent>
           <HeroTitle>
             <strong>실전 AI 사업가</strong>가 알려주는<br />
@@ -219,7 +219,7 @@ const Class = () => {
             </Badge>
           </HeroBadges>
         </HeroContent>
-      </HeroSection>
+      </HeroSection>*/}
 
       <EarlyBirdBanner>
         <Container>

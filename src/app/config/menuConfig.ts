@@ -8,9 +8,10 @@ export const ACTIVE_MENUS = {
     '/signup',
     '/mypage',
     '/payment',
-    '/consulting'
+    '/consulting',
+    '/doasome'  // 두어썸 페이지 추가
   ],  // 개발환경: 모든 메뉴 + 명시적 경로 추가
-  production: ['/services', '/store'],  // 프로덕션: 특정 메뉴만 활성화
+  production: ['/services', '/store', '/doasome'],  // 프로덕션: 두어썸 페이지 추가
   // 기본값 추가
   default: []
 }; 

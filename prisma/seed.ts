@@ -7,16 +7,18 @@ async function main() {
   console.log('데이터베이스 시드 시작...')
 
   try {
-    // 기존 데이터 정리 (순서 중요: 외래키 제약조건 때문)
-    await prisma.blog_content_tags.deleteMany()
-    await prisma.blog_likes.deleteMany()
-    await prisma.blog_comments.deleteMany()
-    await prisma.blog_contents.deleteMany()
-    await prisma.blog_categories.deleteMany()
-    await prisma.blog_tags.deleteMany()
-    await prisma.user.deleteMany()
+    // 기존 데이터가 있는지 확인
+    const existingContents = await prisma.blog_contents.count()
+    const existingUsers = await prisma.user.count()
+    
+    if (existingContents > 0 || existingUsers > 0) {
+      console.log('기존 데이터가 존재합니다. 데이터를 보존합니다.')
+      console.log(`- 기존 블로그 컨텐츠: ${existingContents}개`)
+      console.log(`- 기존 사용자: ${existingUsers}명`)
+      return
+    }
 
-    console.log('기존 데이터 정리 완료')
+    console.log('새로운 데이터 생성 시작...')
 
     // 사용자 생성
     const user1 = await prisma.user.create({
@@ -157,7 +159,7 @@ npm run dev
 Next.js는 React 개발자들에게 강력한 도구를 제공하며, 모던 웹 개발의 표준이 되어가고 있습니다.`,
         author_id: user1.id,
         category_id: categories[0].id,
-        // status 필드 생략 - 기본값 "DRAFT" 사용됨
+        status: 'PUBLISHED',
         is_featured: true,
         is_hero: false,
         meta_title: 'Next.js로 시작하는 현대적인 웹 개발',
@@ -194,6 +196,7 @@ Next.js는 React 개발자들에게 강력한 도구를 제공하며, 모던 웹
 확장 가능한 아키텍처는 점진적으로 개선해 나가는 것이 중요합니다.`,
         author_id: user1.id,
         category_id: categories[0].id,
+        status: 'PUBLISHED',
         is_featured: true,
         is_hero: true,
         meta_title: '확장 가능한 애플리케이션 아키텍처 설계 가이드',
@@ -227,6 +230,7 @@ Next.js는 React 개발자들에게 강력한 도구를 제공하며, 모던 웹
 좋은 UX 디자인은 사용자의 니즈를 깊이 이해하는 것에서 시작됩니다.`,
         author_id: user2.id,
         category_id: categories[2].id,
+        status: 'PUBLISHED',
         is_featured: false,
         is_hero: false,
         meta_title: 'UX 디자인 원칙: 사용자 경험 향상 가이드',

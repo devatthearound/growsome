@@ -1,262 +1,271 @@
-'use client'
+'use client';
 
 import React from 'react';
 import styled from 'styled-components';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faRocket } from '@fortawesome/free-solid-svg-icons';
+import { faRocket, faChartLine, faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import Link from 'next/link';
 
-const tools = () => {
-  const fadeIn = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
-  };
-
-  const projects = [
+const Tools = () => {
+  const tools = [
     {
-      id: 'affili-smart',
-      title: '🎥 AffiliSmart',
-      description: '클릭 한 번으로 매력적인 상품 홍보 영상을 자동으로 생성하세요. AI가 당신의 마케팅을 더 스마트하게 만들어줍니다.',
+      id: 'affiliate',
+      title: "제휴자동화",
+      subtitle: "Affiliate Automation",
+      description: "쿠팡 파트너스 API를 활용한 자동화된 제휴 마케팅 솔루션",
       features: [
-        '상품 자동 검색',
-        '영상 자동 생성',
-        '마케팅 최적화',
-        '수익 분석 대시보드'
+        "쿠팡 파트너스 API 자동 연동",
+        "상품 검색 및 영상 자동 생성",
+        "유튜브 자동 업로드",
+        "템플릿 기반 영상 제작"
       ],
-      path: '/tools/affili-smart',
-      tag: '수익화',
-      status: 'beta'
+      color: "#514FE4",
+      icon: <FontAwesomeIcon icon={faRocket} />,
+      link: "/affil"
     },
     {
-      id: 'time-block',
-      title: '⏰ 타임블록',
-      description: '시간을 블록처럼 쌓아가세요. 하루 24시간이 더 가치있게 변화합니다.',
+      id: 'funnel',
+      title: "퍼널자동화",
+      subtitle: "Funnel Automation", 
+      description: "AI 기반 퍼널 자동화로 리드 생성부터 전환까지 완벽 자동화",
       features: [
-        '블록 단위 시간 관리',
-        '일정 자동 조정',
-        '목표 설정 및 추적',
-        '생산성 분석'
+        "AI 기반 퍼널 설계",
+        "자동 리드 생성",
+        "스마트 전환 최적화",
+        "실시간 퍼널 분석"
       ],
-      path: '/tools/time-block',
-      tag: '생산성',
-      status: 'alpha'
-    },
-    {
-      id: 'blog-auto',
-      title: '✍️ 블로그 오토파일럿',
-      description: 'AI가 당신의 블로그를 24시간 운영합니다. 잠자는 동안에도 성장하는 블로그를 경험하세요.',
-      features: [
-        'AI 컨텐츠 생성',
-        '자동 발행 스케줄링',
-        'SEO 최적화',
-        '성과 분석'
-      ],
-      path: '/tools/blog-auto',
-      tag: '자동화',
-      status: 'development'
+      color: "#667eea",
+      icon: <FontAwesomeIcon icon={faChartLine} />,
+      link: "/funnel"
     }
   ];
 
   return (
-    <PageContainer>
-      <PageHeader
-        as={motion.div}
-        initial="hidden"
-        animate="visible"
-        variants={fadeIn}
-      >
-        <Title>AI 자동화 연구소</Title>
-        <SubTitle>쿠팡파트너스를 시작으로 제휴 마케팅 & 마케팅 성과 자동화!</SubTitle>
-        <Description>
-          "제휴 마케팅을 자동화하면? 마케팅 성과를 극대화하면?"
-          <br />
-          우리가 먼저 만들어보았습니다.
-          <br />
-          당신의 비즈니스 성장을 극대화할 AI 프로젝트를 만나보세요.
-        </Description>
-      </PageHeader>
+    <ToolsSection>
+      <Container>
+        <SectionHeader>
+          <Title>
+            Growsome <Accent>Tools</Accent>
+          </Title>
+          <Subtitle>
+            AI 기반 자동화 도구로 비즈니스 성장을 가속화하세요
+          </Subtitle>
+          <Description>
+            제휴마케팅부터 퍼널 자동화까지, 모든 것을 한 곳에서
+          </Description>
+        </SectionHeader>
 
-      <ProjectGrid>
-        {projects.map((project) => (
-          <ProjectCard
-            key={project.id}
-            as={motion.div}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            variants={fadeIn}
-            transition={{ duration: 0.5 }}
-          >
-            <Link href={project.path} style={{ textDecoration: 'none', color: 'inherit' }}>
-              <ProjectContent>
-                <ProjectTag>{project.tag}</ProjectTag>
-                <ProjectHeader>
-                  <ProjectTitle>{project.title}</ProjectTitle>
-                  <StatusBadge status={project.status}>
-                    {project.status === 'beta' && 'Beta'}
-                    {project.status === 'alpha' && 'Alpha'}
-                    {project.status === 'development' && '개발중'}
-                  </StatusBadge>
-                </ProjectHeader>
-                <ProjectDescription>{project.description}</ProjectDescription>
-                <FeatureList>
-                  {project.features.map((feature, index) => (
-                    <FeatureItem key={index}>
-                      <FeatureIcon>✓</FeatureIcon>
-                      {feature}
-                    </FeatureItem>
-                  ))}
-                </FeatureList>
-                <TryButton>
-                  지금 시작하기 <FontAwesomeIcon icon={faRocket} />
-                </TryButton>
-              </ProjectContent>
-            </Link>
-          </ProjectCard>
-        ))}
-      </ProjectGrid>
-    </PageContainer>
+        <ToolsGrid>
+          {tools.map((tool) => (
+            <ToolCard key={tool.id} color={tool.color}>
+              <ToolHeader>
+                <ToolIcon color={tool.color}>
+                  {tool.icon}
+                </ToolIcon>
+                <ToolSubtitle>{tool.subtitle}</ToolSubtitle>
+              </ToolHeader>
+              
+              <ToolTitle>{tool.title}</ToolTitle>
+              <ToolDescription>{tool.description}</ToolDescription>
+              
+              <ToolFeatures>
+                {tool.features.map((feature, index) => (
+                  <FeatureItem key={index}>
+                    <FeatureDot color={tool.color} />
+                    {feature}
+                  </FeatureItem>
+                ))}
+              </ToolFeatures>
+              
+              <ToolLink href={tool.link}>
+                자세히 보기
+                <FontAwesomeIcon icon={faArrowRight} />
+              </ToolLink>
+            </ToolCard>
+          ))}
+        </ToolsGrid>
+
+
+      </Container>
+    </ToolsSection>
   );
 };
 
-// 스타일 컴포넌트들을 pages/tools.js와 동일하게 수정
-const PageContainer = styled.div`
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 40px 20px;
+const ToolsSection = styled.section`
+  padding: 80px 0;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
 `;
 
-const PageHeader = styled.div`
+const Container = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+`;
+
+const SectionHeader = styled.div`
   text-align: center;
   margin-bottom: 60px;
 `;
 
-const Title = styled.h1`
-  font-size: 2.5rem;
-  margin-bottom: 20px;
-`;
-
-const SubTitle = styled.h2`
-  font-size: 1.5rem;
-  color: #514FE4;
-  margin-bottom: 20px;
-`;
-
-const Description = styled.p`
-  font-size: 1.2rem;
-  color: #666;
-  max-width: 800px;
-  margin: 0 auto;
-  line-height: 1.8;
-  text-align: center;
-`;
-
-const ProjectGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 30px;
-`;
-
-const ProjectCard = styled(motion.div)`
-  background: white;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  transition: transform 0.3s ease;
-
-  &:hover {
-    transform: translateY(-5px);
+const Title = styled.h2`
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #1a202c;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
   }
 `;
 
-const ProjectContent = styled.div`
-  padding: 20px;
+const Accent = styled.span`
+  color: #514FE4;
 `;
 
-const ProjectHeader = styled.div`
+const Subtitle = styled.h3`
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #2d3748;
+  
+  @media (max-width: 768px) {
+    font-size: 1.25rem;
+  }
+`;
+
+const Description = styled.p`
+  font-size: 1.1rem;
+  color: #718096;
+  max-width: 600px;
+  margin: 0 auto;
+`;
+
+const ToolsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 30px;
+  margin-bottom: 60px;
+  
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const ToolCard = styled.div<{ color: string }>`
+  background: white;
+  border-radius: 20px;
+  padding: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+  
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    border-color: ${props => props.color}20;
+  }
+`;
+
+const ToolHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-`;
-
-const ProjectTitle = styled.h3`
-  font-size: 1.2rem;
-  color: #514FE4;
-  margin-bottom: 10px;
-`;
-
-const ProjectTag = styled.span`
-  display: inline-block;
-  padding: 4px 12px;
-  background: #f3f0ff;
-  color: #514FE4;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  margin-bottom: 12px;
-`;
-
-const StatusBadge = styled.span<{ status: string }>`
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  background: ${props => {
-    switch (props.status) {
-      case 'beta': return '#e3f2fd';
-      case 'alpha': return '#f3e5f5';
-      case 'development': return '#f5f5f5';
-      default: return '#f5f5f5';
-    }
-  }};
-  color: ${props => {
-    switch (props.status) {
-      case 'beta': return '#1976d2';
-      case 'alpha': return '#9c27b0';
-      case 'development': return '#666';
-      default: return '#666';
-    }
-  }};
-`;
-
-const ProjectDescription = styled.p`
-  color: #666;
-  font-size: 0.9rem;
   margin-bottom: 20px;
+`;
+
+const ToolIcon = styled.div<{ color: string }>`
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: ${props => props.color};
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+`;
+
+const ToolSubtitle = styled.div`
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const ToolTitle = styled.h3`
+  font-size: 1.8rem;
+  font-weight: 700;
+  margin-bottom: 15px;
+  color: #1a202c;
+`;
+
+const ToolDescription = styled.p`
+  font-size: 1rem;
+  color: #4a5568;
+  margin-bottom: 25px;
   line-height: 1.6;
 `;
 
-const FeatureList = styled.ul`
+const ToolFeatures = styled.ul`
   list-style: none;
-  padding: 0;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
 `;
 
 const FeatureItem = styled.li`
   display: flex;
   align-items: center;
-  margin-bottom: 8px;
-  color: #444;
-  font-size: 0.9rem;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  color: #4a5568;
 `;
 
-const FeatureIcon = styled.span`
+const FeatureDot = styled.div<{ color: string }>`
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: ${props => props.color};
+  margin-right: 12px;
+  flex-shrink: 0;
+`;
+
+const ToolLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   color: #514FE4;
-  margin-right: 8px;
-`;
-
-const TryButton = styled.div`
-  background: #514FE4;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 6px;
-  text-align: center;
-  font-weight: 500;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
   
   &:hover {
-    background: #4340c0;
+    gap: 12px;
   }
 `;
 
-export default tools; 
+const CTASection = styled.div`
+  text-align: center;
+`;
+
+const CTAButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #514FE4;
+  color: white;
+  padding: 16px 32px;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(81, 79, 228, 0.3);
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(81, 79, 228, 0.4);
+    color: white;
+  }
+`;
+
+export default Tools; 

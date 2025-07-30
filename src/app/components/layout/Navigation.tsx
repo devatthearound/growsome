@@ -28,7 +28,9 @@ const Navigation = ({ onSubscribeClick }: { onSubscribeClick: () => void }) => {
   };
 
   const menuItems = [
-    { path: '/about', name: 'About' },
+    { path: '/tools', name: 'Tools' },
+    { path: '/affil', name: '제휴자동화' },
+    { path: '/funnel', name: '퍼널자동화' },
     { path: '/services', name: 'AI비즈니스솔루션' },
     { path: '/subscription', name: '가격' },
     { path: '/works', name: 'Works' },

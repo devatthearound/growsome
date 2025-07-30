@@ -9,6 +9,7 @@ import { ColumnBox, RowBox, Container } from '@/components/design-system/Layout'
 import { GreenButton, SecondaryButton } from '@/components/design-system/Button';
 
 interface SurveyData {
+  // 기존 필드
   businessStage: string;
   mainConcern: string;
   currentWebsite: string;
@@ -22,28 +23,51 @@ interface SurveyData {
   phone: string;
   email: string;
   company: string;
+  
+  // 추가 필드
+  serviceTypes: string[];
+  projectName: string;
+  openSchedule: string;
+  budget: string;
+  referenceUrl: string;
+  attachedFiles: File[];
+  detailedInquiry: string;
+  privacyAgreement: boolean;
 }
 
 const TypeformSurvey = () => {
   const router = useRouter();
   const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<Partial<SurveyData>>({});
+  const [answers, setAnswers] = useState<Partial<SurveyData>>({
+    serviceTypes: [],
+    attachedFiles: [],
+    privacyAgreement: false
+  });
   const [isAnimating, setIsAnimating] = useState(false);
   const [loading, setLoading] = useState(false);
   const [inputError, setInputError] = useState(false);
 
   const questions = [
     {
-      id: 'businessStage' as keyof SurveyData,
-      type: 'choice',
-      question: '현재 비즈니스 단계는?',
-      description: '현재 상황을 정확히 파악해보겠습니다',
-      options: [
-        { value: 'idea', label: '아이디어만 있음 (예비창업)' },
-        { value: 'preparing', label: '서비스 런칭 준비중' },
-        { value: 'operating_small', label: '서비스 운영중 (월매출 1억 미만)' },
-        { value: 'operating_large', label: '성장 단계 (월매출 1억 이상)' }
-      ]
+      id: 'serviceTypes' as keyof SurveyData,
+      type: 'multiChoice',
+      question: '어떤 서비스가 필요하신가요?',
+      description: '원하시는 서비스를 1개 이상 선택 해 주세요. 다중선택이 가능합니다.',
+              options: [
+          { value: 'landing_page', label: '랜딩페이지' },
+          { value: 'payment_subscription', label: '결제/구독' },
+          { value: 'lms_course', label: 'LMS강의' },
+          { value: 'community', label: '커뮤니티' },
+          { value: 'blog', label: '블로그' },
+          { value: 'seo_optimization', label: 'SEO 최적화' },
+          { value: 'notification_system', label: '알림시스템' },
+          { value: 'ui_ux_system', label: 'UI/UX 시스템' },
+          { value: 'n8n_automation', label: 'n8n자동화' },
+          { value: 'customer_management', label: '고객관리' },
+          { value: 'annual_operation', label: '연간운영' },
+          { value: 'admin_permission', label: '관리자 권한관리' },
+          { value: 'data_visualization', label: '데이터시각화' }
+        ]
     },
     {
       id: 'mainConcern' as keyof SurveyData,
@@ -142,41 +166,41 @@ const TypeformSurvey = () => {
       ]
     },
     {
-      id: 'name' as keyof SurveyData,
-      type: 'text',
-      question: '성함을 알려주세요',
-      description: '진단 결과를 전달받을 정보를 입력해주세요',
-      placeholder: '홍길동'
-    },
-    {
       id: 'email' as keyof SurveyData,
       type: 'email',
-      question: '이메일 주소를 입력해주세요',
+      question: '이메일',
       description: '진단 결과 전송을 위해 필요합니다',
       placeholder: 'example@email.com'
     },
     {
+      id: 'name' as keyof SurveyData,
+      type: 'text',
+      question: '담당자명/직책',
+      description: '진단 결과를 전달받을 정보를 입력해주세요',
+      placeholder: '홍길동 / 마케팅팀장'
+    },
+    {
       id: 'phone' as keyof SurveyData,
       type: 'tel',
-      question: '연락처를 입력해주세요',
+      question: '연락처',
       description: '24시간 내 개별 연락드립니다',
       placeholder: '010-0000-0000'
     },
     {
       id: 'company' as keyof SurveyData,
       type: 'text',
-      question: '회사명을 입력해주세요 (선택)',
+      question: '회사명',
       description: '더 정확한 진단을 위해 도움이 됩니다',
-      placeholder: '회사명 (선택사항)'
+      placeholder: '회사명'
     }
   ];
 
   const progress = ((currentQuestion + 1) / questions.length) * 100;
 
-  const handleAnswer = (value: string) => {
+  const handleAnswer = (value: string | string[] | boolean) => {
     setAnswers(prev => ({ ...prev, [questions[currentQuestion].id]: value }));
     
-    // 자동으로 다음 질문으로 이동 (선택형 질문의 경우)
+    // 자동으로 다음 질문으로 이동 (단일 선택형 질문의 경우만)
     if (questions[currentQuestion].type === 'choice') {
       setTimeout(() => {
         nextQuestion();
@@ -213,7 +237,7 @@ const TypeformSurvey = () => {
       
       // 제출 전 모든 필수 필드 검증
       const requiredFields = [
-        'businessStage', 'mainConcern', 'currentWebsite', 'desiredTimeline',
+        'serviceTypes', 'businessStage', 'mainConcern', 'currentWebsite', 'desiredTimeline',
         'budgetRange', 'dataCollection', 'desiredData', 'brandingSituation',
         'brandDirection', 'name', 'phone', 'email'
       ];
@@ -254,13 +278,8 @@ const TypeformSurvey = () => {
       
       console.log('설문 제출 성공:', result);
       
-      // 추천 결과를 쿼리 파라미터로 전달하며 결과 페이지로 이동
-      const queryParams = new URLSearchParams({
-        surveyId: result.surveyId?.toString() || 'temp',
-        recommendation: JSON.stringify(result.recommendations || {})
-      });
-      
-      router.push(`/diagnosis/result?${queryParams.toString()}`);
+      // 새로운 완료 페이지로 이동
+      router.push('/diagnosis/complete');
       
     } catch (error) {
       console.error('설문 제출 오류:', error);
@@ -288,13 +307,23 @@ const TypeformSurvey = () => {
 
   const canProceed = () => {
     const currentAnswer = answers[questions[currentQuestion].id];
+    const currentQuestionId = questions[currentQuestion].id;
+    
     // company는 선택사항이므로 검증에서 제외
-    if (questions[currentQuestion].id === 'company') {
+    if (currentQuestionId === 'company') {
       return true;
     }
     // 이메일 단계에서는 형식까지 검증
-    if (questions[currentQuestion].id === 'email') {
+    if (currentQuestionId === 'email') {
       return currentAnswer && emailRegex.test(currentAnswer.toString().trim());
+    }
+    // serviceTypes는 다중 선택이므로 배열 길이로 검증
+    if (currentQuestionId === 'serviceTypes') {
+      return Array.isArray(currentAnswer) && currentAnswer.length > 0;
+    }
+    // multiChoice 타입은 배열이므로 길이로 검증
+    if (questions[currentQuestion].type === 'multiChoice') {
+      return Array.isArray(currentAnswer) && currentAnswer.length > 0;
     }
     return currentAnswer && currentAnswer.toString().trim() !== '';
   };
@@ -346,29 +375,50 @@ const TypeformSurvey = () => {
 
               {/* Answer Options */}
               <AnswerContainer>
-                {currentQ.type === 'choice' ? (
-                  // 선택형 질문
-                  <OptionsContainer>
-                    {currentQ.options?.map((option, index) => (
-                      <OptionCard
-                        key={option.value}
-                        $selected={answers[currentQ.id] === option.value}
-                        onClick={() => handleAnswer(option.value)}
-                        $delay={index * 100}
-                      >
-                        <OptionLabel>
-                          {String.fromCharCode(65 + index)}
-                        </OptionLabel>
-                        <OptionText>
-                          <Typography.TextM500 color={growsomeTheme.color.Black800}>
-                            {option.label}
-                          </Typography.TextM500>
-                        </OptionText>
-                        <OptionArrow $selected={answers[currentQ.id] === option.value}>
-                          →
-                        </OptionArrow>
-                      </OptionCard>
-                    ))}
+                {currentQ.type === 'choice' || currentQ.type === 'multiChoice' ? (
+                  // 선택형 질문 (단일/다중 선택)
+                  <OptionsContainer $isFirstQuestion={currentQuestion === 0}>
+                    {currentQ.options?.map((option, index) => {
+                      const currentAnswer = answers[currentQ.id];
+                      const isSelected = currentQ.type === 'multiChoice' 
+                        ? (Array.isArray(currentAnswer) ? currentAnswer as string[] : []).includes(option.value)
+                        : currentAnswer === option.value;
+                      
+                      return (
+                        <OptionCard
+                          key={option.value}
+                          $selected={isSelected}
+                          onClick={() => {
+                            if (currentQ.type === 'multiChoice') {
+                              const currentValues = answers[currentQ.id] as string[] || [];
+                              const newValues = isSelected
+                                ? currentValues.filter(v => v !== option.value)
+                                : [...currentValues, option.value];
+                              handleAnswer(newValues);
+                            } else {
+                              handleAnswer(option.value);
+                            }
+                          }}
+                          $delay={index * 100}
+                        >
+                          <OptionLabel>
+                            {currentQ.type === 'multiChoice' ? (
+                              isSelected ? '✓' : String.fromCharCode(65 + index)
+                            ) : (
+                              String.fromCharCode(65 + index)
+                            )}
+                          </OptionLabel>
+                          <OptionText>
+                            <Typography.TextM500 color={growsomeTheme.color.Black800}>
+                              {option.label}
+                            </Typography.TextM500>
+                          </OptionText>
+                          <OptionArrow $selected={isSelected}>
+                            {currentQ.type === 'multiChoice' ? '✓' : '→'}
+                          </OptionArrow>
+                        </OptionCard>
+                      );
+                    })}
                   </OptionsContainer>
                                 ) : (
                   // 입력형 질문
@@ -376,7 +426,7 @@ const TypeformSurvey = () => {
                     <InputField
                       type={currentQ.type}
                       placeholder={currentQ.placeholder}
-                      value={answers[currentQ.id] || ''}
+                      value={answers[currentQ.id] as string || ''}
                       onChange={(e) => {
                         handleAnswer(e.target.value);
                         if (inputError) setInputError(false); // 입력 시 에러 상태 해제
@@ -402,8 +452,29 @@ const TypeformSurvey = () => {
                 )}
               </AnswerContainer>
 
-              {/* Next Button for text inputs */}
-              {currentQ.type !== 'choice' && (
+              {/* Next Button for text inputs and multiChoice */}
+              {(currentQ.type !== 'choice' && currentQ.type !== 'multiChoice') && (
+                <ButtonContainer>
+                  <GreenButton
+                    $size="large"
+                    onClick={() => {
+                      if (canProceed()) {
+                        nextQuestion();
+                      } else {
+                        setInputError(true);
+                        setTimeout(() => setInputError(false), 2000);
+                      }
+                    }}
+                    disabled={!canProceed()}
+                  >
+                    {loading ? '제출 중...' : 
+                     currentQuestion === questions.length - 1 ? '진단 완료하기 🎉' : '다음 질문'}
+                  </GreenButton>
+                </ButtonContainer>
+              )}
+              
+              {/* Next Button for multiChoice */}
+              {currentQ.type === 'multiChoice' && (
                 <ButtonContainer>
                   <GreenButton
                     $size="large"
@@ -571,10 +642,14 @@ const AnswerContainer = styled.div`
   margin-bottom: ${growsomeTheme.spacing.xl};
 `;
 
-const OptionsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
+const OptionsContainer = styled.div<{ $isFirstQuestion?: boolean }>`
+  display: grid;
+  grid-template-columns: ${props => props.$isFirstQuestion ? 'repeat(2, 1fr)' : '1fr'};
   gap: ${growsomeTheme.spacing.md};
+  
+  @media ${growsomeTheme.device.mobile} {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const OptionCard = styled.button<{ $selected: boolean; $delay: number }>`
@@ -591,6 +666,7 @@ const OptionCard = styled.button<{ $selected: boolean; $delay: number }>`
   animation: ${slideIn} 0.5s ease-out;
   animation-delay: ${props => props.$delay}ms;
   animation-fill-mode: both;
+  min-height: 80px;
   
   &:hover {
     border-color: ${growsomeTheme.color.Primary400};
@@ -620,6 +696,8 @@ const OptionLabel = styled.div`
 
 const OptionText = styled.div`
   flex: 1;
+  font-size: ${growsomeTheme.fontSize.TextM};
+  line-height: 1.4;
 `;
 
 const OptionArrow = styled.div<{ $selected: boolean }>`

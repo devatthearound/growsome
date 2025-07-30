@@ -35,11 +35,14 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
 
   // 중앙 집중식 네비게이션 링크 관리
   const navigationLinks: NavItem[] = [
-    { path: '/product', label: '사업성장' },
-    { path: '/portfolio', label: '포트폴리오' },
-    { path: '/services', label: 'AI 솔루션' },
-    { path: '/blog', label: '블로그' },
+    { path: '/product', label: 'AI 커리큘럼' },
+    { path: '/store', label: 'AI 스토어' },
+    { path: '/diagnosis', label: '프로젝트 의뢰하기' }
   ];
+
+  const isDev = process.env.NODE_ENV === 'development';
+  const filteredLinks = navigationLinks.filter(link => link.path !== '/blog');
+  const devLinks = isDev ? navigationLinks : filteredLinks;
 
   const handleMenuClick = (path: string) => {
     if (isMounted && router) {
@@ -90,7 +93,7 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
           
           <MainNav>
             <NavList>
-              {navigationLinks.map((link) => {
+              {devLinks.map((link) => {
                 const isActive = link.path === '/blog' ? currentPath.startsWith('/blog') : currentPath === link.path;
                 return (
                   <NavItem key={link.path}>
@@ -162,7 +165,7 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
 
       <MobileMenu $isOpen={isMenuOpen}>
         <MobileNavList>
-          {navigationLinks.map((link) => {
+          {devLinks.map((link) => {
             const isActive = link.path === '/blog' ? currentPath.startsWith('/blog') : currentPath === link.path;
             return (
               <MobileNavItem 

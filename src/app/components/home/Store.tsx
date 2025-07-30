@@ -82,20 +82,7 @@ const Store = () => {
   return (
     <StoreSection id="store">
       <Container>
-        <SectionHeader
-          as={motion.div}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={fadeIn}
-          transition={{ duration: 0.6 }}
-        >
-          <SectionTag>Store</SectionTag>
-          <h2>AI 에셋 스토어</h2>
-          <Description>AI로 제작된 고퀄리티 디자인 에셋을 제공합니다</Description>
-        </SectionHeader>
-
-        <ProductGrid>
+      <ProductGrid>
           {products.map((product, index) => (
             <ProductCard
               key={product.id}
@@ -126,10 +113,21 @@ const Store = () => {
             </ProductCard>
           ))}
         </ProductGrid>
+        <SectionHeader
+          as={motion.div}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeIn}
+          transition={{ duration: 0.6 }}
+        >
+          <SectionTag>Store</SectionTag>
+          <h2>AI 에셋 스토어</h2>
+          <Description>AI로 제작된 고퀄리티 디자인 에셋을 제공합니다</Description>
+        </SectionHeader>
 
-        <ViewAllButton href="/store">
-          전체 에셋 보기 <FontAwesomeIcon icon={faArrowRight} />
-        </ViewAllButton>
+
+
       </Container>
     </StoreSection>
   );

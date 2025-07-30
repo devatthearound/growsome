@@ -380,7 +380,7 @@ const CoursePreviewTable: React.FC = () => {
       <CoursePreviewSection>
         <CoursePreviewContainer>
           <CoursePreviewTitle>
-            💪 강의 미리보기
+            💪 필수 강의
           </CoursePreviewTitle>
           <CoursePreviewSubtitle>
             강의 데이터를 로드하고 있습니다...
@@ -394,11 +394,11 @@ const CoursePreviewTable: React.FC = () => {
     <CoursePreviewSection>
       <CoursePreviewContainer>
         <CoursePreviewTitle>
-          💪 강의 미리보기
+        💪 필수 강의
         </CoursePreviewTitle>
         <CoursePreviewSubtitle>
-          실제 강의 내용을 미리 확인해보세요.<br/>
-          첫 번째 강의는 무료로 시청할 수 있습니다.
+          AI활용능력을 키우는 기본 강의입니다.<br/>
+          1억원의 지원사업 준비까지 함께 가능한 1만원 강의입니다.
         </CoursePreviewSubtitle>
         
         <CourseTable>
@@ -458,7 +458,7 @@ const CoursePreviewTable: React.FC = () => {
               transition={{ duration: 0.8, ease: "easeOut" }}
               onClick={() => {}}
             >
-              전체 강의 패키지 시작하기
+              1만원으로 강의 패키지 시작하기
               <ArrowRight size={20} />
             </HeroButton>
           </Link>

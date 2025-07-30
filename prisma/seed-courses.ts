@@ -5,6 +5,15 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('강의 카테고리 및 강의 데이터 시드 시작...');
 
+  // 기존 강의 데이터가 있는지 확인
+  const existingCourses = await prisma.course.count()
+  
+  if (existingCourses > 0) {
+    console.log(`기존 강의 데이터가 존재합니다. (${existingCourses}개 강의)`)
+    console.log('데이터를 보존합니다.')
+    return
+  }
+
   // 강의 카테고리 생성
   const category = await prisma.courseCategory.upsert({
     where: { slug: 'business-plan' },
@@ -82,6 +91,66 @@ async function main() {
       isPublic: false,
       isPremium: true,
       sortOrder: 4
+    },
+    {
+      title: '5강. 투자 유치 전략과 피칭',
+      slug: 'investment-pitching',
+      description: '투자자를 설득하는 효과적인 피칭 전략과 투자 유치 방법을 학습합니다. 성공적인 투자 유치 사례를 분석해보세요.',
+      shortDescription: '투자자를 설득하는 효과적인 피칭 전략과 투자 유치 방법을 학습합니다.',
+      vimeoId: '123456793',
+      vimeoUrl: 'https://vimeo.com/123456793',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?w=400&h=200&fit=crop',
+      duration: 425,
+      level: 'intermediate',
+      tags: ['투자유치', '피칭', '프레젠테이션'],
+      isPublic: false,
+      isPremium: true,
+      sortOrder: 5
+    },
+    {
+      title: '6강. AI 기반 비즈니스 모델 혁신',
+      slug: 'ai-business-model',
+      description: 'AI 기술을 활용한 혁신적인 비즈니스 모델 설계 방법을 배웁니다. 미래 지향적인 사업 전략을 수립해보세요.',
+      shortDescription: 'AI 기술을 활용한 혁신적인 비즈니스 모델 설계 방법을 배웁니다.',
+      vimeoId: '123456794',
+      vimeoUrl: 'https://vimeo.com/123456794',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=400&h=200&fit=crop',
+      duration: 398,
+      level: 'advanced',
+      tags: ['AI', '비즈니스모델', '혁신'],
+      isPublic: false,
+      isPremium: true,
+      sortOrder: 6
+    },
+    {
+      title: '7강. 데이터 기반 의사결정',
+      slug: 'data-driven-decision',
+      description: '빅데이터와 AI를 활용한 과학적 의사결정 방법론을 학습합니다. 데이터 기반의 전략 수립으로 성공 확률을 높여보세요.',
+      shortDescription: '빅데이터와 AI를 활용한 과학적 의사결정 방법론을 학습합니다.',
+      vimeoId: '123456795',
+      vimeoUrl: 'https://vimeo.com/123456795',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=200&fit=crop',
+      duration: 342,
+      level: 'advanced',
+      tags: ['데이터분석', '의사결정', 'AI'],
+      isPublic: false,
+      isPremium: true,
+      sortOrder: 7
+    },
+    {
+      title: '8강. 글로벌 시장 진출 전략',
+      slug: 'global-market-entry',
+      description: '해외 시장 진출을 위한 전략적 접근 방법을 다룹니다. 글로벌 경쟁에서 승리하는 방법을 배워보세요.',
+      shortDescription: '해외 시장 진출을 위한 전략적 접근 방법을 다룹니다.',
+      vimeoId: '123456796',
+      vimeoUrl: 'https://vimeo.com/123456796',
+      thumbnailUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=200&fit=crop',
+      duration: 376,
+      level: 'advanced',
+      tags: ['글로벌진출', '해외시장', '전략'],
+      isPublic: false,
+      isPremium: true,
+      sortOrder: 8
     }
   ];
 
