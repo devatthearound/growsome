@@ -250,9 +250,9 @@ const AboutPage = () => {
   const router = useRouter();
 
   const downloadLinks = {
-    windows: "https://github.com/devatthearound/coupas/releases/download/v0.0.1/coupas-win-0.0.1-x64.exe",
-    macArm: "https://github.com/devatthearound/coupas/releases/download/v0.0.1/coupas-mac-0.0.1-arm64.dmg",
-    macIntel: "https://github.com/devatthearound/coupas/releases/download/v0.0.1/coupas-mac-0.0.1-x64.dmg"
+    windows: "https://github.com/devatthearound/coupas/releases/download/v1.0.41/coupas-win-1.0.11-x64.exe",
+    macArm: "https://github.com/devatthearound/coupas/releases/download/v1.0.41/coupas-mac-1.0.11-arm64.dmg",
+    macIntel: "https://github.com/devatthearound/coupas/releases/download/v1.0.41/coupas-mac-1.0.11-x64.dmg"
   };
 
   const handleWindowsDownload = () => {

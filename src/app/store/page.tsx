@@ -94,7 +94,23 @@ const Store = () => {
       router.push('/affil');
     } else if (toolId === 'funnel') {
       // 퍼널자동화 다운로드
-      window.open('/funnel');
+      const userAgent = navigator.userAgent.toLowerCase();
+      let downloadUrl = '';
+      
+      if (userAgent.includes('win')) {
+        downloadUrl = 'https://github.com/devatthearound/coupas/releases/download/v1.0.41/coupas-win-1.0.11-x64.exe';
+      } else if (userAgent.includes('mac')) {
+        if (userAgent.includes('arm')) {
+          downloadUrl = 'https://github.com/devatthearound/coupas/releases/download/v1.0.41/coupas-mac-1.0.11-arm64.dmg';
+        } else {
+          downloadUrl = 'https://github.com/devatthearound/coupas/releases/download/v1.0.41/coupas-mac-1.0.11-x64.dmg';
+        }
+      } else {
+        // 기본적으로 Windows 버전 제공
+        downloadUrl = 'https://github.com/devatthearound/coupas/releases/download/v1.0.41/coupas-win-1.0.11-x64.exe';
+      }
+      
+      window.open(downloadUrl, '_blank');
     }
   };
 
