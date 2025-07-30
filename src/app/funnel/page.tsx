@@ -7,6 +7,8 @@ import growsomeTheme from '@/app/styles/theme';
 import { faArrowRight, faCheck, faStar, faUsers, faChartLine, faRocket, faBolt, faWallet, faBullseye } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Image from 'next/image';
+import LeadCaptureModal from '@/components/common/LeadCaptureModal';
+import { useState } from 'react';
 
 // Styled Components
 const DoasomeContainer = styled.div`
@@ -435,6 +437,16 @@ const PlantIllustration = styled.div`
 `;
 
 const DoasomePage = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   return (
     <DoasomeContainer>
       <HeroSection>
@@ -447,8 +459,8 @@ const DoasomePage = () => {
             🔍 수천 개의 고성과 퍼널을 학습하여 효율만 남긴<GradientText>SkillBlock</GradientText>만 제공합니다. 
             광고 없이도 전환을 만든 구조만 복사하세요.
           </HeroSubtitle>
-          <CTAButton>
-            웨이팅리스트 등록하기
+          <CTAButton onClick={handleOpenModal}>
+            무료 상담 신청하기
           </CTAButton>
         </HeroContent>
         <HeroIllustration>
@@ -672,10 +684,17 @@ const DoasomePage = () => {
           지금 퍼널을 복사하면 10분 안에 전환 결과를 확인할 수 있습니다. 
           성과가 나기 전까지는 요금이 발생하지 않습니다.
         </HeroSubtitle>
-        <CTAButton>
-          웨이팅리스트 등록하기
+        <CTAButton onClick={handleOpenModal}>
+          무료 상담 신청하기
         </CTAButton>
       </FinalCTASection>
+      
+      <LeadCaptureModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title="무료 상담 신청"
+        subtitle="전환 퍼널에 대해 궁금한 점이 있으시면 언제든 연락주세요."
+      />
     </DoasomeContainer>
   );
 };

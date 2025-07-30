@@ -32,20 +32,20 @@ const Portfolio = () => {
       year: '2024~2025'
     },
     {
-      id: 'cupas',
-      image: '/images/projects/cupas/main_thumb_800x500.png',
-      title: '쿠파스 자동화',
-      description: 'N잡러를 위한 쿠팡파트너스 자동화 솔루션',
-      category: 'Marketing',
-      client: '디어라운드',
-      year: '2025'
-    },
-    {
       id: 'pickup',
       image: '/images/projects/pickup/main_thumb_800x500.png',
       title: '픽업해',
       description: '0% 배달수수료 픽업해',
       category: 'Service SaaS',
+      client: '디어라운드',
+      year: '2025'
+    },
+    {
+      id: 'cupas',
+      image: '/images/projects/cupas/main_thumb_800x500.png',
+      title: '쿠파스 자동화',
+      description: 'N잡러를 위한 쿠팡파트너스 자동화 솔루션',
+      category: 'Marketing',
       client: '디어라운드',
       year: '2025'
     },

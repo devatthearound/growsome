@@ -368,73 +368,6 @@ const AboutPage = () => {
           </div>
         </section>
 
-        {/* Courses Section */}
-        <ClassSection>
-          <ClassContainer>
-            <ClassTitle>AI 사업 교육 과정</ClassTitle>
-            <ClassDescription>
-              100만 원 상당 유료 AI 툴까지 무료 제공!<br />
-              단 1만 원 강의 결제로 시작하는<br />
-              체계적이고 실전 중심의 AI 비즈니스 교육<br /><br />
-              기초 → 개발 → 사업화까지<br />
-              단계별 커리큘럼으로<br />
-              당신의 AI 실행력과 수익화 역량을 완성하세요.
-            </ClassDescription>
-            
-            <CourseGrid>
-              {courses.map(course => (
-                <CourseCard key={course.id}>
-                  <CourseHeader>
-                    <div style={{ 
-                      width: '20px', 
-                      height: '20px', 
-                      backgroundColor: course.color, 
-                      borderRadius: '50%', 
-                      marginBottom: '10px' 
-                    }}></div>
-                    <ClassCourseTitle>{course.title}</ClassCourseTitle>
-                    <ClassCourseDescription>{course.description}</ClassCourseDescription>
-                    <CourseMeta>
-                      <MetaItem>
-                        <FontAwesomeIcon icon={faUsers} />
-                        난이도: {course.level}
-                      </MetaItem>
-                      <MetaItem>
-                        <FontAwesomeIcon icon={faClock} />
-                        기간: {course.duration}
-                      </MetaItem>
-                    </CourseMeta>
-                  </CourseHeader>
-                  
-                  <PriceSection>
-                    <div>
-                      <ClassOriginalPrice>정가: {course.originalPrice}</ClassOriginalPrice>
-                      <ClassPrice>할인가: {course.price}</ClassPrice>
-                    </div>
-                  </PriceSection>
-                  
-                  <div style={{ marginBottom: '20px' }}>
-                    <h4 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '10px' }}>📦 포함 혜택</h4>
-                    <ClassFeatureList>
-                      {course.features.map((feature, index) => (
-                        <ClassFeatureItem key={index}>
-                          <ClassCheckIcon>
-                            <FontAwesomeIcon icon={faCheck} />
-                          </ClassCheckIcon>
-                          {feature}
-                        </ClassFeatureItem>
-                      ))}
-                    </ClassFeatureList>
-                  </div>
-                  
-                  <ClassCourseButton style={{ backgroundColor: course.color }}>
-                    수강 신청하기
-                  </ClassCourseButton>
-                </CourseCard>
-              ))}
-            </CourseGrid>
-          </ClassContainer>
-        </ClassSection>
 
         {/* CTA Section */}
         <section className="py-20 bg-[#6366F1]">
@@ -459,63 +392,6 @@ const AboutPage = () => {
           </div>
         </section>
 
-        {/* 강의 신청 배너 */}
-        <section className="py-16 bg-gradient-to-r from-yellow-400 to-orange-500">
-          <div className="max-w-[1380px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="bg-white rounded-2xl p-8 shadow-xl animate-fade-in">
-              <div className="text-center mb-8">
-                <h2 className="text-3xl md:text-4xl font-bold text-[#1E1B4B] mb-4">
-                  이런 프로그램 만들고 싶으신가요?
-                </h2>
-                <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                  쿠팡 파트너스 영상 생성기와 같은 프로그램을 직접 개발하고 싶다면, 
-                  AI 활용 기본 강의를 통해 프로그래밍 역량을 키워보세요.
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                <div className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
-                  <h3 className="text-2xl font-bold text-[#1E1B4B] mb-4">
-                    🎯 강의에서 배울 수 있는 것
-                  </h3>
-                  <ul className="space-y-3 text-gray-700">
-                    <li className="flex items-center gap-2">
-                      <span className="text-green-500 font-bold">✓</span>
-                      API 연동 및 데이터 처리 방법
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-green-500 font-bold">✓</span>
-                      자동화 프로그램 개발 기법
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-green-500 font-bold">✓</span>
-                      UI/UX 디자인 및 사용자 경험 개선
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-green-500 font-bold">✓</span>
-                      실제 서비스 런칭 및 운영 방법
-                    </li>
-                  </ul>
-                </div>
-                
-                <div className="text-center animate-fade-in" style={{ animationDelay: "0.4s" }}>
-                  <div className="bg-[#EEF2FF] rounded-xl p-6 mb-6 border border-[#6366F1]/20">
-                    <h4 className="text-xl font-bold text-[#1E1B4B] mb-2">AI 활용 기본 강의</h4>
-                    <p className="text-gray-600 mb-4">1억원 지원사업 준비까지 함께하는 체계적인 교육</p>
-                    <div className="text-3xl font-bold text-[#6366F1] mb-2">1만원</div>
-                    <p className="text-sm text-gray-500">특별 할인가</p>
-                  </div>
-                  <Button 
-                    className="bg-[#6366F1] hover:bg-[#4F46E5] text-white px-8 py-4 text-lg w-full transition-all duration-300 hover:shadow-lg"
-                    onClick={() => router.push('/store')}
-                  >
-                    강의 신청하기
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       <style jsx>{`

@@ -94,7 +94,7 @@ const Store = () => {
       router.push('/affil');
     } else if (toolId === 'funnel') {
       // 퍼널자동화 다운로드
-      window.open('http://localhost:3001/funnel', '_blank');
+      window.open('/funnel');
     }
   };
 
