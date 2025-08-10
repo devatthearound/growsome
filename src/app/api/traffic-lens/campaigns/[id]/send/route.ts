@@ -5,12 +5,14 @@ import { APIResponse } from '@/types/traffic-lens';
 
 const prisma = new PrismaClient();
 
-// Web Push 설정
-webpush.setVapidDetails(
-  'mailto:support@growsome.com', // 이메일 주소
-  process.env.VAPID_PUBLIC_KEY || '',
-  process.env.VAPID_PRIVATE_KEY || ''
-);
+// Web Push 설정 (환경 변수가 있을 때만 설정)
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    'mailto:support@growsome.com', // 이메일 주소
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+}
 
 // 배치 크기 (한 번에 처리할 구독자 수)
 const BATCH_SIZE = 100;
