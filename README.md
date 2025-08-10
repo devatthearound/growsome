@@ -31,6 +31,14 @@ A Next.js-based content platform with AI automation, advanced analytics, and com
 - **Comment system**
 - **Like/Share functionality**
 
+### Traffic-Lens 📱
+- **웹 푸시 알림 관리**
+- **구독자 관리 및 세그먼테이션**
+- **캠페인 생성 및 발송**
+- **실시간 성과 분석**
+- **VAPID 키 기반 보안**
+- **자동화 트리거 시스템**
+
 ## 🏁 Getting Started
 
 ### Prerequisites
@@ -254,6 +262,62 @@ npm run start
 - Prisma Studio: Database GUI
 - GA4 DebugView: Event validation
 - Browser DevTools: Frontend debugging
+
+## 📱 Traffic-Lens 설정
+
+### 1. VAPID 키 생성
+```bash
+# VAPID 키 생성 스크립트 실행
+node scripts/generate-vapid-keys.js
+```
+
+생성된 키를 `.env` 파일에 추가:
+```bash
+VAPID_PUBLIC_KEY="your-generated-public-key"
+VAPID_PRIVATE_KEY="your-generated-private-key"
+```
+
+### 2. 데이터베이스 마이그레이션
+```bash
+# Traffic-Lens 테이블 생성
+npm run db:generate
+npm run db:push
+```
+
+### 3. 웹사이트 연동
+1. **도메인 등록**: Traffic-Lens 대시보드에서 도메인 추가
+2. **서비스 워커**: 생성된 코드를 `/public/sw.js`에 저장
+3. **연동 코드**: 웹사이트 HTML에 연동 코드 추가
+4. **테스트**: 푸시 알림 권한 요청 및 구독자 등록 확인
+
+### 4. API 엔드포인트
+```bash
+# 도메인 관리
+GET/POST /api/traffic-lens/domains
+GET/PUT/DELETE /api/traffic-lens/domains/[id]
+GET /api/traffic-lens/domains/[id]/sw
+
+# 구독자 관리  
+GET/POST /api/traffic-lens/subscribers
+GET /api/traffic-lens/subscribers/stats
+
+# 캠페인 관리
+GET/POST /api/traffic-lens/campaigns
+POST /api/traffic-lens/campaigns/[id]/send
+
+# 분석 및 추적
+GET /api/traffic-lens/analytics/overview
+POST /api/traffic-lens/notifications/click
+POST /api/traffic-lens/notifications/close
+```
+
+### 5. 주요 기능
+- **대시보드**: 실시간 통계 및 성과 분석
+- **도메인 관리**: 다중 웹사이트 지원
+- **캠페인 생성**: 즉시/예약 발송
+- **구독자 세그먼트**: 지역/행동 기반 타겟팅
+- **성과 추적**: 클릭률, 전환률 분석
+- **자동화**: 트리거 기반 자동 발송
 
 ## 🤝 Contributing
 

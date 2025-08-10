@@ -9,7 +9,14 @@ export const ACCESS_TOKEN_NAME = 'coupas_access_token';
 export const REFRESH_TOKEN_NAME = 'coupas_refresh_token';
 
 // 토큰 검증을 위한 비밀 키
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  console.error('❌ JWT_SECRET environment variable is not set!');
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('JWT_SECRET environment variable is required');
+  }
+}
 
 // 페이로드 타입 정의
 export interface TokenPayload {
@@ -75,9 +82,14 @@ export async function getAuthTokens() {
 
 // JWT 토큰 검증 함수
 export async function verifyToken(token: string): Promise<TokenPayload> {
+  if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET is not configured');
+  }
+  
   return new Promise((resolve, reject) => {
     jwt.verify(token, JWT_SECRET, (err, decoded) => {
       if (err) {
+        console.error('Token verification failed:', err.message);
         reject(err);
       } else {
         resolve(decoded as TokenPayload);
@@ -88,6 +100,10 @@ export async function verifyToken(token: string): Promise<TokenPayload> {
 
 // 토큰 생성 함수
 export async function generateToken(payload: TokenPayload, expiresIn: string | number): Promise<string> {
+  if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET is not configured');
+  }
+  
   return new Promise((resolve, reject) => {
     jwt.sign(
       payload, 
@@ -97,6 +113,7 @@ export async function generateToken(payload: TokenPayload, expiresIn: string | n
       }, 
       (err, token) => {
         if (err) {
+          console.error('Token generation failed:', err.message);
           reject(err);
         } else {
           resolve(token as string);

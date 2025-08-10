@@ -3,7 +3,7 @@ import React, { Suspense } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowRight, faRocket, faChartLine, faUsers, faCheck, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRight, faRocket, faChartLine, faUsers, faCheck, faStar, faBell } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -92,6 +92,9 @@ const Store = () => {
     if (toolId === 'affiliate') {
       // 제휴자동화 서비스 시작
       router.push('/affil');
+    } else if (toolId === 'traffic-lens') {
+      // Traffic-Lens 대시보드로 이동
+      router.push('/traffic-lens');
     } else if (toolId === 'funnel') {
       // 퍼널자동화 다운로드
       const userAgent = navigator.userAgent.toLowerCase();
@@ -151,6 +154,24 @@ const Store = () => {
       bgColor: "rgba(102, 126, 234, 0.1)",
       icon: <FontAwesomeIcon icon={faChartLine} />,
       link: "/funnel"
+    },
+    {
+      id: 'traffic-lens',
+      title: "Traffic-Lens",
+      subtitle: "Push Notification Automation",
+      description: "웹 푸시 알림 관리와 트래픽 분석을 통한 사용자 재방문 유도 자동화",
+      image: "/images/tools/traffic-lens.svg",
+      features: [
+        "웹 푸시 알림 자동 발송",
+        "구독자 세그먼테이션 및 관리",
+        "다중 도메인 지원",
+        "실시간 성과 분석",
+        "트리거 기반 자동화"
+      ],
+      color: "#10b981",
+      bgColor: "rgba(16, 185, 129, 0.1)",
+      icon: <FontAwesomeIcon icon={faBell} />,
+      link: "/traffic-lens"
     }
   ];
 
@@ -220,7 +241,12 @@ const Store = () => {
                     alt={tool.title} 
                     width={400}
                     height={300}
-                    style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                    priority={index === 0} // 첫 번째 이미지에만 priority 설정
+                    style={{ 
+                      objectFit: 'cover', 
+                      width: '100%', 
+                      height: 'auto' // height를 auto로 변경하여 비율 유지
+                    }}
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.src = '/images/tools/product1.png';
@@ -259,7 +285,9 @@ const Store = () => {
                     $color={tool.color}
                     onClick={() => handleToolAction(tool.id)}
                   >
-                    {tool.id === 'affiliate' ? '프로그램 다운받기' : '사전판매 해보기'}
+                    {tool.id === 'affiliate' ? '프로그램 다운받기' : 
+                     tool.id === 'traffic-lens' ? '대시보드 열기' : 
+                     '사전판매 해보기'}
                   </ToolButton>
                 </ToolActions>
               </ToolCard>
@@ -298,6 +326,11 @@ const Store = () => {
                       alt={product.title || 'Product'} 
                       width={300}
                       height={200}
+                      priority={index === 0} // 첫 번째 상품 이미지에 priority 설정
+                      style={{
+                        width: '100%',
+                        height: 'auto' // 비율 유지를 위해 auto 설정
+                      }}
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.src = '/images/store/product1.jpg';

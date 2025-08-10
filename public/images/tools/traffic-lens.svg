@@ -1,0 +1,49 @@
+<svg width="400" height="300" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#10b981;stop-opacity:0.3" />
+    </linearGradient>
+    <linearGradient id="iconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981" />
+      <stop offset="100%" style="stop-color:#059669" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#bgGradient)" rx="12"/>
+  
+  <!-- Main notification icon -->
+  <g transform="translate(200, 100)">
+    <!-- Bell shape -->
+    <path d="M-20 20 Q-20 -10 0 -25 Q20 -10 20 20 L15 20 Q15 30 0 30 Q-15 30 -15 20 Z" fill="url(#iconGradient)"/>
+    <!-- Bell clapper -->
+    <circle cx="0" cy="35" r="3" fill="url(#iconGradient)"/>
+    <!-- Notification badge -->
+    <circle cx="15" cy="-15" r="8" fill="#ef4444"/>
+    <text x="15" y="-10" text-anchor="middle" fill="white" font-size="10" font-weight="bold">3</text>
+  </g>
+  
+  <!-- Push notification mockups -->
+  <g transform="translate(80, 160)">
+    <!-- First notification -->
+    <rect x="0" y="0" width="240" height="60" fill="white" rx="8" opacity="0.9" stroke="#10b981" stroke-width="1"/>
+    <circle cx="20" cy="20" r="8" fill="#10b981"/>
+    <text x="35" y="18" fill="#374151" font-size="12" font-weight="600">새로운 할인 소식!</text>
+    <text x="35" y="32" fill="#6b7280" font-size="10">지금 확인하고 50% 할인 받으세요</text>
+    <text x="35" y="48" fill="#9ca3af" font-size="8">2분 전</text>
+  </g>
+  
+  <!-- Analytics chart mockup -->
+  <g transform="translate(320, 180)">
+    <!-- Mini chart -->
+    <rect x="0" y="0" width="60" height="40" fill="white" rx="4" opacity="0.8"/>
+    <polyline points="5,30 15,20 25,25 35,15 45,18 55,10" stroke="#10b981" stroke-width="2" fill="none"/>
+    <text x="30" y="52" text-anchor="middle" fill="#10b981" font-size="8" font-weight="bold">↗ 23%</text>
+  </g>
+  
+  <!-- Traffic-Lens brand text -->
+  <text x="200" y="250" text-anchor="middle" fill="#10b981" font-size="24" font-weight="bold">Traffic-Lens</text>
+  <text x="200" y="270" text-anchor="middle" fill="#059669" font-size="12">Push Notification Automation</text>
+</svg>

@@ -24,6 +24,8 @@ model User {
   blog_contents  blog_contents[]
   blog_likes     blog_likes[]
   courseProgress UserCourseProgress[]
+  tlDomains      TLDomain[]
+  tlCampaigns    TLCampaign[]
 
   @@map("users")
 }
@@ -247,4 +249,143 @@ model QAIssue {
   @@index([assignee], map: "idx_qa_issues_assignee")
   @@index([createdAt], map: "idx_qa_issues_created")
   @@map("qa_issues")
+}
+
+// Traffic-Lens Tables
+model TLDomain {
+  id               Int                  @id @default(autoincrement())
+  userId           Int                  @map("user_id")
+  domain           String               @unique @db.VarChar(255)
+  siteName         String               @map("site_name") @db.VarChar(255)
+  serviceWorkerPath String             @default("/sw.js") @map("service_worker_path") @db.VarChar(500)
+  vapidPublicKey   String?              @map("vapid_public_key")
+  vapidPrivateKey  String?              @map("vapid_private_key")
+  isActive         Boolean              @default(true) @map("is_active")
+  createdAt        DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime             @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  user             User                 @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  subscribers      TLSubscriber[]
+  campaigns        TLCampaign[]
+  triggers         TLTrafficTrigger[]
+  stats            TLStatsDaily[]
+
+  @@index([userId], map: "idx_tl_domains_user")
+  @@index([domain], map: "idx_tl_domains_domain")
+  @@index([isActive], map: "idx_tl_domains_active")
+  @@map("tl_domains")
+}
+
+model TLSubscriber {
+  id            Int               @id @default(autoincrement())
+  domainId      Int               @map("domain_id")
+  endpoint      String
+  p256dhKey     String            @map("p256dh_key")
+  authKey       String            @map("auth_key")
+  userAgent     String?
+  ipAddress     String?           @map("ip_address") @db.Inet
+  country       String?           @db.VarChar(2)
+  city          String?           @db.VarChar(100)
+  subscribedAt  DateTime          @default(now()) @map("subscribed_at") @db.Timestamptz(6)
+  lastSeen      DateTime          @default(now()) @map("last_seen") @db.Timestamptz(6)
+  isActive      Boolean           @default(true) @map("is_active")
+  
+  domain        TLDomain          @relation(fields: [domainId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  notifications TLNotification[]
+
+  @@unique([domainId, endpoint])
+  @@index([domainId], map: "idx_tl_subscribers_domain")
+  @@index([isActive], map: "idx_tl_subscribers_active")
+  @@index([subscribedAt], map: "idx_tl_subscribers_subscribed")
+  @@index([country], map: "idx_tl_subscribers_country")
+  @@map("tl_subscribers")
+}
+
+model TLCampaign {
+  id           Int              @id @default(autoincrement())
+  domainId     Int              @map("domain_id")
+  userId       Int              @map("user_id")
+  title        String           @db.VarChar(255)
+  body         String
+  iconUrl      String?          @map("icon_url")
+  imageUrl     String?          @map("image_url")
+  clickUrl     String?          @map("click_url")
+  badgeUrl     String?          @map("badge_url")
+  scheduledAt  DateTime?        @map("scheduled_at") @db.Timestamptz(6)
+  sentAt       DateTime?        @map("sent_at") @db.Timestamptz(6)
+  status       String           @default("draft") @db.VarChar(20) // draft, scheduled, sending, sent, failed
+  targetType   String           @default("all") @map("target_type") @db.VarChar(20) // all, segment, individual
+  targetFilter Json?            @map("target_filter") // 세그먼트 조건
+  createdAt    DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime         @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+  
+  domain       TLDomain         @relation(fields: [domainId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  user         User             @relation(fields: [userId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  notifications TLNotification[]
+
+  @@index([domainId], map: "idx_tl_campaigns_domain")
+  @@index([userId], map: "idx_tl_campaigns_user")
+  @@index([status], map: "idx_tl_campaigns_status")
+  @@index([scheduledAt], map: "idx_tl_campaigns_scheduled")
+  @@index([createdAt], map: "idx_tl_campaigns_created")
+  @@map("tl_campaigns")
+}
+
+model TLNotification {
+  id           Int          @id @default(autoincrement())
+  campaignId   Int          @map("campaign_id")
+  subscriberId Int          @map("subscriber_id")
+  sentAt       DateTime     @default(now()) @map("sent_at") @db.Timestamptz(6)
+  clickedAt    DateTime?    @map("clicked_at") @db.Timestamptz(6)
+  status       String       @default("sent") @db.VarChar(20) // sent, clicked, failed
+  errorMessage String?      @map("error_message")
+  userAgent    String?
+  
+  campaign     TLCampaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  subscriber   TLSubscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([campaignId], map: "idx_tl_notifications_campaign")
+  @@index([subscriberId], map: "idx_tl_notifications_subscriber")
+  @@index([status], map: "idx_tl_notifications_status")
+  @@index([sentAt], map: "idx_tl_notifications_sent")
+  @@index([clickedAt], map: "idx_tl_notifications_clicked")
+  @@map("tl_notifications")
+}
+
+model TLTrafficTrigger {
+  id               Int      @id @default(autoincrement())
+  domainId         Int      @map("domain_id")
+  triggerName      String   @map("trigger_name") @db.VarChar(255)
+  triggerType      String   @map("trigger_type") @db.VarChar(50) // page_view, time_spent, bounce_rate, conversion
+  conditions       Json     // 트리거 조건
+  campaignTemplate Json?    @map("campaign_template") // 자동 발송 템플릿
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  
+  domain           TLDomain @relation(fields: [domainId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([domainId], map: "idx_tl_triggers_domain")
+  @@index([triggerType], map: "idx_tl_triggers_type")
+  @@index([isActive], map: "idx_tl_triggers_active")
+  @@map("tl_traffic_triggers")
+}
+
+model TLStatsDaily {
+  id                 Int      @id @default(autoincrement())
+  domainId           Int      @map("domain_id")
+  date               DateTime @db.Date
+  totalSubscribers   Int      @default(0) @map("total_subscribers")
+  newSubscribers     Int      @default(0) @map("new_subscribers")
+  unsubscribed       Int      @default(0)
+  campaignsSent      Int      @default(0) @map("campaigns_sent")
+  totalNotifications Int      @default(0) @map("total_notifications")
+  totalClicks        Int      @default(0) @map("total_clicks")
+  clickRate          Decimal  @default(0) @db.Decimal(5, 4)
+  
+  domain             TLDomain @relation(fields: [domainId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([domainId, date])
+  @@index([domainId], map: "idx_tl_stats_domain")
+  @@index([date], map: "idx_tl_stats_date")
+  @@map("tl_stats_daily")
 }

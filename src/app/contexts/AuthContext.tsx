@@ -82,13 +82,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       console.log('인증 API 응답:', {
         status: response.status,
-        ok: response.ok,
-        headers: Object.fromEntries(response.headers.entries())
+        ok: response.ok
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log('인증 데이터:', data);
+        console.log('인증 성공:', data.user?.email || '알 수 없는 사용자');
         
         if (data.isLoggedIn && data.user) {
           // 사용자 데이터 변환 (DB 필드명 → 인터페이스 필드명)
@@ -105,40 +104,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             canWriteContent: data.user.canWriteContent || true
           };
           
-          console.log('사용자 로그인 성공:', transformedUser.email);
           setUser(transformedUser);
         } else {
-          console.log('사용자 데이터 없음');
           setUser(null);
         }
       } else {
-        // 인증 실패
-        const errorData = await response.text();
-        console.log('인증 실패:', {
-          status: response.status,
-          statusText: response.statusText,
-          body: errorData
-        });
+        // 인증 실패 - 공개 페이지가 아닌 경우에만 에러 로깅
+        if (!isPublicPage) {
+          console.log('인증 실패 - 로그인이 필요합니다');
+        }
         
         setUser(null);
         
-        // 401인 경우 토큰 갱신 시도
-        if (response.status === 401) {
+        // 401인 경우 토큰 갱신 시도 (공개 페이지가 아닌 경우에만)
+        if (response.status === 401 && !isPublicPage) {
           console.log('토큰 갱신 시도...');
-          await attemptTokenRefresh();
+          const refreshSuccess = await attemptTokenRefresh();
+          if (!refreshSuccess) {
+            console.log('토큰 갱신 실패 - 로그인 페이지로 이동이 필요할 수 있습니다');
+          }
         }
       }
     } catch (error) {
-      console.error('인증 체크 중 오류:', error);
+      // 네트워크 오류인 경우에만 에러 로깅 (공개 페이지가 아닌 경우)
+      if (!isPublicPage && error instanceof TypeError && error.message.includes('fetch')) {
+        console.error('네트워크 오류 - 서버 연결을 확인해주세요:', error.message);
+      } else if (!isPublicPage) {
+        console.error('인증 체크 중 예상치 못한 오류:', error);
+      }
       setUser(null);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const attemptTokenRefresh = async () => {
+  const attemptTokenRefresh = async (): Promise<boolean> => {
     try {
-      console.log('토큰 갱신 API 호출...');
+      console.log('토큰 갱신 시도...');
       
       const refreshResponse = await fetch('/api/auth/refresh', {
         method: 'POST',
@@ -148,29 +150,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       });
 
-      console.log('토큰 갱신 응답:', {
-        status: refreshResponse.status,
-        ok: refreshResponse.ok
-      });
-
       if (refreshResponse.ok) {
         const data = await refreshResponse.json();
-        console.log('토큰 갱신 데이터:', data);
         
-        if (data.success) {
-          console.log('토큰 갱신 성공, 인증 상태 재확인...');
-          // 토큰 갱신 성공 시 인증 상태 다시 확인
-          await checkAuthStatus();
+        if (data.success && data.user) {
+          console.log('토큰 갱신 성공');
+          
+          // 갱신된 사용자 정보 즉시 설정
+          const transformedUser: User = {
+            id: data.user.id?.toString(),
+            email: data.user.email,
+            username: data.user.username || data.user.name,
+            slug: data.user.slug || createSlugFromUsername(data.user.username || data.user.name),
+            company_name: data.user.company_name,
+            position: data.user.position,
+            phone_number: data.user.phone_number,
+            profileImage: data.user.profileImage || data.user.avatar,
+            role: data.user.role || 'user',
+            canWriteContent: data.user.canWriteContent || true
+          };
+          
+          setUser(transformedUser);
+          return true;
         }
       } else {
-        const errorData = await refreshResponse.text();
-        console.log('토큰 갱신 실패:', {
-          status: refreshResponse.status,
-          body: errorData
-        });
+        console.log('토큰 갱신 실패 - 다시 로그인이 필요합니다');
       }
+      
+      return false;
     } catch (error) {
       console.error('토큰 갱신 중 오류:', error);
+      return false;
     }
   };
 
