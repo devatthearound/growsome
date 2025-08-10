@@ -1,0 +1,370 @@
+{
+  "name": "Reddit Business Insights Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "reddit-insights",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "reddit-insights"
+    },
+    {
+      "parameters": {
+        "url": "https://www.reddit.com/r/entrepreneur/hot.json",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "get-reddit-posts",
+      "name": "Get Reddit Posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [460, 300],
+      "credentials": {
+        "httpBasicAuth": [],
+        "httpHeaderAuth": [],
+        "httpDigestAuth": [],
+        "oAuth2": [],
+        "httpQueryAuth": []
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Reddit API 응답에서 포스트 데이터 추출\nconst posts = $input.all()[0].json.data.children;\n\n// 비즈니스 관련 키워드 필터링\nconst businessKeywords = [\n  'startup', 'business', 'entrepreneur', 'revenue', 'profit',\n  'market', 'customer', 'product', 'service', 'funding',\n  'growth', 'scaling', 'strategy', 'opportunity', 'problem',\n  'solution', 'idea', 'validation', 'traction', 'monetization'\n];\n\n// 포스트 필터링 및 정리\nconst filteredPosts = posts\n  .map(post => post.data)\n  .filter(post => {\n    const title = post.title.toLowerCase();\n    const selftext = (post.selftext || '').toLowerCase();\n    const text = title + ' ' + selftext;\n    \n    // 비즈니스 키워드가 포함된 포스트만 선택\n    return businessKeywords.some(keyword => text.includes(keyword)) &&\n           post.score > 10 && // 최소 업보트 수\n           post.num_comments > 5; // 최소 댓글 수\n  })\n  .map(post => ({\n    id: post.id,\n    title: post.title,\n    author: post.author,\n    score: post.score,\n    num_comments: post.num_comments,\n    created_utc: post.created_utc,\n    url: `https://reddit.com${post.permalink}`,\n    selftext: post.selftext,\n    subreddit: post.subreddit,\n    upvote_ratio: post.upvote_ratio\n  }))\n  .slice(0, 20); // 상위 20개 포스트만 선택\n\nreturn filteredPosts.map(post => ({ json: post }));"
+      },
+      "id": "filter-posts",
+      "name": "Filter Posts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "contents",
+              "value": "={{ [{\n  \"parts\": [\n    {\n      \"text\": \"다음 Reddit 포스트들을 분석하여 비즈니스 기회와 시장 인사이트를 찾아주세요. 각 포스트에서 다음을 분석해주세요:\\n\\n1. 언급된 문제나 고통점\\n2. 잠재적인 비즈니스 기회\\n3. 타겟 고객 세그먼트\\n4. 시장 규모 추정\\n5. 경쟁 상황\\n6. 수익화 가능성\\n\\n포스트:\\n\" + JSON.stringify($json, null, 2) + \"\\n\\n위 분석을 바탕으로 가장 유망한 비즈니스 기회 3개를 선별하고, 각각에 대해 구체적인 실행 방안을 제시해주세요.\"\n    }\n  ]\n}] }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "analyze-content-ai",
+      "name": "Analyze Content by AI",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 200],
+      "credentials": {
+        "httpBasicAuth": [],
+        "httpHeaderAuth": [],
+        "httpDigestAuth": [],
+        "oAuth2": [],
+        "httpQueryAuth": []
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// AI 분석 결과에서 인사이트 추출\nconst aiResponse = $input.all()[0].json;\nconst analysis = aiResponse.candidates[0].content.parts[0].text;\n\n// 분석 결과를 구조화된 형태로 변환\nconst insights = {\n  timestamp: new Date().toISOString(),\n  total_posts_analyzed: $('Filter Posts').all().length,\n  analysis: analysis,\n  top_opportunities: [],\n  market_insights: {\n    trending_problems: [],\n    customer_segments: [],\n    revenue_potential: []\n  }\n};\n\n// 분석 텍스트에서 주요 기회 추출 (간단한 파싱)\nconst lines = analysis.split('\\n');\nlet currentOpportunity = null;\n\nfor (const line of lines) {\n  if (line.includes('기회') || line.includes('opportunity')) {\n    if (currentOpportunity) {\n      insights.top_opportunities.push(currentOpportunity);\n    }\n    currentOpportunity = {\n      title: line.trim(),\n      description: '',\n      potential: '',\n      execution: ''\n    };\n  } else if (currentOpportunity && line.trim()) {\n    currentOpportunity.description += line.trim() + ' ';\n  }\n}\n\nif (currentOpportunity) {\n  insights.top_opportunities.push(currentOpportunity);\n}\n\nreturn [{ json: insights }];"
+      },
+      "id": "extract-insights",
+      "name": "Extract Insights",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "contents",
+              "value": "={{ [{\n  \"parts\": [\n    {\n      \"text\": \"다음 비즈니스 인사이트를 바탕으로 실행 가능한 액션 아이템과 전략을 제시해주세요:\\n\\n\" + JSON.stringify($json, null, 2) + \"\\n\\n위 분석을 바탕으로:\\n\\n1. 즉시 실행 가능한 액션 아이템 5개\\n2. 3개월 내 실행 계획\\n3. 필요한 리소스와 예산\\n4. 성공 지표 (KPI)\\n5. 위험 요소와 대응 방안\\n\\n이를 JSON 형태로 구조화해서 응답해주세요.\"\n    }\n  ]\n}] }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "generate-action-plan",
+      "name": "Generate Action Plan",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1340, 200],
+      "credentials": {
+        "httpBasicAuth": [],
+        "httpHeaderAuth": [],
+        "httpDigestAuth": [],
+        "oAuth2": [],
+        "httpQueryAuth": []
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 최종 결과 통합\nconst insights = $('Extract Insights').first().json;\nconst actionPlan = $input.all()[0].json;\n\nconst finalReport = {\n  report_date: new Date().toISOString(),\n  summary: {\n    total_posts_analyzed: insights.total_posts_analyzed,\n    top_opportunities_count: insights.top_opportunities.length,\n    analysis_summary: insights.analysis.substring(0, 500) + '...'\n  },\n  insights: insights,\n  action_plan: actionPlan,\n  recommendations: {\n    immediate_actions: [],\n    short_term_goals: [],\n    long_term_strategy: []\n  }\n};\n\n// 액션 플랜에서 추천사항 추출\nif (actionPlan.candidates && actionPlan.candidates[0]) {\n  const planText = actionPlan.candidates[0].content.parts[0].text;\n  \n  // 간단한 파싱으로 추천사항 분류\n  const lines = planText.split('\\n');\n  let currentSection = '';\n  \n  for (const line of lines) {\n    if (line.includes('즉시') || line.includes('immediate')) {\n      currentSection = 'immediate_actions';\n    } else if (line.includes('3개월') || line.includes('short')) {\n      currentSection = 'short_term_goals';\n    } else if (line.includes('장기') || line.includes('long')) {\n      currentSection = 'long_term_strategy';\n    } else if (line.trim() && currentSection) {\n      finalReport.recommendations[currentSection].push(line.trim());\n    }\n  }\n}\n\nreturn [{ json: finalReport }];"
+      },
+      "id": "merge-final-report",
+      "name": "Merge Final Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1560, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/{{ $env.GOOGLE_SHEETS_ID }}/values/Sheet1!A:Z",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.GOOGLE_SHEETS_TOKEN }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "get-sheet-data",
+      "name": "Get Sheet Data",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1780, 200],
+      "credentials": {
+        "httpBasicAuth": [],
+        "httpHeaderAuth": [],
+        "httpDigestAuth": [],
+        "oAuth2": [],
+        "httpQueryAuth": []
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 기존 데이터와 새 데이터 통합\nconst existingData = $input.all()[0].json.values || [];\nconst newReport = $('Merge Final Report').first().json;\n\n// 새 행 데이터 준비\nconst newRow = [\n  newReport.report_date,\n  newReport.summary.total_posts_analyzed,\n  newReport.summary.top_opportunities_count,\n  JSON.stringify(newReport.insights.top_opportunities),\n  newReport.summary.analysis_summary,\n  JSON.stringify(newReport.recommendations.immediate_actions),\n  JSON.stringify(newReport.recommendations.short_term_goals),\n  JSON.stringify(newReport.recommendations.long_term_strategy)\n];\n\n// 기존 데이터에 새 행 추가\nconst updatedData = [...existingData, newRow];\n\nreturn [{ json: { values: updatedData } }];"
+      },
+      "id": "prepare-sheet-update",
+      "name": "Prepare Sheet Update",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/{{ $env.GOOGLE_SHEETS_ID }}/values/Sheet1!A:Z",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{ $env.GOOGLE_SHEETS_TOKEN }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "valueInputOption",
+              "value": "RAW"
+            },
+            {
+              "name": "data",
+              "value": "={{ [{\n  \"range\": \"Sheet1!A:Z\",\n  \"values\": $json.values\n}] }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "update-google-sheets",
+      "name": "Update Google Sheets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [2220, 200],
+      "credentials": {
+        "httpBasicAuth": [],
+        "httpHeaderAuth": [],
+        "httpDigestAuth": [],
+        "oAuth2": [],
+        "httpQueryAuth": []
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2440, 200]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Reddit Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Reddit Posts": {
+      "main": [
+        [
+          {
+            "node": "Filter Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Posts": {
+      "main": [
+        [
+          {
+            "node": "Analyze Content by AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze Content by AI": {
+      "main": [
+        [
+          {
+            "node": "Extract Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Insights": {
+      "main": [
+        [
+          {
+            "node": "Generate Action Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Action Plan": {
+      "main": [
+        [
+          {
+            "node": "Merge Final Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Final Report": {
+      "main": [
+        [
+          {
+            "node": "Get Sheet Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Sheet Data": {
+      "main": [
+        [
+          {
+            "node": "Prepare Sheet Update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Sheet Update": {
+      "main": [
+        [
+          {
+            "node": "Update Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "id": "reddit-insights",
+      "name": "reddit-insights"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "1"
+} 

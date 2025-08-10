@@ -1,0 +1,298 @@
+{
+  "name": "Telegram Reddit Insights Bot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "telegram-webhook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "telegram-webhook",
+      "name": "Telegram Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "telegram-reddit-bot"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Telegram 메시지 파싱\nconst update = $input.all()[0].json;\n\nif (!update.message) {\n  return [];\n}\n\nconst message = update.message;\nconst chatId = message.chat.id;\nconst text = message.text || '';\nconst username = message.from.username || message.from.first_name;\n\n// 명령어 처리\nconst commands = {\n  '/start': '레딧 인사이트 봇에 오신 것을 환영합니다!\\n\\n사용 가능한 명령어:\\n/insights - 최신 비즈니스 인사이트 분석\\n/help - 도움말 보기',\n  '/insights': 'insights',\n  '/help': '사용 가능한 명령어:\\n\\n/start - 시작하기\\n/insights - 레딧 비즈니스 인사이트 분석\\n/help - 이 도움말 보기\\n\\n봇이 Reddit에서 비즈니스 관련 포스트를 수집하고 AI로 분석하여 비즈니스 기회를 찾아드립니다.',\n};\n\nconst response = {\n  chatId: chatId,\n  command: text.toLowerCase(),\n  username: username,\n  message: commands[text.toLowerCase()] || '알 수 없는 명령어입니다. /help를 입력하여 사용법을 확인하세요.'\n};\n\nreturn [{ json: response }];"
+      },
+      "id": "parse-command",
+      "name": "Parse Command",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "command-check",
+              "leftValue": "={{ $json.command }}",
+              "rightValue": "insights",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-insights-command",
+      "name": "Check Insights Command",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://n8n.growsome.kr/webhook/reddit-insights",
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "trigger-insights-workflow",
+      "name": "Trigger Insights Workflow",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 200],
+      "credentials": {
+        "httpBasicAuth": [],
+        "httpHeaderAuth": [],
+        "httpDigestAuth": [],
+        "oAuth2": [],
+        "httpQueryAuth": []
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 인사이트 결과를 Telegram 메시지로 변환\nconst insightsResult = $input.all()[0].json;\nconst chatId = $('Parse Command').first().json.chatId;\n\nlet message = '🔍 *레딧 비즈니스 인사이트 분석 결과*\\n\\n';\n\nif (insightsResult.summary) {\n  message += `📊 *분석 요약*\\n`;\n  message += `• 분석된 포스트: ${insightsResult.summary.total_posts_analyzed}개\\n`;\n  message += `• 발견된 기회: ${insightsResult.summary.top_opportunities_count}개\\n\\n`;\n}\n\nif (insightsResult.insights && insightsResult.insights.top_opportunities) {\n  message += `💡 *주요 비즈니스 기회*\\n\\n`;\n  insightsResult.insights.top_opportunities.forEach((opportunity, index) => {\n    message += `${index + 1}. ${opportunity.title || '기회 제목'}\\n`;\n    if (opportunity.description) {\n      message += `   ${opportunity.description.substring(0, 100)}...\\n\\n`;\n    }\n  });\n}\n\nif (insightsResult.recommendations && insightsResult.recommendations.immediate_actions) {\n  message += `⚡ *즉시 실행 가능한 액션*\\n\\n`;\n  insightsResult.recommendations.immediate_actions.slice(0, 3).forEach((action, index) => {\n    message += `${index + 1}. ${action}\\n`;\n  });\n}\n\nmessage += '\\n📈 자세한 분석 결과는 Google Sheets에서 확인하세요.';\n\nreturn [{ json: { chatId: chatId, message: message } }];"
+      },
+      "id": "format-insights-response",
+      "name": "Format Insights Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "url": "https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "={{ $json.chatId }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.message }}"
+            },
+            {
+              "name": "parse_mode",
+              "value": "Markdown"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "send-telegram-response",
+      "name": "Send Telegram Response",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1340, 200],
+      "credentials": {
+        "httpBasicAuth": [],
+        "httpHeaderAuth": [],
+        "httpDigestAuth": [],
+        "oAuth2": [],
+        "httpQueryAuth": []
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.telegram.org/bot{{ $env.TELEGRAM_BOT_TOKEN }}/sendMessage",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "chat_id",
+              "value": "={{ $json.chatId }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.message }}"
+            },
+            {
+              "name": "parse_mode",
+              "value": "Markdown"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "id": "send-default-response",
+      "name": "Send Default Response",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [900, 400],
+      "credentials": {
+        "httpBasicAuth": [],
+        "httpHeaderAuth": [],
+        "httpDigestAuth": [],
+        "oAuth2": [],
+        "httpQueryAuth": []
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { success: true, message: 'Telegram bot response sent' } }}",
+        "options": {}
+      },
+      "id": "webhook-response",
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1560, 200]
+    }
+  ],
+  "connections": {
+    "Telegram Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Command": {
+      "main": [
+        [
+          {
+            "node": "Check Insights Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Insights Command": {
+      "main": [
+        [
+          {
+            "node": "Trigger Insights Workflow",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Insights Workflow": {
+      "main": [
+        [
+          {
+            "node": "Format Insights Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Insights Response": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Telegram Response": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Insights Command": {
+      "main": [
+        [
+          {
+            "node": "Send Default Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Default Response": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "id": "telegram-reddit-bot",
+      "name": "telegram-reddit-bot"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "1"
+} 

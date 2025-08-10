@@ -1,0 +1,33 @@
+{
+  "name": "reddit-business-analyzer-bot",
+  "version": "1.0.0",
+  "description": "Discord bot for Reddit business opportunity analysis",
+  "main": "reddit_bot.js",
+  "scripts": {
+    "start": "node reddit_bot.js",
+    "dev": "nodemon reddit_bot.js",
+    "reddit": "node reddit_bot.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.14.1",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "reddit",
+    "business",
+    "analysis",
+    "n8n",
+    "ai"
+  ],
+  "author": "Growsome Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

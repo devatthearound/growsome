@@ -11,5 +11,15 @@ services:
       - N8N_PROTOCOL=https
       - N8N_PORT=5678
       - GENERIC_TIMEZONE=Asia/Seoul
+      # Reddit Insights Workflow Environment Variables
+      - GOOGLE_GEMINI_API_KEY=${GOOGLE_GEMINI_API_KEY}
+      - GOOGLE_SHEETS_ID=${GOOGLE_SHEETS_ID}
+      - GOOGLE_SHEETS_TOKEN=${GOOGLE_SHEETS_TOKEN}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - REDDIT_CLIENT_ID=${REDDIT_CLIENT_ID}
+      - REDDIT_CLIENT_SECRET=${REDDIT_CLIENT_SECRET}
+      - REDDIT_USER_AGENT=${REDDIT_USER_AGENT}
     volumes:
       - ~/.n8n:/home/node/.n8n
+      - ./logs:/var/log

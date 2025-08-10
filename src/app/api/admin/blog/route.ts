@@ -2,6 +2,43 @@ import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
 import { withApiAuth, ApiTokenPayload } from '@/lib/auth-api'; // API 자동화용 인증
 
+// 소셜 미디어 자동화 트리거 함수
+async function triggerSocialMediaAutomation(blogPost: any) {
+  const n8nWebhookUrl = 'https://n8n.growsome.kr/webhook/blog-published';
+  
+  const webhookData = {
+    title: blogPost.title,
+    content: blogPost.content_body,
+    slug: blogPost.slug,
+    thumbnail_url: blogPost.thumbnail_url,
+    tags: [], // TODO: 태그 시스템 연동 시 추가
+    category: 'Tech', // TODO: 카테고리 이름 연동
+    created_at: blogPost.created_at,
+    author: 'Growsome'
+  };
+
+  try {
+    const response = await fetch(n8nWebhookUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Growsome-Blog-Automation/1.0'
+      },
+      body: JSON.stringify(webhookData)
+    });
+
+    if (response.ok) {
+      const result = await response.json();
+      console.log('✅ 소셜 미디어 자동화 트리거 성공:', result);
+      return result;
+    } else {
+      console.error('❌ 소셜 미디어 자동화 트리거 실패:', response.status);
+    }
+  } catch (error) {
+    console.error('❌ 웹훅 호출 오류:', error);
+  }
+}
+
 // slug 생성 함수
 function createSlug(title: string): string {
   return title
@@ -173,13 +210,22 @@ async function createBlogPost(request: Request, user: ApiTokenPayload): Promise<
 
       await client.query('COMMIT');
 
+      const newPost = result.rows[0];
       console.log('✅ 블로그 포스트 생성 성공');
-      console.log('📊 생성된 포스트:', result.rows[0]);
+      console.log('📊 생성된 포스트:', newPost);
+
+      // 🚀 소셜 미디어 자동화 트리거 (발행된 포스트만)
+      if (status === 'published') {
+        triggerSocialMediaAutomation(newPost).catch(error => {
+          console.error('소셜 미디어 자동화 오류 (무시됨):', error);
+        });
+      }
 
       return NextResponse.json({
         success: true,
-        post: result.rows[0],
-        message: '블로그 포스트가 성공적으로 생성되었습니다.'
+        post: newPost,
+        message: '블로그 포스트가 성공적으로 생성되었습니다.',
+        socialAutomation: status === 'published' ? 'triggered' : 'skipped'
       });
 
     } catch (dbError: any) {
