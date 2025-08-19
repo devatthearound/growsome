@@ -1,8 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
   async headers() {
     return [
       {
@@ -25,7 +22,6 @@ const nextConfig = {
     ];
   },
   // SEO 최적화를 위한 빌드 최적화
-  swcMinify: true,
   poweredByHeader: false,
   // 메타태그 강제 적용을 위한 설정
   generateBuildId: async () => {

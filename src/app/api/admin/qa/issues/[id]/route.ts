@@ -5,10 +5,11 @@ const prisma = new PrismaClient();
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await request.json();
+    const params = await context.params;
     const issueId = parseInt(params.id);
     
     const issue = await prisma.qAIssue.update({

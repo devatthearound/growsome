@@ -13,7 +13,7 @@ import Image from 'next/image';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 
-const toolsDetail = () => {
+const ToolsDetail = () => {
   const params = useParams();
   const [project, setProject] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -313,4 +313,4 @@ const UseButton = styled.button<{ inverted: boolean }>`
   }
 `;
 
-export default toolsDetail;
+export default ToolsDetail;

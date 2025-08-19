@@ -27,7 +27,7 @@ export function withClickTracking<P extends object>(
 
       // 원래 onClick 이벤트가 있다면 실행
       if ('onClick' in otherProps && typeof otherProps.onClick === 'function') {
-        (otherProps.onClick as Function)(event);
+        (otherProps.onClick as (event: React.MouseEvent) => void)(event);
       }
     };
 
@@ -61,7 +61,7 @@ export function withFormTracking<P extends object>(
       
       // 원래 onSubmit 이벤트가 있다면 실행
       if ('onSubmit' in props && typeof props.onSubmit === 'function') {
-        (props.onSubmit as Function)(event);
+        (props.onSubmit as (event: React.FormEvent) => void)(event);
       }
     };
 

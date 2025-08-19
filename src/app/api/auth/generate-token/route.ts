@@ -1,5 +1,6 @@
 // n8n 워크플로우용 API 토큰 생성 엔드포인트
 import { NextRequest, NextResponse } from 'next/server'
+import { createHmac } from 'crypto'
 
 // 기본적인 토큰 생성 함수 (jwt import 없이)
 function createSimpleToken(payload: any, secret: string): string {
@@ -18,8 +19,7 @@ function createSimpleToken(payload: any, secret: string): string {
   const base64Header = Buffer.from(JSON.stringify(header)).toString('base64url');
   const base64Payload = Buffer.from(JSON.stringify(tokenPayload)).toString('base64url');
   
-  const signature = require('crypto')
-    .createHmac('sha256', secret)
+  const signature = createHmac('sha256', secret)
     .update(`${base64Header}.${base64Payload}`)
     .digest('base64url');
 

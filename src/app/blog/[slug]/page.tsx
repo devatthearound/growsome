@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { generateBlogMetadata } from '@/lib/metadata'
 import BlogDetailClient from './BlogDetailClient'
 import StructuredData from '@/components/seo/StructuredData'
+import Link from 'next/link'
 
 const prisma = new PrismaClient()
 
@@ -100,9 +101,9 @@ export default async function BlogDetailPage({ params }: Props) {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">페이지를 찾을 수 없습니다</h1>
           <p className="text-gray-600 mb-8">{error}</p>
-          <a href="/blog" className="text-blue-600 hover:text-blue-800">
+          <Link href="/blog" className="text-blue-600 hover:text-blue-800">
             블로그 홈으로 돌아가기
-          </a>
+          </Link>
         </div>
       </div>
     )

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getAuthTokens, verifyToken, refreshTokens, setAuthCookies } from '@/lib/auth'
+import { PrismaClient } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
   try {
@@ -80,7 +81,6 @@ export async function GET(request: NextRequest) {
     
     try {
       // Prisma를 사용해 사용자 정보 조회 (role 포함)
-      const { PrismaClient } = require('@prisma/client');
       const prisma = new PrismaClient();
       
       const user = await prisma.user.findUnique({

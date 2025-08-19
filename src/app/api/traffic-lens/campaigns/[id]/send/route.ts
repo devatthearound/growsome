@@ -165,9 +165,10 @@ async function sendNotificationBatch(
 // POST /api/traffic-lens/campaigns/[id]/send - 캠페인 발송
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const params = await context.params;
     const campaignId = parseInt(params.id);
     
     if (isNaN(campaignId)) {
