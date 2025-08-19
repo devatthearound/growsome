@@ -51,7 +51,13 @@
     "blog:fixed": "tsx scripts/seed-blog-fixed.ts",
     "admin:setup": "tsx scripts/add-admin-user.ts",
     "admin:update-email": "tsx scripts/update-admin-email.ts",
-    "admin:setup-login": "tsx scripts/setup-admin-login.ts"
+    "admin:setup-login": "tsx scripts/setup-admin-login.ts",
+    "seo:check": "node scripts/seo-check.js",
+    "seo:blog": "node seo-blog.js",
+    "seo:validate-sitemap": "curl -s https://growsome.kr/sitemap.xml | head -20",
+    "seo:validate-robots": "curl -s https://growsome.kr/robots.txt",
+    "seo:test-og": "curl -s \"https://growsome.kr/api/og/blog?title=테스트 제목\" -o test-og.png && echo 'OG 이미지 테스트 완료'",
+    "seo:full-check": "npm run seo:check && npm run build && echo 'SEO 전체 점검 완료'"
   },
   "dependencies": {
     "@apollo/server": "^4.11.1",

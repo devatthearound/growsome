@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, Suspense } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import Head from 'next/head';
 import "./globals.css";
 import styled, { createGlobalStyle } from 'styled-components';
 import Script from 'next/script';
@@ -92,6 +93,69 @@ export default function RootLayout({
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta httpEquiv="Content-Type" content="text/html; charset=utf-8" />
+        
+        {/* SEO 메타태그 */}
+        <title>Growsome | AI 기반 비즈니스 성장 플랫폼</title>
+        <meta name="description" content="AI 자동화와 데이터 분석으로 비즈니스 성장을 가속화하는 그로우썸. 스타트업부터 대기업까지 검증된 성장 솔루션을 제공합니다." />
+        <meta name="keywords" content="AI, 비즈니스성장, 디지털마케팅, 자동화, 데이터분석, 스타트업, 그로우썸, 마케팅자동화, 비즈니스컨설팅" />
+        <meta name="author" content="Growsome Team" />
+        
+        {/* 검색엔진 인증 */}
+        <meta name="google-site-verification" content="Mbj7I_kpnhGQluMctu-sd0qEW437g-_7YwjeZWRrvcc" />
+        <meta name="naver-site-verification" content="test-naver-verification-code-will-set-later" />
+        <meta name="msvalidate.01" content="test-bing-verification-code-will-set-later" />
+        
+        {/* Open Graph */}
+        <meta property="og:type" content="website" />
+        <meta property="og:title" content="Growsome | AI 기반 비즈니스 성장 플랫폼" />
+        <meta property="og:description" content="AI 자동화와 데이터 분석으로 비즈니스 성장을 가속화하는 그로우썸" />
+        <meta property="og:url" content="https://growsome.kr" />
+        <meta property="og:site_name" content="Growsome" />
+        <meta property="og:image" content="https://growsome.kr/images/og/growsome-main.jpg" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:locale" content="ko_KR" />
+        
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content="@growsome_kr" />
+        <meta name="twitter:title" content="Growsome | AI 기반 비즈니스 성장 플랫폼" />
+        <meta name="twitter:description" content="AI 자동화와 데이터 분석으로 비즈니스 성장을 가속화하는 그로우썸" />
+        <meta name="twitter:image" content="https://growsome.kr/images/og/growsome-main.jpg" />
+        
+        {/* 추가 메타태그 */}
+        <meta name="theme-color" content="#667eea" />
+        <meta name="robots" content="index,follow" />
+        <link rel="canonical" href="https://growsome.kr" />
+        
+        {/* 파비콘 */}
+        <link rel="icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        
+        {/* 구조화된 데이터 (JSON-LD) */}
+        <script type="application/ld+json">
+          {`
+            {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "Growsome",
+              "description": "AI 기반 비즈니스 성장 플랫폼",
+              "url": "https://growsome.kr",
+              "logo": "https://growsome.kr/images/logo.png",
+              "contactPoint": {
+                "@type": "ContactPoint",
+                "telephone": "+82-2-1234-5678",
+                "contactType": "customer service",
+                "areaServed": "KR",
+                "availableLanguage": ["Korean", "English"]
+              },
+              "sameAs": [
+                "https://www.linkedin.com/company/growsome",
+                "https://twitter.com/growsome_kr"
+              ]
+            }
+          `}
+        </script>
         <Script id="google-tag-manager" strategy="afterInteractive">
           {`
             (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start': new Date().getTime(),event:'gtm.js'});
