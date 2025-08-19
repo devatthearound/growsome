@@ -7,10 +7,11 @@ const prisma = new PrismaClient();
 // DELETE /api/traffic-lens/subscribers/[id] - 특정 구독자 삭제
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const subscriberId = parseInt(params.id);
+    const { id } = await params;
+    const subscriberId = parseInt(id);
 
     if (isNaN(subscriberId)) {
       const response: APIResponse = {
@@ -73,10 +74,11 @@ export async function DELETE(
 // PATCH /api/traffic-lens/subscribers/[id] - 구독자 정보 업데이트
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const subscriberId = parseInt(params.id);
+    const { id } = await params;
+    const subscriberId = parseInt(id);
     const body = await request.json();
 
     if (isNaN(subscriberId)) {
@@ -163,10 +165,11 @@ export async function PATCH(
 // GET /api/traffic-lens/subscribers/[id] - 특정 구독자 상세 정보 조회
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const subscriberId = parseInt(params.id);
+    const { id } = await params;
+    const subscriberId = parseInt(id);
 
     if (isNaN(subscriberId)) {
       const response: APIResponse = {

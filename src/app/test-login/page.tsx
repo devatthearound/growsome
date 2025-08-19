@@ -48,7 +48,7 @@ Response: ${JSON.stringify(data, null, 2)}
       
     } catch (error) {
       console.error('로그인 에러:', error)
-      setResult(`Error: ${error.message}`)
+      setResult(`Error: ${(error as any).message}`)
     } finally {
       setLoading(false)
     }
@@ -71,7 +71,7 @@ Response: ${JSON.stringify(data, null, 2)}
       `)
       
     } catch (error) {
-      setResult(`Error: ${error.message}`)
+      setResult(`Error: ${(error as any).message}`)
     } finally {
       setLoading(false)
     }

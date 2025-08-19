@@ -143,7 +143,7 @@ const SafeEditor = ({
         lowlight,
       }),
       Color.configure({ types: [TextStyle.name, 'listItem'] }),
-      TextStyle.configure({ types: ['listItem'] }),
+      TextStyle.configure(),
       Highlight.configure({ multicolor: true }),
       Superscript,
       Subscript,
@@ -208,7 +208,7 @@ const SafeEditor = ({
 
     const url = window.prompt('YouTube URL을 입력하세요:')
     if (url) {
-      editor.chain().focus().setYouTubeVideo({ src: url }).run()
+      editor.chain().focus().setYoutubeVideo({ src: url }).run()
     }
   }, [editor])
 
@@ -255,7 +255,7 @@ const SafeEditor = ({
         
         <button
           type="button"
-          onClick={() => editor.chain().focus().toggleInlineCode().run()}
+          onClick={() => editor.chain().focus().toggleCode().run()}
           className={`p-2 rounded hover:bg-gray-200 transition-colors ${editor.isActive('code') ? 'bg-gray-200' : ''}`}
           title="인라인 코드"
         >

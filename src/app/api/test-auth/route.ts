@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
           data: {
             email: 'test@example.com',
             username: 'testuser',
+            phoneNumber: '010-0000-0000',
             status: 'active'
           }
         });

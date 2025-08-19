@@ -96,7 +96,7 @@ const BlogWriter = ({ contentId, mode = 'create' }: BlogWriterProps) => {
       setContent(existingContent.contentBody || '')
       setExcerpt(existingContent.excerpt || '')
       setCategoryId(existingContent.categoryId || undefined)
-      setStatus(existingContent.status || 'DRAFT')
+      setStatus((existingContent.status as 'DRAFT' | 'PUBLISHED' | 'PRIVATE') || 'DRAFT')
       setThumbnailUrl(existingContent.thumbnailUrl || '')
       setMetaTitle(existingContent.metaTitle || '')
       setMetaDescription(existingContent.metaDescription || '')
@@ -154,7 +154,7 @@ const BlogWriter = ({ contentId, mode = 'create' }: BlogWriterProps) => {
           slug: slug.trim(),
           contentBody: content,
           authorId: 1, // TODO: 실제 사용자 ID로 변경
-          categoryId: categoryId,
+          categoryId: categoryId || 1, // 기본값으로 1을 사용
           status: saveStatus,
           isFeatured,
           isHero: false,
@@ -174,7 +174,7 @@ const BlogWriter = ({ contentId, mode = 'create' }: BlogWriterProps) => {
           title: title.trim(),
           slug: slug.trim(),
           contentBody: content,
-          categoryId: categoryId,
+          categoryId: categoryId || 1, // 기본값으로 1을 사용
           status: saveStatus,
           isFeatured,
           isHero: false,

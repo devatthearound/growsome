@@ -39,7 +39,7 @@ export async function GET() {
       return NextResponse.json({
         success: false,
         error: '테이블 접근 실패',
-        details: tableError.message,
+        details: (tableError as any).message,
         suggestion: '데이터베이스 마이그레이션이 필요합니다. npm run db:push 실행하세요.'
       }, { status: 500 });
     }
@@ -50,7 +50,7 @@ export async function GET() {
     return NextResponse.json({
       success: false,
       error: '데이터베이스 연결 실패',
-      details: error.message,
+      details: (error as any).message,
       suggestion: '환경변수 DATABASE_URL을 확인하고 데이터베이스가 실행 중인지 확인하세요.'
     }, { status: 500 });
   } finally {

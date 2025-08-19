@@ -334,10 +334,14 @@ export async function POST(
     
     // 에러 발생 시 캠페인 상태 되돌리기
     try {
-      await prisma.tLCampaign.update({
-        where: { id: parseInt(params.id) },
-        data: { status: 'draft' },
-      });
+      const params = await context.params;
+      const campaignId = parseInt(params.id);
+      if (!isNaN(campaignId)) {
+        await prisma.tLCampaign.update({
+          where: { id: campaignId },
+          data: { status: 'draft' },
+        });
+      }
     } catch (rollbackError) {
       console.error('Failed to rollback campaign status:', rollbackError);
     }

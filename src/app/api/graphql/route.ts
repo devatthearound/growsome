@@ -250,7 +250,7 @@ const resolvers = {
       }
     },
     
-    category: async (_, { id, slug }) => {
+    category: async (_: any, { id, slug }: { id?: number; slug?: string }) => {
       try {
         if (!id && !slug) {
           throw new Error('Either id or slug must be provided')
@@ -268,7 +268,7 @@ const resolvers = {
     },
     
     // Content 리졸버들
-    contents: async (_, { first = 10, categoryId, status = 'PUBLISHED' }) => {
+    contents: async (_: any, { first = 10, categoryId, status = 'PUBLISHED' }: { first?: number; categoryId?: number; status?: string }) => {
       try {
         const where: any = { status: status.toUpperCase() }
         if (categoryId) {
@@ -297,7 +297,7 @@ const resolvers = {
       }
     },
     
-    content: async (_, { id, slug }) => {
+    content: async (_: any, { id, slug }: { id?: number; slug?: string }) => {
       try {
         if (!id && !slug) {
           throw new Error('Either id or slug must be provided')
@@ -340,7 +340,7 @@ const resolvers = {
       }
     },
     
-    featuredContents: async (_, { limit = 5 }) => {
+    featuredContents: async (_: any, { limit = 5 }: { limit?: number }) => {
       try {
         const contents = await prisma.blog_contents.findMany({
           where: {
@@ -394,7 +394,7 @@ const resolvers = {
     },
     
     // User 리졸버들
-    user: async (_, { id }) => {
+    user: async (_: any, { id }: { id: number }) => {
       try {
         if (!id) {
           throw new Error('User id must be provided')
@@ -411,11 +411,11 @@ const resolvers = {
       }
     },
     
-    users: async (_, { limit = 10 }) => {
+    users: async (_: any, { limit = 10 }: { limit?: number }) => {
       try {
         const users = await prisma.user.findMany({
           where: { status: 'active' },
-          orderBy: { created_at: 'desc' },
+          orderBy: { createdAt: 'desc' },
           take: limit
         })
         
@@ -440,7 +440,7 @@ const resolvers = {
       }
     },
     
-    tag: async (_, { id, slug }) => {
+    tag: async (_: any, { id, slug }: { id?: number; slug?: string }) => {
       try {
         if (!id && !slug) {
           throw new Error('Either id or slug must be provided')
@@ -458,7 +458,7 @@ const resolvers = {
     },
     
     // Comments 리졸버들
-    comments: async (_, { contentId }) => {
+    comments: async (_: any, { contentId }: { contentId: number }) => {
       try {
         const comments = await prisma.blog_comments.findMany({
           where: {
@@ -488,7 +488,7 @@ const resolvers = {
 
   Mutation: {
     // Content Mutations
-    createContent: async (_, { input }) => {
+    createContent: async (_: any, { input }: { input: any }) => {
       try {
         const result = await prisma.$transaction(async (tx) => {
           // 1. 컨텐츠 생성
@@ -553,7 +553,7 @@ const resolvers = {
       }
     },
     
-    updateContent: async (_, { id, input }) => {
+    updateContent: async (_: any, { id, input }: { id: number; input: any }) => {
       try {
         const updateData: any = {
           updated_at: new Date()
@@ -596,7 +596,7 @@ const resolvers = {
       }
     },
     
-    deleteContent: async (_, { id }) => {
+    deleteContent: async (_: any, { id }: { id: number }) => {
       try {
         await prisma.blog_contents.delete({
           where: { id }
@@ -609,7 +609,7 @@ const resolvers = {
     },
     
     // Category Mutations
-    createCategory: async (_, { input }) => {
+    createCategory: async (_: any, { input }: { input: any }) => {
       try {
         const newCategory = await prisma.blog_categories.create({
           data: {
@@ -628,7 +628,7 @@ const resolvers = {
       }
     },
     
-    updateCategory: async (_, { id, input }) => {
+    updateCategory: async (_: any, { id, input }: { id: number; input: any }) => {
       try {
         const updateData: any = { updated_at: new Date() }
         
@@ -650,7 +650,7 @@ const resolvers = {
       }
     },
     
-    deleteCategory: async (_, { id }) => {
+    deleteCategory: async (_: any, { id }: { id: number }) => {
       try {
         await prisma.blog_categories.delete({
           where: { id }
@@ -663,7 +663,7 @@ const resolvers = {
     },
     
     // Comment Mutations
-    createComment: async (_, { input }) => {
+    createComment: async (_: any, { input }: { input: any }) => {
       try {
         const newComment = await prisma.blog_comments.create({
           data: {
@@ -691,7 +691,7 @@ const resolvers = {
       }
     },
     
-    updateComment: async (_, { id, input }) => {
+    updateComment: async (_: any, { id, input }: { id: number; input: any }) => {
       try {
         const updateData: any = { updated_at: new Date() }
         
@@ -713,7 +713,7 @@ const resolvers = {
       }
     },
     
-    deleteComment: async (_, { id }) => {
+    deleteComment: async (_: any, { id }: { id: number }) => {
       try {
         const comment = await prisma.blog_comments.findFirst({
           where: { id }
@@ -739,7 +739,7 @@ const resolvers = {
     },
     
     // Like Toggle
-    toggleLike: async (_, { contentId, userId }) => {
+    toggleLike: async (_: any, { contentId, userId }: { contentId: number; userId: number }) => {
       try {
         const existingLike = await prisma.blog_likes.findFirst({
           where: {
@@ -799,7 +799,7 @@ const resolvers = {
 
   // Type 리졸버들
   Category: {
-    contentCount: async (category) => {
+    contentCount: async (category: any) => {
       try {
         const count = await prisma.blog_contents.count({
           where: {
@@ -815,7 +815,7 @@ const resolvers = {
       }
     },
     
-    contents: async (category) => {
+    contents: async (category: any) => {
       try {
         const contents = await prisma.blog_contents.findMany({
           where: {
@@ -843,7 +843,7 @@ const resolvers = {
   },
   
   Content: {
-    comments: async (content) => {
+    comments: async (content: any) => {
       try {
         const comments = await prisma.blog_comments.findMany({
           where: {
@@ -863,7 +863,7 @@ const resolvers = {
       }
     },
     
-    tags: async (content) => {
+    tags: async (content: any) => {
       try {
         const contentTags = await prisma.blog_content_tags.findMany({
           where: { content_id: content.id },
@@ -877,7 +877,7 @@ const resolvers = {
       }
     },
     
-    likes: async (content) => {
+    likes: async (content: any) => {
       try {
         const likes = await prisma.blog_likes.findMany({
           where: { content_id: content.id },
@@ -895,7 +895,7 @@ const resolvers = {
   },
   
   User: {
-    contents: async (user) => {
+    contents: async (user: any) => {
       try {
         const contents = await prisma.blog_contents.findMany({
           where: { author_id: user.id },
@@ -918,7 +918,7 @@ const resolvers = {
       }
     },
     
-    comments: async (user) => {
+    comments: async (user: any) => {
       try {
         const comments = await prisma.blog_comments.findMany({
           where: { user_id: user.id },
@@ -935,7 +935,7 @@ const resolvers = {
       }
     },
     
-    likes: async (user) => {
+    likes: async (user: any) => {
       try {
         const likes = await prisma.blog_likes.findMany({
           where: { user_id: user.id },
@@ -954,7 +954,7 @@ const resolvers = {
   },
   
   Tag: {
-    contents: async (tag) => {
+    contents: async (tag: any) => {
       try {
         const contentTags = await prisma.blog_content_tags.findMany({
           where: { tag_id: tag.id },
@@ -979,7 +979,7 @@ const resolvers = {
   },
   
   Comment: {
-    replies: async (comment) => {
+    replies: async (comment: any) => {
       try {
         const replies = await prisma.blog_comments.findMany({
           where: {
@@ -1002,18 +1002,18 @@ const resolvers = {
   
   // 스칼라 타입 리졸버들
   DateTime: {
-    serialize: (date) => {
+    serialize: (date: any) => {
       if (!date) return null
       return date instanceof Date ? date.toISOString() : new Date(date).toISOString()
     },
-    parseValue: (value) => new Date(value),
-    parseLiteral: (ast) => new Date(ast.value)
+    parseValue: (value: any) => new Date(value),
+    parseLiteral: (ast: any) => new Date(ast.value)
   },
   
   JSON: {
-    serialize: (value) => value,
-    parseValue: (value) => value,
-    parseLiteral: (ast) => JSON.parse(ast.value)
+    serialize: (value: any) => value,
+    parseValue: (value: any) => value,
+    parseLiteral: (ast: any) => JSON.parse(ast.value)
   }
 }
 
@@ -1140,18 +1140,18 @@ const server = new ApolloServer({
       path: error.path,
       ...(process.env.NODE_ENV === 'development' && { 
         extensions: error.extensions,
-        stack: error.stack 
+        stack: (error as any).stack 
       })
     }
   },
   plugins: [
     {
-      requestDidStart() {
+      async requestDidStart() {
         return {
-          didResolveOperation(requestContext) {
+          async didResolveOperation(requestContext: any) {
             console.log('GraphQL Operation:', requestContext.request.operationName)
           },
-          didEncounterErrors(requestContext) {
+          async didEncounterErrors(requestContext: any) {
             console.error('GraphQL Errors:', requestContext.errors)
           }
         }

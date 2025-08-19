@@ -1,10 +1,11 @@
 // 간단한 GraphQL Schema Builder (Pothos)
 import SchemaBuilder from '@pothos/core'
-import { blogPrisma } from '../lib/prisma-blog'
+import PrismaPlugin from '@pothos/plugin-prisma'
+import { prisma } from '../lib/prisma'
 
 export const builder = new SchemaBuilder<{
   Context: {
-    prisma: typeof blogPrisma
+    prisma: typeof prisma
     user?: {
       id: string
       role: string
@@ -21,7 +22,10 @@ export const builder = new SchemaBuilder<{
     }
   }
 }>({
-  plugins: [],
+  plugins: [PrismaPlugin],
+  prisma: {
+    client: prisma,
+  },
 })
 
 // 기본 스칼라 타입 정의

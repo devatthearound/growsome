@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
     console.error('GraphQL endpoint error:', error);
     return NextResponse.json({
       errors: [{
-        message: error.message,
+        message: (error as any).message,
         extensions: { code: 'INTERNAL_ERROR' }
       }]
     }, { status: 500 });

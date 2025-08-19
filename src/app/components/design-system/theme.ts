@@ -14,6 +14,7 @@ const theme: DefaultTheme = {
         Green500: "#06ff01",
         Green600: "#05cc01",
         Green700: "#049900",
+        Green900: "#023300",
         
         Gray25: "#f2f5fa",
         Gray50: "#F0F1F3",
@@ -44,6 +45,7 @@ const theme: DefaultTheme = {
         Green400: "#3DA172",
         Green800: "#032214",
 
+        Red25: "#FEF6F5",
         Red50: "#FEEDEC",
         Red100: "#FCDAD7",
         Red200: "#F9B4AF",

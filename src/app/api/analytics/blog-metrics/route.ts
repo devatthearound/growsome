@@ -6,11 +6,11 @@ const prisma = new PrismaClient();
 export async function GET(request: NextRequest) {
   try {
     // 블로그 포스트 기본 통계
-    const totalPosts = await prisma.post.count();
+    const totalPosts = await prisma.blog_contents.count();
     
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const publishedToday = await prisma.post.count({
+    const publishedToday = await prisma.blog_contents.count({
       where: {
         published_at: {
           gte: today
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
 
     const weekAgo = new Date();
     weekAgo.setDate(weekAgo.getDate() - 7);
-    const publishedThisWeek = await prisma.post.count({
+    const publishedThisWeek = await prisma.blog_contents.count({
       where: {
         published_at: {
           gte: weekAgo
@@ -29,20 +29,20 @@ export async function GET(request: NextRequest) {
     });
 
     // AI 생성 포스트 수 (ai_generated 필드가 있는 경우)
-    const aiGeneratedPosts = await prisma.post.count({
+    const aiGeneratedPosts = await prisma.blog_contents.count({
       where: {
         // AI 생성 포스트를 구분할 수 있는 조건 추가
         // 예: content에 특정 키워드가 있거나, 별도 필드가 있는 경우
         OR: [
           { title: { contains: 'AI' } },
-          { content: { contains: 'AI' } },
+          { content_body: { contains: 'AI' } },
           { meta_description: { contains: 'AI' } }
         ]
       }
     });
 
     // 참여도 지표
-    const engagementStats = await prisma.post.aggregate({
+    const engagementStats = await prisma.blog_contents.aggregate({
       _sum: {
         view_count: true,
         like_count: true,
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     });
 
     // 인기 포스트 TOP 5
-    const topPerformers = await prisma.post.findMany({
+    const topPerformers = await prisma.blog_contents.findMany({
       orderBy: [
         { view_count: 'desc' },
         { like_count: 'desc' }

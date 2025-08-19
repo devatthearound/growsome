@@ -8,12 +8,12 @@ const Separator = React.forwardRef<
   }
 >(
   (
-    { className, orientation = "horizontal", decorative = true, ...props },
+    { className, orientation = "horizontal", ...props },
     ref
   ) => (
     <div
       ref={ref}
-      role={decorative ? "none" : "separator"}
+      role="separator"
       aria-orientation={orientation}
       className={cn(
         "shrink-0 bg-border",

@@ -12,7 +12,7 @@ interface Tag {
 }
 
 interface Category {
-  id: number;
+  id: string;
   name: string;
   slug: string;
 }
@@ -88,7 +88,7 @@ const TagsPage = () => {
       opacity: 1,
       transition: {
         duration: 0.3,
-        ease: "easeOut"
+        ease: "easeOut" as const
       }
     }
   };

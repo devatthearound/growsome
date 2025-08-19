@@ -7,7 +7,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 declare global {
   interface Window {
     gtag: (
-      command: 'config' | 'event' | 'js' | 'set' | 'consent',
+      command: 'config' | 'event' | 'js' | 'set',
       target: string,
       config?: Record<string, any>
     ) => void;
@@ -42,8 +42,7 @@ export function EnhancedGoogleAnalytics() {
         user_type: 'registered',
         company_name: user.company_name || 'unknown',
         position: user.position || 'unknown',
-        user_email: user.email || 'unknown',
-        registration_date: user.created_at || 'unknown'
+        user_email: user.email || 'unknown'
       });
     } else {
       // 비로그인 사용자
@@ -194,50 +193,50 @@ export const trackPerformance = () => {
         });
       }
 
-      // Core Web Vitals 추적
-      if ('web-vitals' in window) {
-        import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-          getCLS((metric) => {
-            window.gtag('event', 'web_vitals', {
-              event_category: 'performance',
-              event_label: 'CLS',
-              value: Math.round(metric.value * 1000)
-            });
-          });
+      // Core Web Vitals 추적 (web-vitals 패키지 문제로 임시 비활성화)
+      // if ('web-vitals' in window) {
+      //   import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+      //     getCLS((metric) => {
+      //       window.gtag('event', 'web_vitals', {
+      //         event_category: 'performance',
+      //         event_label: 'CLS',
+      //         value: Math.round(metric.value * 1000)
+      //       });
+      //     });
 
-          getFID((metric) => {
-            window.gtag('event', 'web_vitals', {
-              event_category: 'performance',
-              event_label: 'FID',
-              value: Math.round(metric.value)
-            });
-          });
+      //     getFID((metric) => {
+      //       window.gtag('event', 'web_vitals', {
+      //         event_category: 'performance',
+      //         event_label: 'FID',
+      //         value: Math.round(metric.value)
+      //       });
+      //     });
 
-          getFCP((metric) => {
-            window.gtag('event', 'web_vitals', {
-              event_category: 'performance',
-              event_label: 'FCP',
-              value: Math.round(metric.value)
-            });
-          });
+      //     getFCP((metric) => {
+      //       window.gtag('event', 'web_vitals', {
+      //         event_category: 'performance',
+      //         event_label: 'FCP',
+      //         value: Math.round(metric.value)
+      //       });
+      //     });
 
-          getLCP((metric) => {
-            window.gtag('event', 'web_vitals', {
-              event_category: 'performance',
-              event_label: 'LCP',
-              value: Math.round(metric.value)
-            });
-          });
+      //     getLCP((metric) => {
+      //       window.gtag('event', 'web_vitals', {
+      //         event_category: 'performance',
+      //         event_label: 'LCP',
+      //         value: Math.round(metric.value)
+      //       });
+      //     });
 
-          getTTFB((metric) => {
-            window.gtag('event', 'web_vitals', {
-              event_category: 'performance',
-              event_label: 'TTFB',
-              value: Math.round(metric.value)
-            });
-          });
-        });
-      }
+      //     getTTFB((metric) => {
+      //       window.gtag('event', 'web_vitals', {
+      //         event_category: 'performance',
+      //         event_label: 'TTFB',
+      //         value: Math.round(metric.value)
+      //       });
+      //     });
+      //   });
+      // }
     }, 0);
   });
 };

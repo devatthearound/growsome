@@ -34,14 +34,14 @@ export interface TLCampaign {
   userId: number;
   title: string;
   body: string;
-  iconUrl?: string;
-  imageUrl?: string;
-  clickUrl?: string;
-  badgeUrl?: string;
-  scheduledAt?: Date;
-  sentAt?: Date;
-  status: 'draft' | 'scheduled' | 'sending' | 'sent' | 'failed';
-  targetType: 'all' | 'segment' | 'individual';
+  iconUrl?: string | null;
+  imageUrl?: string | null;
+  clickUrl?: string | null;
+  badgeUrl?: string | null;
+  scheduledAt?: Date | null;
+  sentAt?: Date | null;
+  status: string;
+  targetType: string;
   targetFilter?: any;
   createdAt: Date;
   updatedAt: Date;
@@ -92,11 +92,11 @@ export interface CreateCampaignRequest {
   domainId: number;
   title: string;
   body: string;
-  iconUrl?: string;
-  imageUrl?: string;
-  clickUrl?: string;
-  badgeUrl?: string;
-  scheduledAt?: Date;
+  iconUrl?: string | null;
+  imageUrl?: string | null;
+  clickUrl?: string | null;
+  badgeUrl?: string | null;
+  scheduledAt?: Date | null;
   targetType?: 'all' | 'segment' | 'individual';
   targetFilter?: any;
 }
@@ -195,9 +195,9 @@ export interface TrafficAnalysisCondition {
 export interface CampaignTemplate {
   title: string;
   body: string;
-  iconUrl?: string;
-  imageUrl?: string;
-  clickUrl?: string;
+  iconUrl?: string | null;
+  imageUrl?: string | null;
+  clickUrl?: string | null;
   delay?: number; // seconds
 }
 

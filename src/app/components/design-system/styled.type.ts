@@ -24,6 +24,7 @@ export interface DefaultTheme {
         Green800: string;
         Green900: string;
 
+        Red25: string;
         Red50: string;
         Red100: string;
         Red200: string;

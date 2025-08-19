@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
     // 요청 메타 정보 수집
     const forwarded = request.headers.get('x-forwarded-for');
     const realIP = request.headers.get('x-real-ip');
-    const ipAddress = forwarded?.split(',')[0] || realIP || request.ip || null;
+    const ipAddress = forwarded?.split(',')[0] || realIP || null;
     const userAgent = request.headers.get('user-agent') || null;
     const referrer = request.headers.get('referer') || null;
 

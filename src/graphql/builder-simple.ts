@@ -1,11 +1,11 @@
 // 간단한 GraphQL Schema Builder (Pothos)
 import SchemaBuilder from '@pothos/core'
 import PrismaPlugin from '@pothos/plugin-prisma'
-import { blogPrisma } from '../lib/prisma-blog'
+import { prisma } from '../lib/prisma'
 
 export const builder = new SchemaBuilder<{
   Context: {
-    prisma: typeof blogPrisma
+    prisma: typeof prisma
     user?: {
       id: string
       role: string
@@ -24,7 +24,7 @@ export const builder = new SchemaBuilder<{
 }>({
   plugins: [PrismaPlugin],
   prisma: {
-    client: blogPrisma,
+    client: prisma,
   },
 })
 

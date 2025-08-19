@@ -16,7 +16,7 @@ const ClarityAnalytics = () => {
       
       // Clarity가 로드될 때까지 잠시 기다린 후 사용
       const checkClarityReady = () => {
-        if (typeof window !== 'undefined' && typeof window.clarity === 'function') {
+        if (typeof window !== 'undefined' && typeof (window as any).clarity === 'function') {
           console.log('Clarity 초기화 완료');
         } else {
           // 100ms 후 다시 확인
@@ -37,7 +37,7 @@ const ClarityAnalytics = () => {
   // 사용자 인증 상태가 변경될 때마다 식별 정보 업데이트
   useEffect(() => {
     try {
-      if (isLoggedIn && user && typeof window !== 'undefined' && typeof window.clarity === 'function') {
+      if (isLoggedIn && user && typeof window !== 'undefined' && typeof (window as any).clarity === 'function') {
         // 로그인한 사용자 식별
         Clarity.identify(
           user.id.toString(), // custom-id
@@ -53,7 +53,7 @@ const ClarityAnalytics = () => {
         
         // 로그인 이벤트 추적
         Clarity.event("user_logged_in");
-      } else if (typeof window !== 'undefined' && typeof window.clarity === 'function') {
+      } else if (typeof window !== 'undefined' && typeof (window as any).clarity === 'function') {
         // 비로그인 사용자
         Clarity.identify("anonymous", undefined, pathname, "Anonymous User");
         Clarity.setTag("userType", "anonymous");
@@ -66,7 +66,7 @@ const ClarityAnalytics = () => {
   // 페이지 변경 시 페이지 ID 업데이트
   useEffect(() => {
     try {
-      if (pathname && typeof window !== 'undefined' && typeof window.clarity === 'function') {
+      if (pathname && typeof window !== 'undefined' && typeof (window as any).clarity === 'function') {
         Clarity.setTag("currentPage", pathname);
         Clarity.event("page_viewed");
       }

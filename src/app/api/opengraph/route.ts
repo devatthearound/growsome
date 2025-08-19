@@ -22,7 +22,6 @@ export async function POST(request: NextRequest) {
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; LinkPreview/1.0)',
       },
-      timeout: 10000, // 10초 타임아웃
     })
 
     if (!response.ok) {

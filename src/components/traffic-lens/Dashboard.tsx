@@ -74,8 +74,12 @@ export default function TrafficLensDashboard() {
           todayNotifications: 42,
           averageClickRate: 3.2,
           activeSubscribers: 1180,
+          totalCampaigns: 15,
+          sentNotifications: 1250,
+          clickRate: 3.2,
           recentCampaigns: [],
           subscriberGrowth: [],
+          topPerformingCampaigns: [],
           campaignPerformance: [],
         };
         setStats(mockStats);

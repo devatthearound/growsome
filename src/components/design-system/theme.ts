@@ -53,6 +53,7 @@ export const growsomeTheme = {
     White: "#FFFFFF",
     
     // Status colors
+    Red25: "#FEF6F5",
     Red500: "#F04438",
     Red400: "#F56565",
     Red300: "#FC8181",

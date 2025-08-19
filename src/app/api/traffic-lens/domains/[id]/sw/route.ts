@@ -6,10 +6,11 @@ const prisma = new PrismaClient();
 // GET /api/traffic-lens/domains/[id]/sw - 서비스 워커 코드 생성
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const domainId = parseInt(params.id);
+    const { id } = await params;
+    const domainId = parseInt(id);
     
     if (isNaN(domainId)) {
       return new NextResponse('Invalid domain ID', { status: 400 });

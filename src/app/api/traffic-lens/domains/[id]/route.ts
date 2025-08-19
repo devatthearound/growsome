@@ -7,10 +7,11 @@ const prisma = new PrismaClient();
 // GET /api/traffic-lens/domains/[id] - 특정 도메인 조회
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const domainId = parseInt(params.id);
+    const { id } = await params;
+    const domainId = parseInt(id);
     
     if (isNaN(domainId)) {
       const response: APIResponse = {
@@ -75,10 +76,11 @@ export async function GET(
 // PUT /api/traffic-lens/domains/[id] - 도메인 수정
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const domainId = parseInt(params.id);
+    const { id } = await params;
+    const domainId = parseInt(id);
     
     if (isNaN(domainId)) {
       const response: APIResponse = {
@@ -148,10 +150,11 @@ export async function PUT(
 // DELETE /api/traffic-lens/domains/[id] - 도메인 삭제
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const domainId = parseInt(params.id);
+    const { id } = await params;
+    const domainId = parseInt(id);
     
     if (isNaN(domainId)) {
       const response: APIResponse = {

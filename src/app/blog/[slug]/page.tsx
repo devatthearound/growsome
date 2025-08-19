@@ -8,14 +8,15 @@ import Link from 'next/link'
 const prisma = new PrismaClient()
 
 interface Props {
-  params: { slug: string }
+  params: Promise<{ slug: string }>
 }
 
 // 메타데이터 생성 함수
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   try {
+    const { slug } = await params;
     const post = await prisma.blog_contents.findUnique({
-      where: { slug: params.slug },
+      where: { slug },
       include: {
         users: {
           select: { username: true }
@@ -64,12 +65,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function BlogDetailPage({ params }: Props) {
+  const { slug } = await params;
   let post = null
   let error = null
 
   try {
     post = await prisma.blog_contents.findUnique({
-      where: { slug: params.slug },
+      where: { slug },
       include: {
         users: {
           select: { id: true, username: true }
@@ -150,7 +152,7 @@ export default async function BlogDetailPage({ params }: Props) {
       {/* 실제 페이지 콘텐츠 */}
       <BlogDetailClient 
         initialPost={post}
-        slug={params.slug}
+        slug={slug}
       />
     </>
   )
