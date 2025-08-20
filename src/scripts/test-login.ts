@@ -62,7 +62,8 @@ async function testLoginCredentials() {
               break;
             }
           } catch (error) {
-            console.log(`  Testing "${testPassword}": ❌ Error - ${error.message}`);
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.log(`  Testing "${testPassword}": ❌ Error - ${errorMessage}`);
           }
         }
       } else {

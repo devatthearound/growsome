@@ -6,6 +6,13 @@ import { faArrowDown, faPlay, faArrowLeft, faVideo, faLink, faArrowUp, faCog, fa
 import { useRouter } from 'next/navigation';
 import styled from 'styled-components';
 
+// styled-jsx 타입 선언
+declare module 'react' {
+  interface StyleHTMLAttributes<T> extends React.HTMLAttributes<T> {
+    jsx?: boolean;
+  }
+}
+
 // Styled Components for Class Section
 const colors = {
   primary: '#080d34',

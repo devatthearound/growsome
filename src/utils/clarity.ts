@@ -1,5 +1,12 @@
 import Clarity from '@microsoft/clarity';
 
+// Clarity 타입 확장
+declare global {
+  interface Window {
+    clarity?: any;
+  }
+}
+
 // Clarity가 초기화되었는지 확인하는 함수
 const isClarityReady = (): boolean => {
   return typeof window !== 'undefined' && typeof window.clarity === 'function';

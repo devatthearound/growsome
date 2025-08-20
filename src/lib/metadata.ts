@@ -91,8 +91,8 @@ export const defaultMetadata: Metadata = {
   
   // 추가 메타태그
   other: {
-    'naver-site-verification': process.env.NAVER_SITE_VERIFICATION,
-    'msvalidate.01': process.env.BING_VERIFICATION,
+    ...(process.env.NAVER_SITE_VERIFICATION && { 'naver-site-verification': process.env.NAVER_SITE_VERIFICATION }),
+    ...(process.env.BING_VERIFICATION && { 'msvalidate.01': process.env.BING_VERIFICATION }),
     'theme-color': '#667eea',
     'mobile-web-app-capable': 'yes',
     'apple-mobile-web-app-capable': 'yes',
@@ -201,11 +201,11 @@ export function generateBlogMetadata(
     },
     
     other: {
-      'article:published_time': publishedTime,
-      'article:modified_time': modifiedTime,
+      ...(publishedTime && { 'article:published_time': publishedTime }),
+      ...(modifiedTime && { 'article:modified_time': modifiedTime }),
       'article:author': author || 'Growsome Team',
-      'article:section': category,
-      'article:tag': tags?.join(','),
+      ...(category && { 'article:section': category }),
+      ...(tags && tags.length > 0 && { 'article:tag': tags.join(',') }),
     },
   }
 }

@@ -102,9 +102,10 @@ export default function PushNotificationDemo() {
       }
       
       // 구독 생성
+      const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
       const newSubscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+        applicationServerKey: applicationServerKey.buffer as ArrayBuffer
       });
 
       // 서버에 구독 정보 전송
@@ -403,4 +404,28 @@ export default function PushNotificationDemo() {
       </div>
     </div>
   );
+}
+
+// Base64 URL을 Uint8Array로 변환하는 함수
+function urlBase64ToUint8Array(base64String: string): Uint8Array {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding)
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
+
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+
+  for (let i = 0; i < rawData.length; ++i) {
+    outputArray[i] = rawData.charCodeAt(i);
+  }
+  return outputArray;
+}
+
+// ArrayBuffer를 Base64로 변환하는 함수
+function arrayBufferToBase64(buffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  bytes.forEach((b) => binary += String.fromCharCode(b));
+  return window.btoa(binary);
 }

@@ -17,6 +17,33 @@ interface NavItem {
   label: string;
 }
 
+// 스타일 컴포넌트들
+interface StyledProps {
+  $isMobile?: boolean;
+  $theme?: 'light' | 'dark';
+}
+
+interface HeaderWrapperProps {
+  $theme?: 'light' | 'dark';
+}
+
+interface NavLinkProps {
+  $isActive?: boolean;
+  $theme?: 'light' | 'dark';
+}
+
+interface NavLinkUnderlineProps {
+  $isActive?: boolean;
+}
+
+interface MobileMenuProps {
+  $isOpen: boolean;
+}
+
+interface MobileNavItemProps {
+  $isActive?: boolean;
+}
+
 const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
   const [isMounted, setIsMounted] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
@@ -69,21 +96,6 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
     }
   };
 
-  // isMounted 체크를 제거하여 항상 헤더가 표시되도록 함
-  // if (!isMounted) {
-  //   return (
-  //     <HeaderWrapper $theme={theme}>
-  //       <HeaderContainer>
-  //         <NavSection>
-  //           <LogoLink href="/">
-  //             <LogoImage src="/logo_growsome.png" alt="Growsome" />
-  //           </LogoLink>
-  //         </NavSection>
-  //       </HeaderContainer>
-  //     </HeaderWrapper>
-  //   );
-  // }
-
   return (
     <HeaderWrapper $theme={theme}>
       <HeaderContainer>
@@ -117,7 +129,6 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
           {!isLoading && (
             isLoggedIn ? (
               <>
-
                 <UserProfileGroup onClick={() => handleMenuClick('/mypage')}>
                   <User size={16} />
                   <UserName>{user?.username}</UserName>
@@ -130,7 +141,7 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
                   <LogOut size={16} />
                   로그아웃
                 </LogoutButton>
-             {user?.email === 'master@growsome.kr' && (
+                {user?.email === 'master@growsome.kr' && (
                   <Link href="/blog/write" style={{ marginLeft: '1rem', display: 'flex', alignItems: 'center' }} title="새 글 작성">
                     <GreenButton $size="medium" style={{ borderRadius: '50%', padding: '0.5rem', minWidth: 0, width: 44, height: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <Pencil size={22} />
@@ -228,44 +239,17 @@ const Header: React.FC<HeaderProps> = ({ theme = 'light' }) => {
   );
 };
 
-// 스타일 컴포넌트들
-interface StyledProps {
-  $isMobile?: boolean;
-  $theme?: 'light' | 'dark';
-}
-
-interface HeaderWrapperProps {
-  $theme?: 'light' | 'dark';
-}
-
-interface NavLinkProps {
-  $isActive?: boolean;
-  $theme?: 'light' | 'dark';
-}
-
-interface NavLinkUnderlineProps {
-  $isActive?: boolean;
-}
-
-interface MobileMenuProps {
-  $isOpen: boolean;
-}
-
-interface MobileNavItemProps {
-  $isActive?: boolean;
-}
-
 const HeaderWrapper = styled.header<HeaderWrapperProps>`
   position: fixed;
   width: 100%;
   top: 0;
   z-index: 1000;
-  background: ${(props) => props.$theme === 'dark' 
+  background: ${(props: HeaderWrapperProps) => props.$theme === 'dark' 
     ? 'rgba(8, 13, 52, 0.98)' 
     : 'rgba(255, 255, 255, 0.98)'
   };
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid ${(props) => props.$theme === 'dark' 
+  border-bottom: 1px solid ${(props: HeaderWrapperProps) => props.$theme === 'dark' 
     ? 'rgba(255, 255, 255, 0.1)' 
     : 'rgba(0, 0, 0, 0.05)'
   };
@@ -326,7 +310,7 @@ const NavLinkUnderline = styled.span<NavLinkUnderlineProps>`
   position: absolute;
   bottom: -2px;
   left: 0;
-  width: ${(props) => props.$isActive ? '100%' : '0'};
+  width: ${(props: NavLinkUnderlineProps) => props.$isActive ? '100%' : '0'};
   height: 2px;
   background-color: #514FE4;
   transition: width 0.3s ease;
@@ -336,8 +320,8 @@ const NavLink = styled.button<NavLinkProps>`
   background: none;
   border: none;
   font-size: 1.2rem;
-  font-weight: ${(props) => props.$isActive ? '800' : '600'};
-  color: ${(props) => props.$theme === 'dark' ? '#ffffff' : '#080d34'};
+  font-weight: ${(props: NavLinkProps) => props.$isActive ? '800' : '600'};
+  color: ${(props: NavLinkProps) => props.$theme === 'dark' ? '#ffffff' : '#080d34'};
   padding: 0.5rem 0;
   cursor: pointer;
   position: relative;
@@ -372,13 +356,13 @@ const UserProfileGroup = styled.button<StyledProps>`
   border: none;
   padding: 0.5rem;
   cursor: pointer;
-  color: ${(props) => props.$theme === 'dark' ? '#ffffff' : '#666'};
+  color: ${(props: StyledProps) => props.$theme === 'dark' ? '#ffffff' : '#666'};
   transition: color 0.2s ease;
   border-radius: 8px;
 
   &:hover {
     color: #514FE4;
-    background: ${(props) => props.$theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(81, 79, 228, 0.1)'};
+    background: ${(props: StyledProps) => props.$theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(81, 79, 228, 0.1)'};
   }
 `;
 
@@ -404,14 +388,14 @@ const SecretLabButton = styled.button`
 
 const LoginButton = styled.button<StyledProps>`
   background: transparent;
-  color: ${(props) => props.$theme === 'dark' ? '#ffffff' : '#514FE4'};
+  color: ${(props: StyledProps) => props.$theme === 'dark' ? '#ffffff' : '#514FE4'};
   border: 2px solid #514FE4;
   border-radius: 24px;
   padding: 0.6rem 1.5rem;
-  font-size: ${(props) => props.$isMobile ? '1.1rem' : '1.2rem'};
+  font-size: ${(props: StyledProps) => props.$isMobile ? '1.1rem' : '1.2rem'};
   font-weight: 500;
   cursor: pointer;
-  width: ${(props) => props.$isMobile ? '100%' : 'auto'};
+  width: ${(props: StyledProps) => props.$isMobile ? '100%' : 'auto'};
   transition: all 0.2s ease;
 
   &:hover {
@@ -425,7 +409,7 @@ const LogoutButton = styled.button<StyledProps>`
   background: none;
   border: none;
   font-size: 1rem;
-  color: ${(props) => props.$theme === 'dark' ? '#ffffff80' : '#666'};
+  color: ${(props: StyledProps) => props.$theme === 'dark' ? '#ffffff80' : '#666'};
   cursor: pointer;
   padding: 0.5rem;
   transition: color 0.2s ease;
@@ -433,12 +417,12 @@ const LogoutButton = styled.button<StyledProps>`
   align-items: center;
   gap: 8px;
   border-radius: 8px;
-  width: ${(props) => props.$isMobile ? '100%' : 'auto'};
-  justify-content: ${(props) => props.$isMobile ? 'center' : 'flex-start'};
+  width: ${(props: StyledProps) => props.$isMobile ? '100%' : 'auto'};
+  justify-content: ${(props: StyledProps) => props.$isMobile ? 'center' : 'flex-start'};
 
   &:hover {
     color: #514FE4;
-    background: ${(props) => props.$theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(81, 79, 228, 0.1)'};
+    background: ${(props: StyledProps) => props.$theme === 'dark' ? 'rgba(255, 255, 255, 0.1)' : 'rgba(81, 79, 228, 0.1)'};
   }
 `;
 
@@ -486,7 +470,7 @@ const MobileOverlay = styled.div`
 const MobileMenu = styled.div<MobileMenuProps>`
   display: none;
   @media (max-width: 1280px) {
-    display: ${({ $isOpen }) => ($isOpen ? 'block' : 'none')};
+    display: ${({ $isOpen }: MobileMenuProps) => ($isOpen ? 'block' : 'none')};
     position: fixed;
     top: 0;
     right: 0;
@@ -512,9 +496,9 @@ const MobileNavList = styled.div`
 const MobileNavItem = styled.button<MobileNavItemProps>`
   background: none;
   border: none;
-  font-weight: ${(props) => props.$isActive ? '800' : '600'};
+  font-weight: ${(props: MobileNavItemProps) => props.$isActive ? '800' : '600'};
   font-size: 1.3rem;
-  color: ${(props) => props.$isActive ? '#514FE4' : '#333'};
+  color: ${(props: MobileNavItemProps) => props.$isActive ? '#514FE4' : '#333'};
   text-align: left;
   padding: 1rem;
   cursor: pointer;

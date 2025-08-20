@@ -44,7 +44,8 @@ async function debugPassword() {
           console.log(`\n🎉 올바른 비밀번호를 찾았습니다: ${testPassword}`);
         }
       } catch (error) {
-        console.log(`  "${testPassword}" -> ❌ 오류: ${error.message}`);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.log(`  "${testPassword}" -> ❌ 오류: ${errorMessage}`);
       }
     }
 
@@ -67,7 +68,8 @@ async function debugPassword() {
     console.log('🧪 즉시 테스트 결과:', testResult ? '✅ 성공' : '❌ 실패');
 
   } catch (error) {
-    console.error('❌ 오류:', error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ 오류:', errorMessage);
   } finally {
     await prisma.$disconnect();
   }

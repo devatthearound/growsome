@@ -5,9 +5,6 @@ import { builder } from './builder'
 import './types/user'
 import './types/content'
 import './types/comment'
-import './types/banner'
-import './types/provider'
-import './types/interaction'
 
 // Resolver import
 import './resolvers/queries'
