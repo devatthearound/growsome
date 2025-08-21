@@ -200,7 +200,7 @@ const AnalyticsPage = () => {
         <MetricCard>
           <CardTitle>📝 블로그 현황</CardTitle>
           <MetricRow>
-            <MetricLabel>총 포스트 수</MetricLabel>
+            <MetricLabel>전체 포스트 수</MetricLabel>
             <MetricValue>{blogMetrics.totalPosts.toLocaleString()}</MetricValue>
           </MetricRow>
           <MetricRow>
