@@ -126,6 +126,10 @@ const SolutionsContainer = styled.section`
   background-color: rgb(6, 13, 52);
   color: white;
   padding: 80px 0;
+
+  @media (max-width: 1024px) {
+    padding: 60px 0;
+  }
 `;
 
 const ContentWrapper = styled.div`
@@ -140,6 +144,7 @@ const ContentWrapper = styled.div`
   @media (max-width: 1024px) {
     grid-template-columns: 1fr;
     gap: 40px;
+    max-width: 900px;
   }
 `;
 
@@ -166,6 +171,7 @@ const MainHeading = styled.h2`
   @media (max-width: 1024px) {
     font-size: 2.8rem;
     text-align: left;
+    letter-spacing: -2px;
   }
 `;
 
@@ -209,6 +215,10 @@ const SolutionNumber = styled.span`
 const SolutionTitle = styled.h3`
   font-size: 1.8rem;
   margin-bottom: 20px;
+
+  @media (max-width: 1024px) {
+    font-size: 1.6rem;
+  }
 `;
 
 const SolutionDescription = styled.p`
@@ -217,6 +227,11 @@ const SolutionDescription = styled.p`
   margin-bottom: 30px;
   opacity: 0.9;
   font-weight: 400;
+
+  @media (max-width: 1024px) {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
 `;
 
 const InputWrapper = styled.div`

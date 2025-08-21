@@ -44,6 +44,10 @@ const PortfolioSection = styled.section`
   background: ${growsomeTheme.color.White};
   padding: 80px 0;
   
+  @media ${growsomeTheme.device.tablet} {
+    padding: 60px 0;
+  }
+  
   @media ${growsomeTheme.device.mobile} {
     padding: 60px 0;
   }
@@ -52,6 +56,10 @@ const PortfolioSection = styled.section`
 const PortfolioHeader = styled.div`
   text-align: center;
   margin-bottom: 60px;
+  
+  @media ${growsomeTheme.device.tablet} {
+    margin-bottom: 50px;
+  }
   
   @media ${growsomeTheme.device.mobile} {
     margin-bottom: 40px;
@@ -101,6 +109,8 @@ const PortfolioGrid = styled.div`
   
   @media ${growsomeTheme.device.tablet} {
     grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+    max-width: 900px;
   }
   
   @media ${growsomeTheme.device.pc} {
@@ -141,6 +151,10 @@ const PortfolioInfo = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
+  
+  @media ${growsomeTheme.device.tablet} {
+    padding: 22px 18px;
+  }
   
   @media ${growsomeTheme.device.mobile} {
     padding: 20px 16px;

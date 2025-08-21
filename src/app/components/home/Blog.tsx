@@ -199,12 +199,20 @@ const Container = styled.div`
   width: 100%;
   background-color: white;
   padding: 150px 0 100px 0;
+
+  @media (max-width: 1024px) {
+    padding: 100px 0 80px 0;
+  }
 `;
 
 const ContentWrapper = styled.div`
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 20px;
+
+  @media (max-width: 1024px) {
+    max-width: 900px;
+  }
 `;
 
 const Header = styled.div`
@@ -223,6 +231,18 @@ const Header = styled.div`
     color: #666;
     line-height: 1.6;
   }
+
+  @media (max-width: 1024px) {
+    margin-bottom: 40px;
+
+    h1 {
+      font-size: 2.2rem;
+    }
+
+    p {
+      font-size: 1rem;
+    }
+  }
 `;
 
 const BlogGrid = styled.div`
@@ -231,6 +251,11 @@ const BlogGrid = styled.div`
   gap: 30px;
   padding: 20px 0;
   margin-bottom: 50px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 25px;
+  }
 
   @media (max-width: 768px) {
     grid-template-columns: 1fr;

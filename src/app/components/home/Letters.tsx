@@ -58,6 +58,10 @@ const IntroduceSection = styled.section`
   color: #001C46;
   padding: 150px 50px;
   text-align: center;
+
+  @media (max-width: 1024px) {
+    padding: 100px 30px;
+  }
 `;
 
 const ProfileImage = styled.img`
@@ -65,6 +69,10 @@ const ProfileImage = styled.img`
   height: auto;
   border-radius: 50%;
   margin-bottom: 20px;
+
+  @media (max-width: 1024px) {
+    width: 180px;
+  }
 `;
 
 const IntroText = styled.p`
@@ -73,6 +81,11 @@ const IntroText = styled.p`
   max-width: 600px;
   margin: 0 auto;
   letter-spacing: -1px;
+
+  @media (max-width: 1024px) {
+    font-size: 2.2rem;
+    max-width: 500px;
+  }
 `;
 
 const Letter = styled.div`
@@ -83,7 +96,11 @@ const Letter = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  
+
+  @media (max-width: 1024px) {
+    max-width: 500px;
+    margin-top: 80px;
+  }
 `;
 
 const LetterTitle = styled.h3`
@@ -92,7 +109,11 @@ const LetterTitle = styled.h3`
   margin-bottom: 20px;
   text-align: center;
   letter-spacing: -1px;
-  `;
+
+  @media (max-width: 1024px) {
+    font-size: 1.6rem;
+  }
+`;
 
 const LetterContent = styled.div`
   font-size: 1.5rem;
@@ -100,7 +121,6 @@ const LetterContent = styled.div`
   margin-bottom: 40px;
   letter-spacing: -1px;
   text-align: center;
-  
 
   p {
     margin-bottom: 20px;
@@ -122,6 +142,11 @@ const LetterContent = styled.div`
     background: linear-gradient(180deg, rgba(255,255,255,0) 50%, #FFD6EC 50%);
     padding: 0 4px;
     font-weight: 500;
+  }
+
+  @media (max-width: 1024px) {
+    font-size: 1.3rem;
+    line-height: 1.7;
   }
 `;
 

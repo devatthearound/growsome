@@ -94,17 +94,29 @@ const Tools = () => {
 const ToolsSection = styled.section`
   padding: 80px 0;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+
+  @media (max-width: 1024px) {
+    padding: 60px 0;
+  }
 `;
 
 const Container = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
+
+  @media (max-width: 1024px) {
+    max-width: 900px;
+  }
 `;
 
 const SectionHeader = styled.div`
   text-align: center;
   margin-bottom: 60px;
+
+  @media (max-width: 1024px) {
+    margin-bottom: 40px;
+  }
 `;
 
 const Title = styled.h2`
@@ -112,6 +124,10 @@ const Title = styled.h2`
   font-weight: 700;
   margin-bottom: 1rem;
   color: #1a202c;
+  
+  @media (max-width: 1024px) {
+    font-size: 2.5rem;
+  }
   
   @media (max-width: 768px) {
     font-size: 2rem;
@@ -127,6 +143,10 @@ const Subtitle = styled.h3`
   font-weight: 600;
   margin-bottom: 0.5rem;
   color: #2d3748;
+  
+  @media (max-width: 1024px) {
+    font-size: 1.3rem;
+  }
   
   @media (max-width: 768px) {
     font-size: 1.25rem;
@@ -146,6 +166,11 @@ const ToolsGrid = styled.div`
   gap: 30px;
   margin-bottom: 60px;
   
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+  }
+  
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -163,6 +188,10 @@ const ToolCard = styled.div<{ color: string }>`
     transform: translateY(-5px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
     border-color: ${props => props.color}20;
+  }
+
+  @media (max-width: 1024px) {
+    padding: 30px;
   }
 `;
 
@@ -198,6 +227,10 @@ const ToolTitle = styled.h3`
   font-weight: 700;
   margin-bottom: 15px;
   color: #1a202c;
+
+  @media (max-width: 1024px) {
+    font-size: 1.6rem;
+  }
 `;
 
 const ToolDescription = styled.p`

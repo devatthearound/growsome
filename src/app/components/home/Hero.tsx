@@ -73,6 +73,11 @@ const HeroSection = styled.section`
   padding: 20px;
   text-align: left;
 
+  @media (max-width: 1024px) {
+    height: 800px; /* Adjust height for tablet */
+    padding: 40px 20px;
+  }
+
   @media (max-width: 768px) {
     height: auto; /* Adjust height for mobile */
     align-items: center; /* Center align for mobile */
@@ -116,6 +121,11 @@ const MainTitle = styled.h1`
 
   .highlight {
     color: #03ff01;
+  }
+
+  @media (max-width: 1024px) {
+    font-size: 6rem; /* Adjust size for tablet */
+    letter-spacing: -2px;
   }
 
   @media (max-width: 768px) {
@@ -224,6 +234,11 @@ const JoinSection = styled.div`
   color: white;
   margin: 0 auto;
 
+  @media (max-width: 1024px) {
+    max-width: 900px;
+    gap: 40px;
+  }
+
   @media (max-width: 768px) {
     flex-direction: column; /* Stack elements vertically for mobile */
   }
@@ -238,12 +253,20 @@ const JoinText = styled.h2`
   font-size: 2rem;
   margin-bottom: 10px;
   font-weight: 500;
+
+  @media (max-width: 1024px) {
+    font-size: 1.8rem;
+  }
 `;
 
 const JoinDescription = styled.p`
   font-size: 1.2rem;
   margin-bottom: 20px;
   font-weight: 400;
+
+  @media (max-width: 1024px) {
+    font-size: 1.1rem;
+  }
 `;
 
 const JoinForm = styled.div`

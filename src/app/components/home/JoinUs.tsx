@@ -44,6 +44,10 @@ const Section = styled.section`
   padding: 120px 20px;
   background: linear-gradient(135deg, #f0f4ff, #e0e7ff);
   color: #001C46;
+
+  @media (max-width: 1024px) {
+    padding: 80px 20px;
+  }
 `;
 
 const Content = styled.div`
@@ -51,6 +55,10 @@ const Content = styled.div`
   margin: 0 auto;
   text-align: center;
   padding: 0 20px;
+
+  @media (max-width: 1024px) {
+    max-width: 600px;
+  }
 `;
 
 const FreedomSection = styled.div`
@@ -58,6 +66,11 @@ const FreedomSection = styled.div`
   flex-direction: column;
   gap: 50px;
   margin-bottom: 80px;
+
+  @media (max-width: 1024px) {
+    gap: 40px;
+    margin-bottom: 60px;
+  }
 `;
 
 const FreedomItem = styled.div`
@@ -72,6 +85,10 @@ const HighlightText = styled.span`
   font-size: 3rem;
   font-weight: 700;
   letter-spacing: -1px;
+
+  @media (max-width: 1024px) {
+    font-size: 2.5rem;
+  }
 `;
 
 const MainText = styled.h2`
@@ -80,6 +97,10 @@ const MainText = styled.h2`
   margin: 0;
   color: #080d34;
   letter-spacing: -1px;
+
+  @media (max-width: 1024px) {
+    font-size: 2.5rem;
+  }
 `;
 
 const ArrowDown = styled.div`
@@ -99,6 +120,11 @@ const ArrowDown = styled.div`
       transform: translateY(-5px);
     }
   }
+
+  @media (max-width: 1024px) {
+    font-size: 2.5rem;
+    margin: 40px 0;
+  }
 `;
 
 const SubscribeSection = styled.div`
@@ -112,6 +138,10 @@ const SubscribeTitle = styled.h2`
   font-weight: 600;
   color: #080d34;
   letter-spacing: -1px;
+
+  @media (max-width: 1024px) {
+    font-size: 1.8rem;
+  }
 `;
 
 const SubscribeDescription = styled.p`
@@ -119,6 +149,10 @@ const SubscribeDescription = styled.p`
   line-height: 1.5;
   color: #666;
   margin-bottom: 40px;
+
+  @media (max-width: 1024px) {
+    font-size: 1.4rem;
+  }
 `;
 
 const MobileSecretLabButton = styled.button`

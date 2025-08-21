@@ -21,6 +21,10 @@ const PartnerSection = styled.section`
   background-color: #fff;
   padding: 40px 20px;
   text-align: center;
+
+  @media (max-width: 1024px) {
+    padding: 30px 20px;
+  }
 `;
 
 const LogoContainer = styled.div`
@@ -29,6 +33,10 @@ const LogoContainer = styled.div`
   align-items: center;
   flex-wrap: wrap;
   gap: 40px;
+
+  @media (max-width: 1024px) {
+    gap: 30px;
+  }
 `;
 
 const Logo = styled.img`
@@ -38,6 +46,10 @@ const Logo = styled.img`
 
   &:hover {
     transform: scale(1.1);
+  }
+
+  @media (max-width: 1024px) {
+    height: 35px;
   }
 `;
 
